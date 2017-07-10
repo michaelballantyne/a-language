@@ -1,0 +1,33 @@
+<html>
+<body>
+
+<div id="data" style="display: none">
+</div>
+
+<script id="quine" type="text/javascript">
+'use strict';
+
+function quine(boot, data) {
+    return `<html>
+<body>
+
+<div id="data" style="display: none">${data}</div>
+
+<script id="quine" type="text/javascript">${document.getElementById("quine").innerHTML}<\/script>
+
+<script id="boot" type="text/javascript">${boot}<\/script>
+
+</body>
+</html>
+`
+}
+</script>
+
+<script id="boot" type="text/javascript">'use strict';
+
+var loaded_boot = document.getElementById("boot").innerHTML;
+var loaded_data = document.getElementById("data").innerHTML;
+</script>
+
+</body>
+</html>
