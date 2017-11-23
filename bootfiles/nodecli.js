@@ -178,26 +178,39 @@
         }
     }
     )(resolve, compilejs, escodegen);
+    const bootstrap = (// require: flatten, resolve
+    // provide: main
+    function (flatten, resolve) {
+        const fs = require("fs");
+        
+        function main(args) {
+            const text = flatten.flatten(resolve.resolve, "nodecli")
+            fs.writeFileSync("bootfiles/nodecli.js", text)
+        }
+    
+        return { main: main }
+    }
+    )(flatten, resolve);
     const runner = (// require:
     // provide:
     function () {
         return {}
     }
     )();
-    const nodecli = (// require: resolve, flatten, runner
+    const nodecli = (// require: resolve, bootstrap, runner
     // provide: main
-    function (resolve, flatten, runner) {
+    function (resolve, bootstrap, runner) {
         function usage() {
-            console.log("Usage: node run.js --flatten <module-name> | --run <module-name> <function>");
+            console.log("Usage: node run.js --bootstrap | --run <module-name> <function>");
             process.exit(1);
         }
     
         function main(args) {
             if (args[0] === "--run") {
-                throw "not implemented"
+                throw "not implemented2"
             }
-            if (args[0] === "--flatten") {
-                console.log(flatten.flatten(resolve.resolve, args[1]))
+            if (args[0] === "--bootstrap") {
+                bootstrap.main([])
             }
             else {
                 usage()
@@ -206,6 +219,6 @@
     
         return { main: main }
     }
-    )(resolve, flatten, runner);
+    )(resolve, bootstrap, runner);
     return nodecli;
 });
