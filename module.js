@@ -23,7 +23,7 @@ const subset = function (left, right) {
     return true;
 }
 
-const run_module = function(modules_map, module_name) {
+const run_module = function(resolve, module_name) {
     if (!(typeof module_name === "string" || module_name instanceof String)) {
         throw "malformed module name; should be a string: " + asString(module_name);
     }
@@ -34,7 +34,7 @@ const run_module = function(modules_map, module_name) {
             return existing_instance;
         }
 
-        const module_declaration = modules_map[module_name];
+        const module_declaration = resolve(module_name);
         if (module_declaration === undefined) {
             throw "No declaration for module of name: " + module_name;
         }

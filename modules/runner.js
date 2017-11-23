@@ -1,0 +1,5 @@
+// require:
+// provide:
+function () {
+    return {}
+}

@@ -1,9 +1,6 @@
-const LinkModule = require("./module.js").LinkModule;
-
-let reader_module = LinkModule(
-    [],
-    ["reader","main","test"],
-function () {
+// require:
+// provide: read, main, test
+(function () {
     'use strict';
 
     let position = Symbol("position");
@@ -291,7 +288,7 @@ function () {
         }
     };
 
-    let main = function (inspect, process_mod) {
+    let main = function () {
         const util = require("util");
 
         function print(obj) {
@@ -327,11 +324,7 @@ function () {
         main: main,
         read: read
     }
-});
-
-if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
-    module.exports = reader_module;
-}
+})
 
 // grammar:
 //

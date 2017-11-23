@@ -1,111 +1,92 @@
-const LinkModule = require("./module.js").LinkModule;
-
-// Generates a string of JS code.
-// Needs to link with primitive stuff that may exist written in JS. Options:
-//  - some entries in module_registry could be ffi modules, which just promise that names will
-//       be available at runtime via a global variable. Or it could require them to be passed
-//       as function arguments to the closure implementing the flattened code.
-//
-// Ok, so passed in as arguments to final linked code. FFI stuff could come in as transitive dep,
-//       so how does the loader know how to load the flattened thing? It could list its deps and
-//       a runtime registry could provide them. Could be errors if deps don't provide the same functions
-//       as compiler expected they would. Maybe fine for now.
-//
-//  LinkModule([deps ...], [exports ...],
-//    function (dep ...) {
-//        ...
-//    }
-//
-//  Exports are the exports of the main module.
-//
-//  Input modules should be compile modules; that is, modules with source. Output will be a link module.
-//
-//  Forget submodules for now.
-//
-
-const flatten_module = LinkModule(
-    ["escodegen"],
-    ["flatten", "main"],
-function(escodegen) {
-    const isString = i => typeof i === "string" || i instanceof String
-
-    const CompileModule = function (imports, exports, body_code) {
-        if (imports === undefined || !Array.isArray(imports) || !imports.every(isString) ||
-            exports === undefined || !Array.isArray(exports) || !exports.every(isString) ||
-                body_code === undefined || !isString(body_code)) {
-            throw "Malformed module declaration"
-        }
-
+// require: resolve, compilejs, escodegen
+// provide: flatten, main
+function (resolve, compilejs, escodegen) {
+    function moduleInstance(name, source, deps) {
         return {
-            imports: imports,
-            exports: exports,
-            body_code: body_code
-        };
-    };
-
-    const flatten = function(module_registry, main_module_name) {
-        let tree = {
             type: 'VariableDeclaration',
-            declarations: [
-                {
-                    type: "VariableDeclarator",
-                    id: {
-                        type: "Identifier",
-                        name: "module_a"
-                    },
-                    init: {
+            declarations: [{
+                type: "VariableDeclarator",
+                id: {
+                    type: "Identifier",
+                    name: name
+                },
+                init: {
+                    type: "CallExpression",
+                    callee: {
                         type: "Literal",
-                        value: "foo",
-                        verbatim: module_registry["b"].body_code
-                    }
-                }],
+                        verbatim: source
+                    },
+                    arguments: deps.map(name => ({ type: "Identifier", name: name }))
+                }
+            }],
             kind: "const"
+        };
+    }
+
+    function wrap(declarations, final_module_name) {
+        return {
+            type: "ExpressionStatement",
+            expression: {
+                type: "FunctionExpression",
+                id: null,
+                params: [],
+                body: {
+                    type: "BlockStatement",
+                    body: [
+                        ...declarations,
+                        {
+                            type: "ReturnStatement",
+                            argument: {
+                                type: "Identifier",
+                                name: final_module_name
+                            }
+                        }
+                    ]
+                }
+            }
+        };
+    }
+
+    function flatten(resolve, main_module_name) {
+        if (!(typeof main_module_name === "string" || main_module_name instanceof String)) {
+            throw "malformed module name; should be a string: " + asString(module_name);
         }
+
+        function flatten_internal([declarations, visited], module_name) {
+            if (visited.has(module_name)) {
+                return [declarations, visited];
+            }
+
+            const source = resolve(module_name);
+            const compiled = compilejs.compileJS(source);
+
+            const [declarations2, visited2] =
+                compiled.imports.reduce(flatten_internal, [declarations, visited])
+
+            const newVisited = new Set(visited2)
+            newVisited.add(module_name);
+
+            return [
+                [...declarations2,
+                    moduleInstance(module_name, compiled.body_code, compiled.imports)],
+                    newVisited
+            ];
+        }
+
+        const [declarations, ignore] = flatten_internal([[], new Set()], main_module_name);
+        const tree = wrap(declarations, main_module_name);
 
         return escodegen.generate(tree, { verbatim: "verbatim"} )
     }
 
     function main() {
-        let modules = {};
-        modules["a"] = CompileModule([],["foo"],
-`
-function () {
-    function foo () {
-        return 5;
-    }
-
-    return {
-        foo: foo;
-    };
-}
-`
-        );
-
-        modules["b"] = CompileModule(["a"],["main"],
-`
-function (a) {
-    function main () {
-        console.log(a.foo());
-    }
-
-    return {
-        main: main;
-    };
-}
-`
-        );
-        console.log(flatten(modules, "b"));
+        const main_module_name = process.argv[2]
+        const res = flatten(resolve.resolve, main_module_name);
+        console.log(res);
     }
 
     return {
         flatten: flatten,
         main: main
     }
-});
-
-
-if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
-    module.exports = flatten_module;
 }
-
-
