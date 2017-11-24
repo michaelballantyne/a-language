@@ -1,6 +1,10 @@
-// require: compilejs, escodegen
+// require: compile/js, compile/escodegen
 // provide: flatten
 (function (compilejs, escodegen) {
+    function escapeModuleName(name) {
+        return name.replace("/", "_");
+    }
+
     function moduleInstance(name, source, deps) {
         return {
             type: 'VariableDeclaration',
@@ -8,7 +12,7 @@
                 type: "VariableDeclarator",
                 id: {
                     type: "Identifier",
-                    name: name
+                    name: escapeModuleName(name)
                 },
                 init: {
                     type: "CallExpression",
@@ -16,7 +20,7 @@
                         type: "Literal",
                         verbatim: source
                     },
-                    arguments: deps.map(name => ({ type: "Identifier", name: name }))
+                    arguments: deps.map(name => ({ type: "Identifier", name: escapeModuleName(name) }))
                 }
             }],
             kind: "const"
@@ -38,7 +42,7 @@
                             type: "ReturnStatement",
                             argument: {
                                 type: "Identifier",
-                                name: final_module_name
+                                name: escapeModuleName(final_module_name)
                             }
                         }
                     ]

@@ -1,5 +1,5 @@
 (function () {
-    const compiledmodule = (// require:
+    const compile_module = (// require:
     // provide: CompiledModule
     (function () {
         const isString = i => typeof i === "string" || i instanceof String
@@ -21,7 +21,7 @@
         return { CompiledModule: CompiledModule }
     })
     )();
-    const compilejs = (// require: compiledmodule
+    const compile_js = (// require: compile/module
     // provide: compileJS
     (function (compiledmodule) {
         function parseDecl(name, line) {
@@ -41,7 +41,7 @@
     
             const s2 = s1[1].split(",").map(i => i.trim());
     
-            if (!s2.every(s => /^[a-zA-Z()]+$/.test(s))) {
+            if (!s2.every(s => /^[a-zA-Z\/]+$/.test(s))) {
                 malformed()
             }
     
@@ -62,8 +62,8 @@
     
         return { compileJS: compileJS }
     })
-    )(compiledmodule);
-    const runner = (// require: compilejs
+    )(compile_module);
+    const compile_runner = (// require: compile/js
     // provide: run
     (function (compilejs) {
         const subset = function (left, right) {
@@ -113,8 +113,8 @@
     
         return { run: run}
     })
-    )(compilejs);
-    const noderesolve = (// require:
+    )(compile_js);
+    const node_resolve = (// require:
     // provide: resolve
     (function () {
         const fs = require("fs")
@@ -128,7 +128,7 @@
         return { resolve: resolve }
     })
     )();
-    const nodecli = (// require: runner, noderesolve
+    const node_cli = (// require: compile/runner, node/resolve
     // provide: main
     (function (runner, noderesolve) {
         const fs = require("fs");
@@ -154,6 +154,6 @@
     
         return { main: main };
     })
-    )(runner, noderesolve);
-    return nodecli;
+    )(compile_runner, node_resolve);
+    return node_cli;
 });

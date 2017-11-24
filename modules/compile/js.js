@@ -1,4 +1,4 @@
-// require: compiledmodule
+// require: compile/module
 // provide: compileJS
 (function (compiledmodule) {
     function parseDecl(name, line) {
@@ -18,7 +18,7 @@
 
         const s2 = s1[1].split(",").map(i => i.trim());
 
-        if (!s2.every(s => /^[a-zA-Z()]+$/.test(s))) {
+        if (!s2.every(s => /^[a-zA-Z\/]+$/.test(s))) {
             malformed()
         }
 

@@ -1,4 +1,4 @@
-// require: runner, noderesolve
+// require: compile/runner, node/resolve
 // provide: main
 (function (runner, noderesolve) {
     const fs = require("fs");

@@ -1,4 +1,4 @@
-// require: compilejs
+// require: compile/js
 // provide: run
 (function (compilejs) {
     const subset = function (left, right) {
