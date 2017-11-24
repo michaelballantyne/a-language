@@ -135,7 +135,7 @@
         const vm = require("vm");
     
         function eval_module(text) {
-            return vm.runInNewContext(text, {console: console, require: require, process: process});
+            return vm.runInNewContext(text, {setImmediate: setImmediate, console: console, require: require, process: process});
         }
     
         function usage() {
