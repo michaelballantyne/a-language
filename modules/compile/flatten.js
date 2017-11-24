@@ -1,6 +1,6 @@
-// require: compile/js, vendor/escodegen
+// require: vendor/immutable, compile/js, vendor/escodegen
 // provide: flatten
-(function (compilejs, escodegen) {
+(function (Immutable, compilejs, escodegen) {
     function escapeModuleName(name) {
         return name.replace("/", "_");
     }
@@ -64,21 +64,18 @@
             const source = resolve(module_name);
             const compiled = compilejs.compileJS(source);
 
-            const [declarations2, visited2] =
+            const [declarationsAfterImports, visitedAfterImports] =
                 compiled.imports.reduce(flatten_internal, [declarations, visited])
 
-            const newVisited = new Set(visited2)
-            newVisited.add(module_name);
-
+            const declarationCode = moduleInstance(module_name, compiled.body_code, compiled.imports);
             return [
-                [...declarations2,
-                    moduleInstance(module_name, compiled.body_code, compiled.imports)],
-                    newVisited
+                declarationsAfterImports.push(declarationCode),
+                visitedAfterImports.add(module_name)
             ];
         }
 
-        const [declarations, ignore] = flatten_internal([[], new Set()], main_module_name);
-        const tree = wrap(declarations, main_module_name);
+        const [declarations,] = flatten_internal([Immutable.List(), Immutable.Set()], main_module_name);
+        const tree = wrap(declarations.toArray(), main_module_name);
 
         return escodegen.generate(tree, { verbatim: "verbatim"} )
     }
