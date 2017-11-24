@@ -1,4 +1,4 @@
-// require: compile/js, compile/escodegen
+// require: compile/js, vendor/escodegen
 // provide: flatten
 (function (compilejs, escodegen) {
     function escapeModuleName(name) {
