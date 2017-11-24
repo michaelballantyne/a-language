@@ -31,7 +31,6 @@
         const imports = parseDecl("require", lines[0]);
         const exports = parseDecl("provide", lines[1]);
 
-
         const module_declaration = compiledmodule.CompiledModule(imports, exports, source);
 
         return module_declaration;

@@ -1,24 +1,14 @@
-// require: compile/js
+// require: vendor/immutable, compile/js
 // provide: run
-(function (compilejs) {
-    const subset = function (left, right) {
-        for (var elem of left) {
-            if (!right.has(elem)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
+(function (Immutable, compilejs) {
     const run = function(resolve, eval_module, module_name) {
         if (!(typeof module_name === "string" || module_name instanceof String)) {
             throw "malformed module name; should be a string: " + module_name;
         }
 
         const run_module_internal = function (instance_map, module_name) {
-            const existing_instance = instance_map[module_name];
-            if (existing_instance !== undefined) {
-                return existing_instance;
+            if (instance_map.has(module_name)) {
+                return instance_map.get(module_name);
             }
 
             const module_source = resolve(module_name);
@@ -31,19 +21,17 @@
 
             const body_function = eval_module(module_declaration.body_code);
             const instance =
-                body_function.apply(undefined, imports.map(i => imports_instantiated[i]));
+                body_function.apply(undefined, imports.map(i => imports_instantiated.get(i)));
 
-            if (!subset(new Set(module_declaration.exports), new Set(Object.keys(instance)))) {
+            if (!(Immutable.Collection(module_declaration.exports).isSubset(Immutable.Collection(Object.keys(instance))))) {
                 throw "Module instance does not include all keys listed in exports: " + module_name;
             }
 
-            return {
-                ...imports_instantiated,
-                [module_name]: instance
-            }
+            return imports_instantiated.set(module_name, instance);
         }
 
-        return run_module_internal({}, module_name)[module_name];
+        const instance_map = run_module_internal(Immutable.Map(), module_name)
+        return instance_map.get(module_name);
     }
 
     return { run: run}
