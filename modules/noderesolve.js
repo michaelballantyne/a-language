@@ -1,6 +1,6 @@
 // require:
 // provide: resolve
-function () {
+(function () {
     const fs = require("fs")
 
     function resolve(name) {
@@ -10,4 +10,4 @@ function () {
     }
 
     return { resolve: resolve }
-}
+})

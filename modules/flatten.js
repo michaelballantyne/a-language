@@ -1,6 +1,6 @@
-// require: resolve, compilejs, escodegen
-// provide: flatten, main
-function (resolve, compilejs, escodegen) {
+// require: compilejs, escodegen
+// provide: flatten
+(function (compilejs, escodegen) {
     function moduleInstance(name, source, deps) {
         return {
             type: 'VariableDeclaration',
@@ -79,14 +79,7 @@ function (resolve, compilejs, escodegen) {
         return escodegen.generate(tree, { verbatim: "verbatim"} )
     }
 
-    function main() {
-        const main_module_name = process.argv[2]
-        const res = flatten(resolve.resolve, main_module_name);
-        console.log(res);
-    }
-
     return {
-        flatten: flatten,
-        main: main
+        flatten: flatten
     }
-}
+})

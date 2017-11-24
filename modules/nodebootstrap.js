@@ -1,12 +1,12 @@
-// require: flatten, resolve
+// require: flatten, noderesolve
 // provide: main
-function (flatten, resolve) {
+(function (flatten, noderesolve) {
     const fs = require("fs");
-    
+
     function main(args) {
-        const text = flatten.flatten(resolve.resolve, "nodecli")
+        const text = flatten.flatten(noderesolve.resolve, "nodecli")
         fs.writeFileSync("bootfiles/nodecli.js", text)
     }
 
     return { main: main }
-}
+})

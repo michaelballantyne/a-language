@@ -1,21 +1,7 @@
 (function () {
-    const resolve = (// require:
-    // provide: resolve
-    function () {
-        const fs = require("fs")
-    
-        function resolve(name) {
-            const text = fs.readFileSync("modules/" + name + ".js").toString();
-    
-            return text;
-        }
-    
-        return { resolve: resolve }
-    }
-    )();
     const compiledmodule = (// require:
     // provide: CompiledModule
-    function () {
+    (function () {
         const isString = i => typeof i === "string" || i instanceof String
     
         function CompiledModule(imports, exports, body_code) {
@@ -33,11 +19,11 @@
         }
     
         return { CompiledModule: CompiledModule }
-    }
+    })
     )();
     const compilejs = (// require: compiledmodule
     // provide: compileJS
-    function (compiledmodule) {
+    (function (compiledmodule) {
         function parseDecl(name, line) {
             function malformed() {
                 throw "malformed " + name + ": " + line;
@@ -62,8 +48,6 @@
             return s2;
         }
     
-        //const evaled = eval(text, {console: console, require: require, process: process})
-    
         // source string -> CompiledModule
         function compileJS(source) {
             const lines = source.split('\n');
@@ -77,123 +61,11 @@
         }
     
         return { compileJS: compileJS }
-    }
+    })
     )(compiledmodule);
-    const escodegen = (// require:
-    // provide: generate
-    function () {
-        return require("escodegen");
-    }
-    )();
-    const flatten = (// require: resolve, compilejs, escodegen
-    // provide: flatten, main
-    function (resolve, compilejs, escodegen) {
-        function moduleInstance(name, source, deps) {
-            return {
-                type: 'VariableDeclaration',
-                declarations: [{
-                    type: "VariableDeclarator",
-                    id: {
-                        type: "Identifier",
-                        name: name
-                    },
-                    init: {
-                        type: "CallExpression",
-                        callee: {
-                            type: "Literal",
-                            verbatim: source
-                        },
-                        arguments: deps.map(name => ({ type: "Identifier", name: name }))
-                    }
-                }],
-                kind: "const"
-            };
-        }
-    
-        function wrap(declarations, final_module_name) {
-            return {
-                type: "ExpressionStatement",
-                expression: {
-                    type: "FunctionExpression",
-                    id: null,
-                    params: [],
-                    body: {
-                        type: "BlockStatement",
-                        body: [
-                            ...declarations,
-                            {
-                                type: "ReturnStatement",
-                                argument: {
-                                    type: "Identifier",
-                                    name: final_module_name
-                                }
-                            }
-                        ]
-                    }
-                }
-            };
-        }
-    
-        function flatten(resolve, main_module_name) {
-            if (!(typeof main_module_name === "string" || main_module_name instanceof String)) {
-                throw "malformed module name; should be a string: " + asString(module_name);
-            }
-    
-            function flatten_internal([declarations, visited], module_name) {
-                if (visited.has(module_name)) {
-                    return [declarations, visited];
-                }
-    
-                const source = resolve(module_name);
-                const compiled = compilejs.compileJS(source);
-    
-                const [declarations2, visited2] =
-                    compiled.imports.reduce(flatten_internal, [declarations, visited])
-    
-                const newVisited = new Set(visited2)
-                newVisited.add(module_name);
-    
-                return [
-                    [...declarations2,
-                        moduleInstance(module_name, compiled.body_code, compiled.imports)],
-                        newVisited
-                ];
-            }
-    
-            const [declarations, ignore] = flatten_internal([[], new Set()], main_module_name);
-            const tree = wrap(declarations, main_module_name);
-    
-            return escodegen.generate(tree, { verbatim: "verbatim"} )
-        }
-    
-        function main() {
-            const main_module_name = process.argv[2]
-            const res = flatten(resolve.resolve, main_module_name);
-            console.log(res);
-        }
-    
-        return {
-            flatten: flatten,
-            main: main
-        }
-    }
-    )(resolve, compilejs, escodegen);
-    const bootstrap = (// require: flatten, resolve
-    // provide: main
-    function (flatten, resolve) {
-        const fs = require("fs");
-        
-        function main(args) {
-            const text = flatten.flatten(resolve.resolve, "nodecli")
-            fs.writeFileSync("bootfiles/nodecli.js", text)
-        }
-    
-        return { main: main }
-    }
-    )(flatten, resolve);
     const runner = (// require: compilejs
     // provide: run
-    function (compilejs) {
+    (function (compilejs) {
         const subset = function (left, right) {
             for (var elem of left) {
                 if (!right.has(elem)) {
@@ -240,13 +112,12 @@
         }
     
         return { run: run}
-    }
+    })
     )(compilejs);
-    const nodecli = (// require: bootstrap, runner
-    // provide: main
-    function (bootstrap, runner) {
+    const noderesolve = (// require:
+    // provide: resolve
+    (function () {
         const fs = require("fs")
-        const vm = require("vm")
     
         function resolve(name) {
             const text = fs.readFileSync("modules/" + name + ".js").toString();
@@ -254,28 +125,35 @@
             return text;
         }
     
+        return { resolve: resolve }
+    })
+    )();
+    const nodecli = (// require: runner, noderesolve
+    // provide: main
+    (function (runner, noderesolve) {
+        const fs = require("fs");
+        const vm = require("vm");
+    
         function eval_module(text) {
-            return vm.runInNewContext(text, {console: console, require: require, process: process})
+            return vm.runInNewContext(text, {console: console, require: require, process: process});
         }
     
         function usage() {
-            console.log("Usage: node run.js --bootstrap | --run <module-name> <function>");
+            console.log("Usage: node run.js <module-name> <function>");
             process.exit(1);
         }
     
         function main(args) {
-            if (args[0] === "--run") {
-                const module_instance = runner.run(resolve, eval_module, args[1])
-                module_instance["main"](args.slice(2));
-            } else if (args[0] === "--bootstrap") {
-                bootstrap.main([])
+            if (args.length >= 2) {
+                const module_instance = runner.run(noderesolve.resolve, eval_module, args[0])
+                module_instance[args[1]](args.slice(2));
             } else {
-                usage()
+                usage();
             }
         }
     
-        return { main: main }
-    }
-    )(bootstrap, runner);
+        return { main: main };
+    })
+    )(runner, noderesolve);
     return nodecli;
 });

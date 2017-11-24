@@ -319,9 +319,35 @@
         });
     };
 
+
+    function example(args) {
+        const ex =
+`
+(hello
+  ‹‹world ‹‹nested›› end››
+  "other string"
+  'quoted
+  '(quoted)
+  \`quasi
+  \`(quasi ,unquote)
+  (more (deeply nested)))
+
+(second form)
+`
+
+        const util = require("util");
+
+        function print(obj) {
+            console.log(util.inspect(obj, false, null));
+        }
+
+        print(read(ex))
+    }
+
     return {
         test: test,
         main: main,
+        example: example,
         read: read
     }
 })

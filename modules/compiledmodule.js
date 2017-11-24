@@ -1,6 +1,6 @@
 // require:
 // provide: CompiledModule
-function () {
+(function () {
     const isString = i => typeof i === "string" || i instanceof String
 
     function CompiledModule(imports, exports, body_code) {
@@ -18,4 +18,4 @@ function () {
     }
 
     return { CompiledModule: CompiledModule }
-}
+})

@@ -1,22 +1,26 @@
-// require: resolve, bootstrap, runner
+// require: runner, noderesolve
 // provide: main
-function (resolve, bootstrap, runner) {
+(function (runner, noderesolve) {
+    const fs = require("fs");
+    const vm = require("vm");
+
+    function eval_module(text) {
+        return vm.runInNewContext(text, {console: console, require: require, process: process});
+    }
+
     function usage() {
-        console.log("Usage: node run.js --bootstrap | --run <module-name> <function>");
+        console.log("Usage: node run.js <module-name> <function>");
         process.exit(1);
     }
 
     function main(args) {
-        if (args[0] === "--run") {
-            throw "not implemented2"
-        }
-        if (args[0] === "--bootstrap") {
-            bootstrap.main([])
-        }
-        else {
-            usage()
+        if (args.length >= 2) {
+            const module_instance = runner.run(noderesolve.resolve, eval_module, args[0])
+            module_instance[args[1]](args.slice(2));
+        } else {
+            usage();
         }
     }
 
-    return { main: main }
-}
+    return { main: main };
+})

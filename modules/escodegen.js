@@ -1,5 +1,5 @@
 // require:
 // provide: generate
-function () {
+(function () {
     return require("escodegen");
-}
+})

@@ -1,6 +1,6 @@
 // require: compiledmodule
 // provide: compileJS
-function (compiledmodule) {
+(function (compiledmodule) {
     function parseDecl(name, line) {
         function malformed() {
             throw "malformed " + name + ": " + line;
@@ -25,8 +25,6 @@ function (compiledmodule) {
         return s2;
     }
 
-    //const evaled = eval(text, {console: console, require: require, process: process})
-
     // source string -> CompiledModule
     function compileJS(source) {
         const lines = source.split('\n');
@@ -40,4 +38,4 @@ function (compiledmodule) {
     }
 
     return { compileJS: compileJS }
-}
+})
