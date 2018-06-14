@@ -243,8 +243,9 @@
    [js-core-statement-pass2
     (syntax-parser
       [(while-id condition body ...)
+       (define ctx (syntax-local-make-definition-context))
        (def/stx condition^ (js-expand-expression #'condition #f))
-       (def/stx (body^ ...) (expand-block #'(body ...) #f))
+       (def/stx (body^ ...) (expand-block #'(body ...) ctx))
        #'(while-id condition^ body^ ...)])]
    [extract-js-statement
     (lambda (stx idmap)
@@ -255,6 +256,32 @@
           'test (extract-js-expression #'condition idmap)
           'body (extract-block #'(body ...) idmap))]))]))
 
+(define-syntax if
+  (generics
+   [js-core-statement-pass1 skip-pass1]
+   [js-core-statement-pass2
+    (syntax-parser
+      [(if-id c (b1 ...) (b2 ...))
+       (def/stx c^ (js-expand-expression #'c #f))
+      
+       (define ctx1 (syntax-local-make-definition-context))
+       (def/stx (b1^ ...) (expand-block #'(b1 ...) ctx1))
+
+       (define ctx2 (syntax-local-make-definition-context))
+       (def/stx (b2^ ...) (expand-block #'(b2 ...) ctx2))
+
+       #'(if-id c^ (b1^ ...) (b2^ ...))])]))
+
+(define-syntax ?
+  (generics
+   [js-core-expression
+    (syntax-parser
+      [(if-id c e1 e2)
+       (def/stx c^ (js-expand-expression #'c #f))
+       (def/stx e1^ (js-expand-expression #'e1 #f))
+       (def/stx e2^ (js-expand-expression #'e2 #f))
+       #'(if-id c^ e1^ e2^)])]))
+
 (module+ test
   (pretty-print
    (syntax->datum
@@ -263,7 +290,12 @@
                                  (function (n)
                                            (let x 2)
                                            (let res 1)
+                                           (if (? x x res)
+                                               ((let x 1)
+                                                (return (x x)))
+                                               ())
                                            (while (<= x n)
+                                                  (let y 5)
                                                   (set! res (* res x))
                                                   (set! x (+ x 1)))
                                            (return res)))
@@ -274,14 +306,14 @@
                                 (let x 2)
                                 (+ +)
                                 ))
-  (js-exp-extracted (function (+ <= *)
-                              (let fact
-                                (function (n)
-                                          (let x 2)
-                                          (let res 1)
-                                          (while (<= x n)
-                                                 (set! res (* res x))
-                                                 (set! x (+ x 1)))
-                                          (return res)))
-                              (return fact)
-                              )))
+  #;(js-exp-extracted (function (+ <= *)
+                                (let fact
+                                  (function (n)
+                                            (let x 2)
+                                            (let res 1)
+                                            (while (<= x n)
+                                                   (set! res (* res x))
+                                                   (set! x (+ x 1)))
+                                            (return res)))
+                                (return fact)
+                                )))
