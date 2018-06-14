@@ -30,15 +30,23 @@
   (define-syntax-generic js-transformer
     (expand-to-error "not a js form"))
 
-  (define-syntax-generic extract-js
+  (define-syntax-generic extract-js-expression
     (lambda (stx idmap)
       (syntax-parse stx
-        [x:id
+        [x:id (extract-id #'x idmap)]
+        [n:number
          (hasheq
-          'type "Identifier"
-          'name (map-id idmap #'x))]
+          'type "Literal"
+          'value (syntax->datum #'n))]
         [_
-         (expand-to-error "form does not support compilation to JS")])))
+         (raise-syntax-error 'extract-js "form does not support compilation to JS" stx)])))
+
+  (define-syntax-generic extract-js-statement
+    (lambda (stx idmap)
+      (let ([res (extract-js-expression stx idmap)])
+        (hasheq
+         'type "ExpressionStatement"
+         'expression res))))
 
   (define js-var
     (generics
@@ -46,11 +54,9 @@
      [js-variable (lambda (stx) stx)]
      ; TODO: I wanted to write this, but I can't! The binding to js-var is not
      ;   preserved after the initial expansion.
-     #;[extract-js
+     #;[extract-js-expression
         (lambda (stx idmap)
-          (hasheq
-           'type "Identifier"
-           'name (map-id idmap stx)))]))
+          (extract-id #'x idmap))]))
   
   ; TODO: I probably need to get the expander into a (Racket) expression context
   ;   at this point so that use-site scopes added to this point aren't deleted
@@ -100,14 +106,22 @@
   (define (make-idmap)
     (idmap (make-free-id-table) 0))
   
-  (define (map-id map id)
-    (let ([v (free-id-table-ref! (idmap-table map) id (lambda () #f))])
-      (or v
-          (let ([v (string-append (symbol->string (syntax->datum id))
-                                  (number->string (idmap-ctr map)))])
-            (free-id-table-set! (idmap-table map) id v)
-            (set-idmap-ctr! map (+ (idmap-ctr map) 1))
-            v))))
+  (define (extract-id id map)
+    (define name
+      (let ([v (free-id-table-ref! (idmap-table map) id (lambda () #f))])
+        (or v
+            (let ([v (string-append (symbol->string (syntax->datum id))
+                                    (number->string (idmap-ctr map)))])
+              (free-id-table-set! (idmap-table map) id v)
+              (set-idmap-ctr! map (+ (idmap-ctr map) 1))
+              v))))
+    (hasheq 'type "Identifier" 'name name))
+
+  (define (extract-block body idmap)
+    (hasheq
+     'type "BlockStatement"
+     'body (stx-map (λ (b) (extract-js-statement b idmap))
+                    body)))
   )
 
 (define-syntax js-exp-expanded
@@ -119,7 +133,7 @@
 (define-syntax js-exp-extracted
   (syntax-parser
     [(_ arg)
-     (def/stx expanded-js (extract-js (js-expand-expression #'arg #f) (make-idmap)))
+     (def/stx expanded-js (extract-js-expression (js-expand-expression #'arg #f) (make-idmap)))
      #'(pretty-print 'expanded-js)]))
 
 (define-syntax #%js-app
@@ -130,14 +144,14 @@
        (def/stx (e^ e*^ ...)
          (stx-map (lambda (stx) (js-expand-expression stx #f)) #'(e e* ...)))
        #'(app-id e^ e*^ ...)])]
-   [extract-js
+   [extract-js-expression
     (lambda (stx idmap)
       (syntax-parse stx
         [(_ e e* ...)
          (hasheq
           'type "CallExpression"
-          'callee (extract-js #'e idmap)
-          'arguments (stx-map (λ (e) (extract-js e idmap)) #'(e* ...)))]))]))
+          'callee (extract-js-expression #'e idmap)
+          'arguments (stx-map (λ (e) (extract-js-expression e idmap)) #'(e* ...)))]))]))
 
 (define-syntax function
   (generics
@@ -151,19 +165,15 @@
        (def/stx (body^ ...)
          (expand-block #'(body ...) ctx))   
        #'(function-id (x^ ...) body^ ...)])]
-   [extract-js
+   [extract-js-expression
     (lambda (stx idmap)
       (syntax-parse stx
         [(_ (x ...) body ...)
          (hasheq
           'type "FunctionExpression"
-          'params (stx-map (λ (x) (hasheq 'type "Identifier"
-                                          'name (map-id idmap x)))
+          'params (stx-map (λ (x) (extract-id x idmap))
                            #'(x ...))
-          'body (hasheq
-                 'type "BlockStatement"
-                 'body (stx-map (λ (b) (extract-js b idmap))
-                                #'(body ...))))]))]))
+          'body (extract-block #'(body ...) idmap))]))]))
 
 (define-syntax let
   (generics
@@ -178,7 +188,19 @@
     (syntax-parser
       [(var-id x e)
        (def/stx e^ (js-expand-expression #'e #f))
-       #'(var-id x e^)])]))
+       #'(var-id x e^)])]
+   [extract-js-statement
+    (lambda (stx idmap)
+      (syntax-parse stx
+        [(_ x e)
+         (hasheq
+          'type "VariableDeclaration"
+          'kind "let"
+          'declarations
+          (list (hasheq
+                 'type "VariableDeclarator"
+                 'id (extract-id #'x idmap)
+                 'init (extract-js-expression #'e idmap))))]))]))
 
 (define-syntax return
   (generics
@@ -187,7 +209,14 @@
     (syntax-parser
       [(return-id e)
        (def/stx e^ (js-expand-expression #'e #f))
-       #'(return-id e^)])]))
+       #'(return-id e^)])]
+   [extract-js-statement
+    (lambda (stx idmap)
+      (syntax-parse stx
+        [(_ e)
+         (hasheq
+          'type "ReturnStatement"
+          'argument (extract-js-expression #'e idmap))]))]))
 
 (define-syntax set!
   (generics
@@ -197,7 +226,16 @@
       [(set!-id var:id e)
        #:fail-unless (js-variable? #'var) (format "expected variable")
        (def/stx e^ (js-expand-expression #'e #f))
-       #'(set!-id var e^)])]))
+       #'(set!-id var e^)])]
+   [extract-js-expression
+    (lambda (stx idmap)
+      (syntax-parse stx
+        [(_ var:id e)
+         (hasheq
+          'type "AssignmentExpression"
+          'operator "="
+          'left (extract-id #'var idmap)
+          'right (extract-js-expression #'e idmap))]))]))
 
 (define-syntax while
   (generics
@@ -207,7 +245,15 @@
       [(while-id condition body ...)
        (def/stx condition^ (js-expand-expression #'condition #f))
        (def/stx (body^ ...) (expand-block #'(body ...) #f))
-       #'(while-id condition^ body^ ...)])]))
+       #'(while-id condition^ body^ ...)])]
+   [extract-js-statement
+    (lambda (stx idmap)
+      (syntax-parse stx
+        [(_ condition body ...)
+         (hasheq
+          'type "WhileStatement"
+          'test (extract-js-expression #'condition idmap)
+          'body (extract-block #'(body ...) idmap))]))]))
 
 (module+ test
   (pretty-print
@@ -224,19 +270,18 @@
                                (return fact)
                                ))))
 
+  #;(js-exp-extracted (function (+ <= *)
+                                (let x 2)
+                                (+ +)
+                                ))
   (js-exp-extracted (function (+ <= *)
-                              (+ +)
-                              ))
-  #;(pretty-print
-     (syntax->datum
-      (js-exp-extracted (function (+ <= *)
-                                  (let fact
-                                    (function (n)
-                                              (let x 2)
-                                              (let res 1)
-                                              (while (<= x n)
-                                                     (set! res (* res x))
-                                                     (set! x (+ x 1)))
-                                              (return res)))
-                                  (return fact)
-                                  )))))
+                              (let fact
+                                (function (n)
+                                          (let x 2)
+                                          (let res 1)
+                                          (while (<= x n)
+                                                 (set! res (* res x))
+                                                 (set! x (+ x 1)))
+                                          (return res)))
+                              (return fact)
+                              )))
