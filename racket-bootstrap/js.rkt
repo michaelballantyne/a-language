@@ -104,7 +104,7 @@
          (syntax-local-bind-syntaxes (list x) #`#,js-var ctx))
        (def/stx (x^ ...) (internal-definition-context-introduce ctx #'(x ...)))
        (def/stx (body^ ...)
-         (with-expand-context ctx (expand-block #'(body ...) ctx)))   
+         (expand-block #'(body ...) ctx))   
        #'(function-id (x^ ...) body^ ...)])]))
 
 (define-syntax let
