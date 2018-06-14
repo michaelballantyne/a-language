@@ -3,7 +3,9 @@
 (require
   (for-syntax
    syntax-generic2
-   syntax/parse))
+   syntax/stx
+   (rename-in syntax/parse [define/syntax-parse def/stx])
+   ))
 
 (begin-for-syntax
   (define ((expand-to-error message) stx)
@@ -39,9 +41,9 @@
   (define (js-expand-expression stx ctx)
     (syntax-parse stx
       [_ #:when (js-transformer? stx)
-         (js-expand-expression (call-with-expand-context js-transformer ctx stx))]
+         (js-expand-expression (apply-as-transformer js-transformer ctx stx))]
       [_ #:when (js-core-expression? stx)
-         (call-with-expand-context js-core-expression ctx stx)]
+         (apply-as-transformer js-core-expression ctx stx)]
       [_ #:when (js-core-statement-pass1? stx)
          (raise-syntax-error #f "js statement not valid in js expression position" stx)]
       [x:id #:when (js-reference? stx)
@@ -55,16 +57,16 @@
   (define (js-expand-statement-pass1 stx ctx)
     (syntax-parse stx
       [_ #:when (js-transformer? stx)
-         (js-expand-statement-pass1 (call-with-expand-context js-transformer ctx stx) ctx)]
+         (js-expand-statement-pass1 (apply-as-transformer js-transformer ctx stx) ctx)]
       [_ #:when (js-core-statement-pass1? stx)
-         (call-with-expand-context js-core-statement-pass1 ctx stx ctx)]
+         (apply-as-transformer js-core-statement-pass1 ctx stx ctx)]
       ; Assume it's an expression; we'll expand those in pass 2.
       [_ stx]))
 
   (define (js-expand-statement-pass2 stx ctx)
     (syntax-parse stx
       [_ #:when (js-core-statement-pass2? stx)
-         (call-with-expand-context js-core-statement-pass2 ctx stx)]
+         (apply-as-transformer js-core-statement-pass2 ctx stx)]
       [_ (js-expand-expression stx ctx)]))
 
   (define (expand-block body ctx)
@@ -73,22 +75,24 @@
         (js-expand-statement-pass1 b ctx)))
     (for/list ([b body^])
       (js-expand-statement-pass2 b ctx)))
+
+  (define (skip-pass1 stx ctx) stx)
   )
 
 (define-syntax js-exp
   (syntax-parser
     [(_ arg)
-     #`#'#,(js-expand-expression #'arg #f)]))
+     (def/stx expanded-js (js-expand-expression #'arg #f))
+     #'#'expanded-js]))
 
 (define-syntax #%js-app
   (generics
    [js-core-expression
     (syntax-parser
       [(app-id e e* ...)
-       (define/syntax-parse (e^ e*^ ...)
-         (map (lambda (stx) (js-expand-expression stx #f))
-              (syntax->list #'(e e* ...))))
-       #`(app-id e^ e*^ ...)])]))
+       (def/stx (e^ e*^ ...)
+         (stx-map (lambda (stx) (js-expand-expression stx #f)) #'(e e* ...)))
+       #'(app-id e^ e*^ ...)])]))
 
 (define-syntax function
   (generics
@@ -98,10 +102,9 @@
        (define ctx (syntax-local-make-definition-context))
        (for ([x (syntax->list #'(x ...))])
          (syntax-local-bind-syntaxes (list x) #`#,js-var ctx))
-       (define/syntax-parse (x^ ...) (internal-definition-context-introduce ctx #'(x ...)))
-       ; expand body in a new scope, so function arguments may be shadowed.
-       (define/syntax-parse (body^ ...)
-         (expand-block #'(body ...) ctx))   
+       (def/stx (x^ ...) (internal-definition-context-introduce ctx #'(x ...)))
+       (def/stx (body^ ...)
+         (with-expand-context ctx (expand-block #'(body ...) ctx)))   
        #'(function-id (x^ ...) body^ ...)])]))
 
 (define-syntax let
@@ -111,47 +114,41 @@
       (syntax-parse stx
         [(var-id x e)
          (syntax-local-bind-syntaxes (list #'x) #`#,js-var ctx)
-         (define/syntax-parse x^ (internal-definition-context-introduce ctx #'x))
+         (def/stx x^ (internal-definition-context-introduce ctx #'x))
          #'(var-id x^ e)]))]
    [js-core-statement-pass2
     (syntax-parser
       [(var-id x e)
-       (define/syntax-parse e^ (js-expand-expression #'e #f))
+       (def/stx e^ (js-expand-expression #'e #f))
        #'(var-id x e^)])]))
 
 (define-syntax return
   (generics
-   [js-core-statement-pass1
-    (lambda (stx ctx) stx)]
+   [js-core-statement-pass1 skip-pass1]
    [js-core-statement-pass2
     (syntax-parser
       [(return-id e)
-       (define/syntax-parse e^ (js-expand-expression #'e #f))
+       (def/stx e^ (js-expand-expression #'e #f))
        #'(return-id e^)])]))
 
 (define-syntax set!
   (generics
-   [js-core-statement-pass1
-    (lambda (stx ctx) stx)]
+   [js-core-statement-pass1 skip-pass1]
    [js-core-statement-pass2
-    (lambda (stx)
-      (syntax-parse stx
-        [(set!-id var:id e)
-         #:fail-unless (js-variable? #'var)
-         (format "expected variable")
-         (define/syntax-parse e^ (js-expand-expression #'e #f))
-         #'(set!-id var e^)]))]))
+    (syntax-parser
+      [(set!-id var:id e)
+       #:fail-unless (js-variable? #'var) (format "expected variable")
+       (def/stx e^ (js-expand-expression #'e #f))
+       #'(set!-id var e^)])]))
 
 (define-syntax while
   (generics
-   [js-core-statement-pass1
-    (lambda (stx ctx) stx)]
+   [js-core-statement-pass1 skip-pass1]
    [js-core-statement-pass2
     (syntax-parser
       [(while-id condition body ...)
-       (define ctx (syntax-local-make-definition-context))
-       (define/syntax-parse condition^ (js-expand-expression #'condition ctx))
-       (define/syntax-parse (body^ ...) (expand-block #'(body ...) ctx))
+       (def/stx condition^ (js-expand-expression #'condition #f))
+       (def/stx (body^ ...) (expand-block #'(body ...) #f))
        #'(while-id condition^ body^ ...)])]))
 
 (module+ test
@@ -168,12 +165,3 @@
                                   (return res)))
                       (return fact)
                       )))))
-
-#|
-
-
-
-
-
-
-|#
