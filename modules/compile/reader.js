@@ -168,7 +168,7 @@
             seq(whitespace, sexp_list),
             action(seq(sexp, or(seq(whitespace, sexp_list),
                                 empty_as_list)),
-                   ([first, rest]) => Immutable.List([first]).concat(rest)),
+                   ([first, rest]) => rest.unshift(first)),
             empty_as_list
         ));
 
