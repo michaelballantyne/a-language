@@ -3,17 +3,12 @@
 (function (Immutable, runtime) {
     'use strict';
 
-    let position = Symbol("position");
-    let expected = Symbol("expected")
-    let result = Symbol("result");
-    let failure = Symbol("failure");
-
     function c_pred(pred, description) {
         return (input, index) => {
             if (input[index] != undefined && pred(input[index]) === true) {
-                return {[position]: index + 1, [failure]: []}
+                return {position: index + 1, failure: []}
             } else {
-                return {[failure]: [{[expected]: description, [position]: index}]}
+                return {failure: [{expected: description, position: index}]}
             }
         }
     }
@@ -22,40 +17,42 @@
     let c_not = (...to_match) => c_pred(ch => !(to_match.includes(ch)), `not ${to_match}`);
     let c_range = (lower, upper) => c_pred((ch) => lower <= ch && ch <=upper, `range ${lower} to ${upper}`);
 
-    let empty = (input, index) => ({[position]: index, [failure]: []});
+    let empty = (input, index) => ({position: index, failure: []});
 
     function merge_failures(l, r) {
-        if (l.length === 0) return r
-        if (r.length === 0) return l
+        if (l.length === 0) return r;
+        if (r.length === 0) return l;
 
-        if (r[0][position] > l[0][position]) return r
-        if (l[0][position] > r[0][position]) return l
+        if (r[0].position > l[0].position) return r;
+        if (l[0].position > r[0].position) return l;
 
-        return l.concat(r)
+        return l.concat(r);
     }
 
     function seq(...args) {
         return (input, index) => {
             let curr_index = index,
                 results = [],
-                failures = []
+                failures = [];
 
             for (let parser of args) {
-                let res = parser(input, curr_index)
+                let res = parser(input, curr_index);
 
-                if (res[result] !== undefined)
-                    results.push(res[result])
+                if (res.result !== undefined) {
+                    results.push(res.result);
+                }
 
-                failures = merge_failures(failures, res[failure])
+                failures = merge_failures(failures, res.failure);
 
-                curr_index = res[position]
-                if (curr_index === undefined)
+                curr_index = res.position;
+                if (curr_index === undefined) {
                     break;
+                }
             }
 
-            return {[position]: curr_index,
-                    [result]: results.length > 1 ? results : results[0],
-                    [failure]: failures};
+            return {position: curr_index,
+                    result: results.length > 1 ? results : results[0],
+                    failure: failures};
         }
     }
 
@@ -64,16 +61,18 @@
             let failures = []
 
             for (let parser of args) {
-                let res = parser(input, index)
+                let res = parser(input, index);
 
-                if (res[failure] !== undefined)
-                    failures = merge_failures(failures, res[failure])
+                if (res.failure !== undefined) {
+                    failures = merge_failures(failures, res.failure);
+                }
 
-                if (res[position] !== undefined)
-                    return Object.assign({}, res, {[failure]: failures})
+                if (res.position !== undefined) {
+                    return Object.assign({}, res, {failure: failures});
+                }
             }
 
-            return {[failure]: failures};
+            return {failure: failures};
         }
     }
 
@@ -94,17 +93,17 @@
 
     function eof(input, index) {
         if (index === input.length) {
-            return {[position]: index, [failure]: []};
+            return {position: index, failure: []};
         } else {
-            return {[failure]: [{[expected]: "end of file", [position]: index}]};
+            return {failure: [{expected: "end of file", position: index}]};
         }
     }
 
     function capture_string(p) {
         return (input, index) => {
             let res = p(input, index);
-            if (res[position] !== undefined) {
-                return Object.assign({}, res, {[result]: input.substring(index, res[position])});
+            if (res.position !== undefined) {
+                return Object.assign({}, res, {result: input.substring(index, res.position)});
             } else {
                 return res;
             }
@@ -114,8 +113,8 @@
     function action(p, f) {
         return (input, index) => {
             let res = p(input, index);
-            if (res[position] !== undefined) {
-                return Object.assign({}, res, {[result]: f(res[result])});
+            if (res.position !== undefined) {
+                return Object.assign({}, res, {result: f(res.result)});
             } else {
                 return res;
             }
@@ -126,8 +125,8 @@
         return (input, index) => {
             let res = p(input, index);
 
-            if (res[failure].length !== 0 && res[failure][0][position] === index) {
-                return Object.assign({}, res, {[failure]: [{[expected]: name, [position]: index}]})
+            if (res.failure.length !== 0 && res.failure[0].position === index) {
+                return Object.assign({}, res, {failure: [{expected: name, position: index}]});
             }
 
             return res;
@@ -139,7 +138,7 @@
     }
 
     let wrap = (name, wrapper, body) =>
-        describe(name, action(body, (child) => Immutable.List([wrapper, child])))
+        describe(name, action(body, (child) => Immutable.List([wrapper, child])));
 
     let sexp = nonterm("sexp", () =>
         or(
@@ -161,14 +160,14 @@
                 seq(c(","), sexp))
         ));
 
-    let empty_as_list = action(empty, (ignore) => Immutable.List([]))
+    let empty_as_list = action(empty, (ignore) => Immutable.List([]));
 
     let sexp_list = nonterm("list of s-expressions", () =>
         or(
             seq(whitespace, sexp_list),
             action(seq(sexp, or(seq(whitespace, sexp_list),
                                 empty_as_list)),
-                   ([first, rest]) => rest.unshift(first)),
+                   ([first, rest]) => Immutable.List([first]).concat(rest)),
             empty_as_list
         ));
 
@@ -205,99 +204,100 @@
 
     let read = function (string) {
         let res = parse(top, string)
-        if (res[position] === undefined) {
+        if (res.position === undefined) {
             throw { msg: "Parse error", details: res}
         } else {
-            return res[result];
+            return res.result;
         }
-    }
+    };
 
     let test = function () {
         let assert = require("assert")
 
         {
             let ex = parse(c("x"), "x")
-            assert(ex[position] === 1)
+            assert(ex.position === 1)
         }
 
         {
             let ex = parse(c("x"), "y")
-            assert(ex[position] === undefined)
+            assert(ex.position === undefined)
 
-            let f = ex[failure][0]
-            assert(f[position] === 0)
+            let f = ex.failure[0]
+            assert(f.position === 0)
         }
 
 
-        assert(parse(c_not("x"), "y")[position] === 1)
-        assert(parse(c_not("x"), "x")[position] === undefined)
-        assert(parse(c_not("x", "y"), "z")[position] === 1)
+        assert(parse(c_not("x"), "y").position === 1)
+        assert(parse(c_not("x"), "x").position === undefined)
+        assert(parse(c_not("x", "y"), "z").position === 1)
 
         {
             let ex = parse(c_not("x", "y"), "y")
-            assert(ex[position] === undefined)
+            assert(ex.position === undefined)
 
-            let f = ex[failure][0]
-            assert(f[position] === 0)
+            let f = ex.failure[0]
+            assert(f.position === 0)
         }
 
-        assert(parse(seq(c("x"), c("y")), "xy")[position] === 2)
+        assert(parse(seq(c("x"), c("y")), "xy").position === 2)
 
         {
             let ex = parse(seq(c("x"), c("y")), "zy")
-            assert(ex[position] === undefined)
+            assert(ex.position === undefined)
 
-            let f = ex[failure][0]
-            assert(f[position] === 0)
+            let f = ex.failure[0]
+            assert(f.position === 0)
         }
 
         {
             let ex = parse(seq(c("x"), c("y")), "xz")
-            assert(ex[position] === undefined)
+            assert(ex.position === undefined)
 
-            let f = ex[failure][0]
-            assert(f[position] === 1)
+            let f = ex.failure[0]
+            assert(f.position === 1)
         }
 
         {
             let ex = parse(or(c("x"), c("y")), "x")
-            assert(ex[position] === 1)
+            assert(ex.position === 1)
 
-            let f = ex[failure]
+            let f = ex.failure
             assert(f.length === 0)
         }
 
         {
             let ex = parse(or(c("x"), c("y")), "y")
-            assert(ex[position] === 1)
+            assert(ex.position === 1)
 
-            assert(ex[failure].length === 1)
-            let f = ex[failure][0]
-            assert(f[position] === 0)
+            assert(ex.failure.length === 1)
+            let f = ex.failure[0]
+            assert(f.position === 0)
         }
 
         {
             let ex = parse(or(c("x"), empty), "y")
-            assert(ex[position] === 0)
+            assert(ex.position === 0)
 
-            assert(ex[failure].length === 1)
-            let f = ex[failure][0]
-            assert(f[position] === 0)
+            assert(ex.failure.length === 1)
+            let f = ex.failure[0]
+            assert(f.position === 0)
         }
 
         {
             let ex = parse(or(seq(c("x"), c("y"), c("z")), seq(c("x"), c("x"))), "xyy")
-            assert(ex[position] === undefined)
+            assert(ex.position === undefined)
 
-            assert(ex[failure].length === 1)
-            let f = ex[failure][0]
-            assert(f[position] === 2)
+            assert(ex.failure.length === 1)
+            let f = ex.failure[0]
+            assert(f.position === 2)
         }
 
         {
             assert(Immutable.is(read("12"), Immutable.List([12])));
             assert(Immutable.is(read("1 103"), Immutable.List([1, 103])));
         }
+        console.log("tests passed")
     };
 
     let main = function () {
