@@ -55,10 +55,10 @@
 
     function parse_exp(exp, env) {
         if (runtime.is_string(exp)) {
-            return { string_literal: exp }
+            return Map({ string_literal: exp })
         }
         if (runtime.is_number(exp)) {
-            return { number_literal: exp }
+            return Map({ number_literal: exp })
         }
         if (runtime.is_identifier(exp)) { // Variable reference
             const env_entry = env.get(exp, false);
@@ -68,7 +68,7 @@
                 syntax_error(exp);
             } else if (env_entry.has("local_ref")) {
                 const unique_sym = env_entry.get("local_ref");
-                return { reference: unique_sym }
+                return Map({ reference: unique_sym })
             } else if (env_entry.has("module_ref_sym")) {
                 const module_ref_sym = env_entry.get("module_ref_sym");
                 const field = env_entry.get("module_ref_field");
@@ -97,24 +97,18 @@
     }
 
     function test_parse_exp() {
-        const util = require("util");
-
-        function print(obj) {
-            console.log(util.inspect(obj, false, null));
+        function read_and_parse(str) {
+            return parse_exp(reader.read(str).get(0), initial_env);
         }
 
-        let process = require("process")
-        let chunks = [];
-        process.stdin.resume()
-        process.stdin.on('data', function(chunk) { chunks.push(chunk); });
-        process.stdin.on('end', function() {
-            let string = chunks.join("");
-            try {
-                print(parse_exp(reader.read(string).get(0), initial_env));
-            } catch (e) {
-                print(e);
+        function assert_is(actual, expected) {
+            if (!Immutable.is(actual, expected)) {
+                throw "assertion failed.\nActual: " + actual.toString() + "\nExpected: " + expected.toString();
             }
-        });
+        }
+
+        assert_is(read_and_parse("103"), Map({number_literal: 103}));
+        assert_is(read_and_parse("\"foo\""), Map({string_literal: "foo"}));
     }
 
     return {
