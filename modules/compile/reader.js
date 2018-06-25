@@ -1,6 +1,6 @@
-// require:
+// require: vendor/immutable, runtime/runtime
 // provide: read, main, test
-(function () {
+(function (Immutable, runtime) {
     'use strict';
 
     let position = Symbol("position");
@@ -139,35 +139,35 @@
     }
 
     let wrap = (name, wrapper, body) =>
-        describe(name, action(body, (child) => [wrapper, child]))
+        describe(name, action(body, (child) => Immutable.List([wrapper, child])))
 
     let sexp = nonterm("sexp", () =>
         or(
             id,
             string,
             dsl_string,
-            wrap("parens", "#%round",
+            wrap("parens", runtime.make_identifier("#%round"),
                 seq(c("("), sexp_list, c(")"))),
-            wrap("square brackets", "#%square",
+            wrap("square brackets", runtime.make_identifier("#%square"),
                 seq(c("["), sexp_list, c("]"))),
-            wrap("curly brackets", "#%curly",
+            wrap("curly brackets", runtime.make_identifier("#%curly"),
                 seq(c("{"), sexp_list, c("}"))),
-            wrap("tick", "#%tick",
+            wrap("tick", runtime.make_identifier("#%tick"),
                 seq(c("'"), sexp)),
-            wrap("backtick", "#%backtick",
+            wrap("backtick", runtime.make_identifier("#%backtick"),
                 seq(c("`"), sexp)),
-            wrap("comma", "#%comma",
+            wrap("comma", runtime.make_identifier("#%comma"),
                 seq(c(","), sexp))
         ));
 
-    let empty_as_list = action(empty, (ignore) => [])
+    let empty_as_list = action(empty, (ignore) => Immutable.List([]))
 
     let sexp_list = nonterm("list of s-expressions", () =>
         or(
             seq(whitespace, sexp_list),
             action(seq(sexp, or(seq(whitespace, sexp_list),
                                 empty_as_list)),
-                   ([first, rest]) => [first].concat(rest)),
+                   ([first, rest]) => Immutable.List([first]).concat(rest)),
             empty_as_list
         ));
 
@@ -175,9 +175,10 @@
         one_or_more(or(c(" "), c("\n"))));
 
     let id = nonterm("identifier", () =>
-        capture_string(one_or_more(or(c_range("a", "z"),
-                                      c_range("A","Z"),
-                                      c("-"), c("?")))));
+        action(capture_string(one_or_more(or(c_range("a", "z"),
+                                             c_range("A","Z"),
+                                             c("-"), c("?")))),
+              (str) => runtime.make_identifier(str)));
 
     let string = nonterm("string", () =>
         seq(c("\""), capture_string(zero_or_more(c_not("\""))), c("\"")));

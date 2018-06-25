@@ -8,7 +8,7 @@
 
         const run_module_internal = function (instance_map, module_name) {
             if (instance_map.has(module_name)) {
-                return instance_map.get(module_name);
+                return instance_map;
             }
 
             const module_source = resolve(module_name);

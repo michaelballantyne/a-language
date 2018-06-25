@@ -65,7 +65,7 @@
   (define (js-expand-expression stx ctx)
     (syntax-parse stx
       [_ #:when (js-transformer? stx)
-         (js-expand-expression (apply-as-transformer js-transformer ctx stx))]
+         (js-expand-expression (apply-as-transformer js-transformer ctx stx) ctx)]
       [_ #:when (js-core-expression? stx)
          (apply-as-transformer js-core-expression ctx stx)]
       [_ #:when (js-core-statement-pass1? stx)
@@ -270,7 +270,16 @@
        (define ctx2 (syntax-local-make-definition-context))
        (def/stx (b2^ ...) (expand-block #'(b2 ...) ctx2))
 
-       #'(if-id c^ (b1^ ...) (b2^ ...))])]))
+       #'(if-id c^ (b1^ ...) (b2^ ...))])]
+   [extract-js-statement
+    (lambda (stx idmap)
+      (syntax-parse stx
+        [(_ c (b1 ...) (b2 ...))
+         (hasheq
+          'type "IfStatement"
+          'test (extract-js-expression #'c idmap)
+          'consequent (extract-block #'(b1 ...) idmap)
+          'alternate (extract-block #'(b2 ...) idmap))]))]))
 
 (define-syntax ?
   (generics
@@ -280,7 +289,28 @@
        (def/stx c^ (js-expand-expression #'c #f))
        (def/stx e1^ (js-expand-expression #'e1 #f))
        (def/stx e2^ (js-expand-expression #'e2 #f))
-       #'(if-id c^ e1^ e2^)])]))
+       #'(if-id c^ e1^ e2^)]
+      )]
+   [extract-js-expression
+    (lambda (stx idmap)
+      (syntax-parse stx
+        [(_ c e1 e2)
+         (hasheq
+          'type "ConditionalExpression"
+          'test (extract-js-expression #'c idmap)
+          'alternate (extract-js-expression #'e1 idmap)
+          'consequent (extract-js-expression #'e idmap))]))]))
+
+; Finally, a macro!
+(define-syntax cond
+  (generics
+   [js-transformer
+    (syntax-parser
+      #:literals (else)
+      [(cond [else e])
+       #'e]
+      [(cond [c e] clause ...)
+       #'(? c e (cond clause ...))])]))
 
 (module+ test
   (pretty-print
@@ -302,18 +332,35 @@
                                (return fact)
                                ))))
 
-  #;(js-exp-extracted (function (+ <= *)
-                                (let x 2)
-                                (+ +)
-                                ))
-  #;(js-exp-extracted (function (+ <= *)
-                                (let fact
-                                  (function (n)
-                                            (let x 2)
-                                            (let res 1)
-                                            (while (<= x n)
-                                                   (set! res (* res x))
-                                                   (set! x (+ x 1)))
-                                            (return res)))
-                                (return fact)
-                                )))
+  (js-exp-extracted (function (+ <= *)
+                              (let fact
+                                (function (n)
+                                          (let x 2)
+                                          (let res 1)
+                                          (if (? x x res)
+                                              ((let x 1)
+                                               (return (x x)))
+                                              ())
+                                          (while (<= x n)
+                                                 (let y 5)
+                                                 (set! res (* res x))
+                                                 (set! x (+ x 1)))
+                                          (return res)))
+                              (return fact)))
+
+  (pretty-print
+   (syntax->datum
+    (js-exp-expanded
+     (function (< > x y z)
+        (cond
+          [(< x 1) y]
+          [(> x 1) z]
+          [else 1])))))
+
+  (js-exp-extracted
+     (function (< > x y z)
+        (cond
+          [(< x 1) y]
+          [(> x 1) z]
+          [else 1])))
+  )
