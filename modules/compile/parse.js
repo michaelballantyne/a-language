@@ -11,9 +11,17 @@
         throw "unbound reference: " + exp.get("identifier");
     }
 
+    let gensym_counter = 0;
+    function gensym(id) {
+        gensym_counter = gensym_counter + 1;
+        return id.get("identifier") + gensym_counter.toString();
+    }
+
     function match_wrapper(wrapper, sexp) {
         if (Immutable.List.isList(sexp) && Immutable.is(sexp.get(0), runtime.make_identifier(wrapper)) && sexp.size === 2) {
             return sexp.get(1);
+        } else {
+            return false;
         }
     }
 
@@ -34,7 +42,7 @@
     }
 
     function block_parser(exp, env) {
-        throw "block parser not yet implemented";
+        return parse_block(exp.shift(), env)
     }
 
     function recur_parser(exp, env) {
@@ -45,15 +53,66 @@
         throw "quote parser not yet implemented";
     }
 
-    const initial_env = Map([[runtime.make_identifier("def"), Map({def: true})],
+    const def_env_rhs = Map({def: true});
+
+    const initial_env = Map([[runtime.make_identifier("def"), def_env_rhs],
                             [runtime.make_identifier("fn"), Map({core_form: fn_parser})],
                             [runtime.make_identifier("if"), Map({core_form: if_parser})],
                             [runtime.make_identifier("loop"), Map({core_form: loop_parser})],
                             [runtime.make_identifier("block"), Map({core_form: block_parser})],
                             [runtime.make_identifier("recur"), Map({core_form: recur_parser})],
-                            [runtime.make_identifier("quote"), Map({core_form: quote_parser})]])
+                            [runtime.make_identifier("quote"), Map({core_form: quote_parser})]]);
+
+    function parse_block(forms, env) {
+        function match_def(form) {
+            const unwrapped = match_wrapper("#%round", form);
+            if (unwrapped !== false
+                && Immutable.List.isList(unwrapped)
+                && Immutable.is(env.get(unwrapped.get(0)), def_env_rhs)) { // is it a def?
+
+                if (unwrapped.size === 3
+                    && runtime.is_identifier(unwrapped.get(1))) { // is it well formed?
+                    return Map({id: unwrapped.get(1), exp: unwrapped.get(2)});
+                } else {
+                    syntax_error(form);
+                }
+            } else {
+                syntax_error(form); // right now, it's always a sequence of defs than an exp in a block.
+            }
+        }
+
+
+        if (forms.size === 0) {
+            throw "block must have at least one form";
+        } else if (forms.size === 1) {
+            return parse_exp(forms.get(0), env);
+        } else {
+            const defs = forms.butLast().map(match_def);
+            const exp = forms.last();
+
+            // First pass
+            let new_env = env;
+            let new_def_ids = Immutable.List();
+            defs.forEach((def) => {
+                const surface_id = def.get("id");
+                const new_id = gensym(surface_id);
+                new_env = new_env.set(surface_id, Map({ local_ref: new_id }));
+                new_def_ids = new_def_ids.push(new_id);
+            })
+
+            // Second pass
+            const parsed_rhss = defs.map((def) => parse_exp(def.get("exp"), new_env))
+            //console.log(exp)
+            const parsed_ret = parse_exp(exp, new_env);
+
+            return Map({ block_defs: new_def_ids.zip(parsed_rhss),
+                         block_ret: parsed_ret });
+        }
+    }
+
 
     function parse_exp(exp, env) {
+        //console.log(exp)
         if (runtime.is_string(exp)) {
             return Map({ string_literal: exp })
         }
@@ -98,7 +157,8 @@
 
     function test_parse_exp() {
         function read_and_parse(str) {
-            return parse_exp(reader.read(str).get(0), initial_env);
+            const sexp = reader.read(str).get(0)
+            return parse_exp(sexp, initial_env);
         }
 
         function assert_is(actual, expected) {
@@ -109,6 +169,7 @@
 
         assert_is(read_and_parse("103"), Map({number_literal: 103}));
         assert_is(read_and_parse("\"foo\""), Map({string_literal: "foo"}));
+        console.log(read_and_parse("(block (def x 5) (def y x) y)"));
     }
 
     return {
