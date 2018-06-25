@@ -1,28 +1,14 @@
 // require: vendor/immutable, compile/reader, runtime/runtime
 // provide: test_parse_exp, parse_module
 (function (Immutable, reader, runtime) {
-    // Environment rhs types
-    const core_form_parse_fn = Symbol("core_form_parse_fn");
-    function make_core_form(name, fn) {
-        return [runtime.make_identifier(name), Immutable.Map([[core_form_parse_fn, fn]])];
-    }
-
-    // The value in the environment for the def core form is just this symbol.
-    const def_entry = Symbol("def");
-
-    const local_ref_unique_id = Symbol("local_ref_unique_id");
-    function make_local_ref(unique_id) {
-        return Immutable.Map([[local_ref_unique_id, unique_id]]);
-    }
-
-    const module_ref_var_id = Symbol("module_ref_var_id");
-    const module_ref_field_name = Symbol("module_ref_field_name");
-    function make_module_ref(var_id, field_name) {
-        return Immutable.Map([[module_ref_var_id, var_id], [module_ref_field_name, field_name]]);
-    }
+    const Map = Immutable.Map;
 
     function syntax_error(exp) {
         throw "bad syntax: " + exp.toString();
+    }
+
+    function unbound_error(exp) {
+        throw "unbound reference: " + exp.get("identifier");
     }
 
     function match_wrapper(wrapper, sexp) {
@@ -59,28 +45,43 @@
         throw "quote parser not yet implemented";
     }
 
-    const initial_env = Immutable.Map([["def", def_entry],
-                                       make_core_form("fn", fn_parser),
-                                       make_core_form("if", if_parser),
-                                       make_core_form("loop", loop_parser),
-                                       make_core_form("block", block_parser),
-                                       make_core_form("recur", recur_parser),
-                                       make_core_form("quote", quote_parser)]);
+    const initial_env = Map([[runtime.make_identifier("def"), Map({def: true})],
+                            [runtime.make_identifier("fn"), Map({core_form: fn_parser})],
+                            [runtime.make_identifier("if"), Map({core_form: if_parser})],
+                            [runtime.make_identifier("loop"), Map({core_form: loop_parser})],
+                            [runtime.make_identifier("block"), Map({core_form: block_parser})],
+                            [runtime.make_identifier("recur"), Map({core_form: recur_parser})],
+                            [runtime.make_identifier("quote"), Map({core_form: quote_parser})]])
 
     function parse_exp(exp, env) {
-        if (runtime.isString(exp)) {
-            throw "string literals parser not yet implemented";
+        if (runtime.is_string(exp)) {
+            return { string_literal: exp }
         }
-        if (runtime.isNumber(exp)) {
-            throw "number literals parser not yet implemented";
+        if (runtime.is_number(exp)) {
+            return { number_literal: exp }
         }
-        if (runtime.isIdentifier(exp)) { // Variable reference
-            throw "variable reference parser not yet implemented";
-        } else if (match_wrapper("#%round", exp) && exp.size > 0) {
+        if (runtime.is_identifier(exp)) { // Variable reference
+            const env_entry = env.get(exp, false);
+            if (env_entry === false) {
+                unbound_error(exp);
+            } else if (env_entry.has("core_form")) {
+                syntax_error(exp);
+            } else if (env_entry.has("local_ref")) {
+                const unique_sym = env_entry.get("local_ref");
+                return { reference: unique_sym }
+            } else if (env_entry.has("module_ref_sym")) {
+                const module_ref_sym = env_entry.get("module_ref_sym");
+                const field = env_entry.get("module_ref_field");
+                throw "module refs not yet implemented";
+            } else {
+                throw "internal error: malformed environment";
+            }
+        }
+        if (match_wrapper("#%round", exp) && exp.size > 0) {
             const list = match_wrapper("#%round", exp);
             const rator = list.get(0)
-            if (runtime.isIdentifier(rator) && env.has(rator) && env.get(rator).has(core_form_parse_fn)) { // Core syntactic form
-                const core_form_parser = env.get(rator).get(core_form_parse_fn);
+            if (runtime.is_identifier(rator) && env.has(rator) && env.get(rator).has("core_form")) { // Core syntactic form
+                const core_form_parser = env.get(rator).get("core_form");
                 return core_form_parser(list, env);
             } else { // Application
                 return app_parser(list, env);

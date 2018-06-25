@@ -1,9 +1,7 @@
 // require: vendor/immutable
-// provide: identifier, isIdentifier, isNumber, isString, isJSObject, isJSArray, make_identifier
+// provide: is_identifier, is_number, is_string, is_js_object, is_js_array, make_identifier
 (function (Immutable) {
-    const identifier = Symbol("identifier")
-
-    function isString(arg) {
+    function is_string(arg) {
         if (typeof arg === 'string' || arg instanceof String) {
             return true;
         } else {
@@ -11,29 +9,28 @@
         }
     }
 
-    function isNumber(arg) {
+    function is_number(arg) {
         return !isNaN(arg);
     }
 
-    function isIdentifier(arg) {
-        return Immutable.Map.isMap(arg) && arg.has(identifier);
+    function is_identifier(arg) {
+        return Immutable.Map.isMap(arg) && arg.has("identifier");
     }
 
-    function isJSObject(arg) {
+    function is_js_object(arg) {
         return arg !== null && typeof arg === 'object';
     }
 
     function make_identifier(str) {
-        return Immutable.Map([[identifier, str]]);
+        return Immutable.Map({identifier: str});
     }
 
     return {
-        identifier: identifier,
-        isIdentifier: isIdentifier,
-        isNumber: isNumber,
-        isString: isString,
-        isJSObject: isJSObject,
-        isJSArray: Array.isArray,
+        is_identifier: is_identifier,
+        is_number: is_number,
+        is_string: is_string,
+        is_js_object: is_js_object,
+        is_js_array: Array.isArray,
         make_identifier: make_identifier
     }
 })
