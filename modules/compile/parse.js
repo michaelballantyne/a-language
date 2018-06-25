@@ -52,8 +52,8 @@
 
     function test_match(argv) {
         const assert = require("assert");
-        let val = reader.read("(a b (\"c\" \"d\"))");
-        assert(Immutable.is(matcher("(a b ,v)")(val).get("v"), Immutable.fromJS([runtime.make_identifier("#%round"), ["c", "d"]])));
+        let val = reader.read("(a b (1 \"c\" \"d\"))");
+        assert(Immutable.is(matcher("(a b ,v)")(val).get("v"), Immutable.fromJS([runtime.make_identifier("#%round"), [1, "c", "d"]])));
 
         console.log("tests passed");
     }

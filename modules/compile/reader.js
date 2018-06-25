@@ -144,6 +144,7 @@
     let sexp = nonterm("sexp", () =>
         or(
             id,
+            integer,
             string,
             dsl_string,
             wrap("parens", runtime.make_identifier("#%round"),
@@ -179,6 +180,11 @@
                                              c_range("A","Z"),
                                              c("-"), c("?")))),
               (str) => runtime.make_identifier(str)));
+
+    let integer = nonterm("integer", () =>
+        action(capture_string(seq(c_range("1", "9"),
+                                  zero_or_more(c_range("0", "9")))),
+               (str) => parseInt(str)));
 
     let string = nonterm("string", () =>
         seq(c("\""), capture_string(zero_or_more(c_not("\""))), c("\"")));
@@ -287,6 +293,11 @@
             let f = ex[failure][0]
             assert(f[position] === 2)
         }
+
+        {
+            assert(Immutable.is(read("12"), Immutable.List([12])));
+            assert(Immutable.is(read("1 103"), Immutable.List([1, 103])));
+        }
     };
 
     let main = function () {
@@ -356,6 +367,7 @@
 // grammar:
 //
 // sexpr := id
+//        | integer
 //        | string
 //        | dsl-string
 //        | "(" sexp-list ")"
@@ -374,6 +386,8 @@
 //
 // id := (a-z | A-Z | "-" | "?")+
 //
+// integer := 1-9 0-9*
+//
 // string = ‹‹"›› (!‹‹"››)* ‹‹"››
 //
 // dsl-string := "‹" "‹" dsl-string-contents "›" "›"
@@ -387,6 +401,7 @@
 // (grammar
 //   (sexp
 //    (or id
+//        integer
 //        string
 //        dsl-string
 //        (seq "(" sexp-list ")")
@@ -404,6 +419,8 @@
 //    (one-or-more (or " " "\n")))
 //   (id
 //    (one-or-more (or (c-range "a" "z") (c-range "A" "Z") "-" "?")))
+//   (integer
+//    (seq (c-range "1" "9") (zero-or-more (c-range "0" "9"))))
 //   (string
 //    (seq ‹‹"›› (zero-or-more (c-not ‹‹"››)) ‹‹"››))
 //   (dsl-string
