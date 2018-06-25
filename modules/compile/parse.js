@@ -34,6 +34,33 @@
         return Map({app_exps: exps.map((exp) => parse_exp(exp, env))});
     }
 
+    function if_parser(exp, env) {
+        if (exp.size !== 4) {
+            syntax_error(exp);
+        }
+
+        return Map({ if_c: parse_exp(exp.get(1), env),
+                     if_t: parse_exp(exp.get(2), env),
+                     if_e: parse_exp(exp.get(3), env) });
+    }
+
+    function quote_parser(exp, env) {
+        if (exp.size !== 2) {
+            syntax_error(exp);
+        }
+
+        return Map({ quoted_datum: exp.get(1) });
+    }
+
+    function block_parser(exp, env) {
+        const parsed_block = parse_block(exp.shift(), env);
+        if (parsed_block.get("block_defs").isEmpty()) {
+            return parsed_block.get("block_ret");
+        } else {
+            return parsed_block.set("block_exp", true);
+        }
+    }
+
     function fn_parser(exp, env) {
         if (exp.size < 3) {
             syntax_error(exp);
@@ -46,48 +73,54 @@
             syntax_error(exp)
         }
 
-        const old_arg_ids = arg_list;
-        const new_arg_ids = old_arg_ids.map((id) => gensym(id));
+        let new_args = List()
+        let new_env = env;
+        arg_list.forEach((arg) => {
+            const new_id = gensym(arg);
 
-        const new_env = old_arg_ids
-                         .zip(new_arg_ids)
-                         .reduce((env, pr) => env.set(pr[0], Map({ local_ref: pr[1]})), env)
+            new_args = new_args.push(new_id);
+            new_env = new_env.set(arg, Map({ local_ref: new_id }));
+        })
 
-        return parse_block(exp.shift().shift(), new_env).set("fn_args", new_arg_ids);
-    }
-
-    function if_parser(exp, env) {
-        if (exp.size !== 4) {
-            syntax_error(exp);
-        }
-
-        return Map({ if_c: parse_exp(exp.get(1), env),
-                     if_t: parse_exp(exp.get(2), env),
-                     if_e: parse_exp(exp.get(3), env) });
+        return parse_block(exp.shift().shift(), new_env).set("fn_args", new_args);
     }
 
     function loop_parser(exp, env) {
+        if (exp.size < 3) {
+            syntax_error(exp);
+        }
+
+        const binding_list = match_wrapper("#%round", exp.get(1))
+
+        if (!(List.isList(binding_list))) {
+            syntax_error(exp);
+        }
+
+        let vars = List()
+        let init_exps = List()
+        let new_env = env;
+        binding_list.forEach((binding_pr) => {
+            const unwrapped = match_wrapper("#%square", binding_pr)
+            const surface_id = unwrapped.get(0);
+            const init_exp = parse_exp(unwrapped.get(1), env);
+            const new_id = gensym(surface_id);
+
+            vars = vars.push(new_id);
+            init_exps = init_exps.push(init_exp);
+            new_env = new_env.set(surface_id, Map({ local_ref: new_id }));
+        });
+
+        return parse_block(exp.shift().shift(), new_env).set("loop_vars", vars).set("loop_inits", init_exps);
+
         throw "loop parser not yet implemented";
     }
 
-    function block_parser(exp, env) {
-        return parse_block(exp.shift(), env)
-    }
-
     function recur_parser(exp, env) {
-        if (exps.size < 1) {
+        if (exp.size < 1) {
             syntax_error(exp);
         }
 
-        return Map({recur_exps: exps.shift().map((exp) => parse_exp(exp, env))});
-    }
-
-    function quote_parser(exp, env) {
-        if (exp.size !== 2) {
-            syntax_error(exp);
-        }
-
-        return Map({ quoted_datum: exp.get(1) });
+        return Map({recur_exps: exp.shift().map((exp) => parse_exp(exp, env))});
     }
 
     const def_env_rhs = Map({def: true});
@@ -121,8 +154,6 @@
 
         if (forms.size === 0) {
             throw "block must have at least one form";
-        } else if (forms.size === 1) {
-            return parse_exp(forms.get(0), env);
         } else {
             const defs = forms.butLast().map(match_def);
             const exp = forms.last();
@@ -139,7 +170,6 @@
 
             // Second pass
             const parsed_rhss = defs.map((def) => parse_exp(def.get("exp"), new_env))
-            //console.log(exp)
             const parsed_ret = parse_exp(exp, new_env);
 
             return Map({ block_defs: new_def_ids.zipWith((id, rhs) => Map({id: id, rhs: rhs}), parsed_rhss),
@@ -149,7 +179,6 @@
 
 
     function parse_exp(exp, env) {
-        //console.log(exp)
         if (runtime.is_string(exp)) {
             return Map({ string_literal: exp })
         }
@@ -210,11 +239,25 @@
         assert_is(read_and_parse("(block (def x 5) (def y x) y)"),
                   Map({ block_defs: List([Map({id: "x1", rhs: Map({ number_literal: 5 })}),
                                           Map({id: "y2", rhs: Map({ reference: "x1" })})]),
-                        block_ret: Map({ reference: "y2" })}));
+                        block_ret: Map({ reference: "y2" }),
+                        block_exp: true}));
         assert_is(read_and_parse("(fn (x y) (def x 5) x)"),
                   Map({ fn_args: List(["x1", "y2"]),
                         block_defs: List([Map({id: "x3", rhs: Map({ number_literal: 5 })})]),
                         block_ret: Map({ reference: "x3" })}));
+        assert_is(read_and_parse("(block 5)"),
+                  Map({ number_literal: 5 }));
+
+        assert_is(read_and_parse("(loop ([x 7]) (if x (recur x) 8))"),
+                 Map({ loop_vars: List(["x1"]),
+                       loop_inits: List([Map({ number_literal: 7 })]),
+                       block_defs: List(),
+                       block_ret: Map({
+                           if_c: Map({ reference: "x1" }),
+                           if_t: Map({ recur_exps: List([Map({ reference: "x1" })]) }),
+                           if_e: Map({ number_literal: 8 })
+                       })
+                 }));
     }
 
     return {
