@@ -1,5 +1,5 @@
 // require: vendor/immutable, compile/reader, runtime/runtime
-// provide: testmatch, parsemodule
+// provide: test_match, parse_module
 (function (Immutable, reader, runtime) {
     function check_pvar(pat) {
         if (Immutable.List.isList(pat) && Immutable.is(pat.get(0), runtime.make_identifier("#%comma"))) {
@@ -64,8 +64,8 @@
     }
 
     return {
-        testmatch: test_match,
-        parsemodule: parse_module
+        test_match: test_match,
+        parse_module: parse_module
     };
 })
 

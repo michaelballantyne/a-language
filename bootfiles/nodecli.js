@@ -5843,7 +5843,7 @@
     
             const s2 = s1[1].split(",").map(i => i.trim());
     
-            if (!s2.every(s => /^[a-zA-Z\/]+$/.test(s))) {
+            if (!s2.every(s => /^[a-zA-Z_\/]+$/.test(s))) {
                 malformed()
             }
     
@@ -5874,7 +5874,7 @@
     
             const run_module_internal = function (instance_map, module_name) {
                 if (instance_map.has(module_name)) {
-                    return instance_map.get(module_name);
+                    return instance_map;
                 }
     
                 const module_source = resolve(module_name);
