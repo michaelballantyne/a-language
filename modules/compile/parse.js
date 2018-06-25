@@ -2,6 +2,7 @@
 // provide: test_parse_exp, parse_module
 (function (Immutable, reader, runtime) {
     const Map = Immutable.Map;
+    const List = Immutable.List;
 
     function syntax_error(exp) {
         throw "bad syntax: " + exp.toString();
@@ -18,7 +19,7 @@
     }
 
     function match_wrapper(wrapper, sexp) {
-        if (Immutable.List.isList(sexp) && Immutable.is(sexp.get(0), runtime.make_identifier(wrapper)) && sexp.size === 2) {
+        if (List.isList(sexp) && Immutable.is(sexp.get(0), runtime.make_identifier(wrapper)) && sexp.size === 2) {
             return sexp.get(1);
         } else {
             return false;
@@ -26,15 +27,43 @@
     }
 
     function app_parser(exps, env) {
-        throw "app parser not yet implemented";
+        if (exps.size < 1) {
+            syntax_error(exp);
+        }
+
+        return Map({app_exps: exps.map((exp) => parse_exp(exp, env))});
     }
 
     function fn_parser(exp, env) {
-        throw "fn parser not yet implemented";
+        if (exp.size < 3) {
+            syntax_error(exp);
+        }
+
+        const arg_list = match_wrapper("#%round", exp.get(1))
+
+        if (!(List.isList(arg_list)
+              && arg_list.every((element) => runtime.is_identifier(element)))) {
+            syntax_error(exp)
+        }
+
+        const old_arg_ids = arg_list;
+        const new_arg_ids = old_arg_ids.map((id) => gensym(id));
+
+        const new_env = old_arg_ids
+                         .zip(new_arg_ids)
+                         .reduce((env, pr) => env.set(pr[0], Map({ local_ref: pr[1]})), env)
+
+        return parse_block(exp.shift().shift(), new_env).set("fn_args", new_arg_ids);
     }
 
     function if_parser(exp, env) {
-        throw "if parser not yet implemented";
+        if (exp.size !== 4) {
+            syntax_error(exp);
+        }
+
+        return Map({ if_c: parse_exp(exp.get(1), env),
+                     if_t: parse_exp(exp.get(2), env),
+                     if_e: parse_exp(exp.get(3), env) });
     }
 
     function loop_parser(exp, env) {
@@ -46,11 +75,19 @@
     }
 
     function recur_parser(exp, env) {
-        throw "recur parser not yet implemented";
+        if (exps.size < 1) {
+            syntax_error(exp);
+        }
+
+        return Map({recur_exps: exps.shift().map((exp) => parse_exp(exp, env))});
     }
 
     function quote_parser(exp, env) {
-        throw "quote parser not yet implemented";
+        if (exp.size !== 2) {
+            syntax_error(exp);
+        }
+
+        return Map({ quoted_datum: exp.get(1) });
     }
 
     const def_env_rhs = Map({def: true});
@@ -67,7 +104,7 @@
         function match_def(form) {
             const unwrapped = match_wrapper("#%round", form);
             if (unwrapped !== false
-                && Immutable.List.isList(unwrapped)
+                && List.isList(unwrapped)
                 && Immutable.is(env.get(unwrapped.get(0)), def_env_rhs)) { // is it a def?
 
                 if (unwrapped.size === 3
@@ -92,7 +129,7 @@
 
             // First pass
             let new_env = env;
-            let new_def_ids = Immutable.List();
+            let new_def_ids = List();
             defs.forEach((def) => {
                 const surface_id = def.get("id");
                 const new_id = gensym(surface_id);
@@ -105,7 +142,7 @@
             //console.log(exp)
             const parsed_ret = parse_exp(exp, new_env);
 
-            return Map({ block_defs: new_def_ids.zip(parsed_rhss),
+            return Map({ block_defs: new_def_ids.zipWith((id, rhs) => Map({id: id, rhs: rhs}), parsed_rhss),
                          block_ret: parsed_ret });
         }
     }
@@ -157,6 +194,7 @@
 
     function test_parse_exp() {
         function read_and_parse(str) {
+            gensym_counter = 0;
             const sexp = reader.read(str).get(0)
             return parse_exp(sexp, initial_env);
         }
@@ -169,7 +207,14 @@
 
         assert_is(read_and_parse("103"), Map({number_literal: 103}));
         assert_is(read_and_parse("\"foo\""), Map({string_literal: "foo"}));
-        console.log(read_and_parse("(block (def x 5) (def y x) y)"));
+        assert_is(read_and_parse("(block (def x 5) (def y x) y)"),
+                  Map({ block_defs: List([Map({id: "x1", rhs: Map({ number_literal: 5 })}),
+                                          Map({id: "y2", rhs: Map({ reference: "x1" })})]),
+                        block_ret: Map({ reference: "y2" })}));
+        assert_is(read_and_parse("(fn (x y) (def x 5) x)"),
+                  Map({ fn_args: List(["x1", "y2"]),
+                        block_defs: List([Map({id: "x3", rhs: Map({ number_literal: 5 })})]),
+                        block_ret: Map({ reference: "x3" })}));
     }
 
     return {
