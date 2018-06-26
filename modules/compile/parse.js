@@ -1,5 +1,5 @@
 // require: vendor/immutable, compile/reader, runtime/runtime
-// provide: test_parse_exp, parse_module
+// provide: test_parser, parse_module
 (function (Immutable, reader, runtime) {
     const Map = Immutable.Map;
     const List = Immutable.List;
@@ -9,13 +9,13 @@
     }
 
     function unbound_error(exp) {
-        throw "unbound reference: " + exp.get("identifier");
+        throw "unbound reference: " + runtime.get_identifier_string(exp);
     }
 
     let gensym_counter = 0;
     function gensym(id) {
         gensym_counter = gensym_counter + 1;
-        return id.get("identifier") + gensym_counter.toString();
+        return runtime.get_identifier_string(id) + gensym_counter.toString();
     }
 
     function match_wrapper(wrapper, sexp) {
@@ -133,46 +133,56 @@
                             [runtime.make_identifier("recur"), Map({core_form: recur_parser})],
                             [runtime.make_identifier("quote"), Map({core_form: quote_parser})]]);
 
-    function parse_block(forms, env) {
-        function match_def(form) {
-            const unwrapped = match_wrapper("#%round", form);
-            if (unwrapped !== false
-                && List.isList(unwrapped)
-                && Immutable.is(env.get(unwrapped.get(0)), def_env_rhs)) { // is it a def?
+    function match_def(form, env) {
+        const unwrapped = match_wrapper("#%round", form);
+        if (unwrapped !== false
+            && List.isList(unwrapped)
+            && Immutable.is(env.get(unwrapped.get(0)), def_env_rhs)) { // is it a def?
 
-                if (unwrapped.size === 3
-                    && runtime.is_identifier(unwrapped.get(1))) { // is it well formed?
-                    return Map({id: unwrapped.get(1), exp: unwrapped.get(2)});
-                } else {
-                    syntax_error(form);
-                }
+            if (unwrapped.size === 3
+                && runtime.is_identifier(unwrapped.get(1))) { // is it well formed?
+                return Map({id: unwrapped.get(1), exp: unwrapped.get(2)});
             } else {
-                syntax_error(form); // right now, it's always a sequence of defs than an exp in a block.
+                syntax_error(form);
             }
+        } else {
+            syntax_error(form); // right now, it's always a sequence of defs than an exp in a block.
         }
+    }
 
+    function parse_defs(forms, env) {
+        const defs = forms.map((form) => match_def(form, env));
 
+        // First pass
+        let new_env = env;
+        let surface_def_ids = List();
+        let new_def_ids = List();
+        defs.forEach((def) => {
+            const surface_id = def.get("id");
+            const new_id = gensym(surface_id);
+            surface_def_ids = surface_def_ids.push(surface_id);
+            new_env = new_env.set(surface_id, Map({ local_ref: new_id }));
+            new_def_ids = new_def_ids.push(new_id);
+        });
+
+        // Second pass
+        const parsed_rhss = defs.map((def) => parse_exp(def.get("exp"), new_env));
+
+        return Map({ block_defs: new_def_ids.zipWith((id, rhs) => Map({id: id, rhs: rhs}), parsed_rhss),
+                     new_env: new_env,
+                     surface_def_ids: surface_def_ids });
+    }
+
+    function parse_block(forms, env) {
         if (forms.size === 0) {
             throw "block must have at least one form";
         } else {
-            const defs = forms.butLast().map(match_def);
-            const exp = forms.last();
+            const parsed_defs = parse_defs(forms.butLast(), env);
+            const new_env = parsed_defs.get("new_env");
 
-            // First pass
-            let new_env = env;
-            let new_def_ids = List();
-            defs.forEach((def) => {
-                const surface_id = def.get("id");
-                const new_id = gensym(surface_id);
-                new_env = new_env.set(surface_id, Map({ local_ref: new_id }));
-                new_def_ids = new_def_ids.push(new_id);
-            })
+            const parsed_ret = parse_exp(forms.last(), new_env);
 
-            // Second pass
-            const parsed_rhss = defs.map((def) => parse_exp(def.get("exp"), new_env))
-            const parsed_ret = parse_exp(exp, new_env);
-
-            return Map({ block_defs: new_def_ids.zipWith((id, rhs) => Map({id: id, rhs: rhs}), parsed_rhss),
+            return Map({ block_defs: parsed_defs.get("block_defs"),
                          block_ret: parsed_ret });
         }
     }
@@ -195,9 +205,7 @@
                 const unique_sym = env_entry.get("local_ref");
                 return Map({ reference: unique_sym })
             } else if (env_entry.has("module_ref_sym")) {
-                const module_ref_sym = env_entry.get("module_ref_sym");
-                const field = env_entry.get("module_ref_field");
-                throw "module refs not yet implemented";
+                return env_entry;
             } else {
                 throw "internal error: malformed environment";
             }
@@ -217,11 +225,67 @@
     }
 
     // module registry (for loading dependencies), sexp -> stree
-    function parse_module(modreg, sexp) {
+    function parse_module(sexp, load) {
+        function module_syntax_error() {
+            throw "syntax error: module must start with require and provide forms"
+        }
 
+        if (!(List.isList(sexp)
+              && sexp.size >= 2)) {
+            module_syntax_error();
+        }
+
+
+        const requnwrap = match_wrapper("#%round", sexp.get(0));
+        if (!(List.isList(requnwrap)
+              && requnwrap.size > 0
+              && Immutable.is(requnwrap.get(0), runtime.make_identifier("require"))
+              && requnwrap.shift().every(runtime.is_identifier))) {
+            module_syntax_error();
+        }
+
+        const provunwrap = match_wrapper("#%round", sexp.get(1));
+        if (!(List.isList(provunwrap)
+              && provunwrap.size > 0
+              && Immutable.is(provunwrap.get(0), runtime.make_identifier("provide"))
+              && provunwrap.shift().every(runtime.is_identifier))) {
+            module_syntax_error();
+        }
+
+        const requires = requnwrap.shift();
+        const provides = provunwrap.shift();
+        const body = sexp.shift().shift();
+
+        let module_bindings = List();
+        const module_env = requires.reduce((env,modname) => {
+            const binding = gensym(modname);
+            const decl = load(modname);
+            module_bindings = module_bindings.push(binding);
+            return decl.exports.reduce((env, name) => {
+                return env.set(runtime.make_identifier(name), Map({ module_ref_sym: binding,
+                                                                    module_ref_field: name }));
+            }, env);
+        }, initial_env);
+
+        const parsed_defs = parse_defs(body, module_env)
+
+        if (!(provides.isSubset(parsed_defs.get("surface_def_ids")))) {
+            throw "provided identifier(s) not defined: " + provides.toSet().subtract(parsed_defs.get("surface_def_ids").toSet()).toString()
+        }
+
+        const surface_to_internal = Map(parsed_defs.get("surface_def_ids").zip(parsed_defs.get("block_defs").map((def) => def.get("id"))))
+        const provide_internal_ids = provides.map((prov) => surface_to_internal.get(prov))
+
+        return Map({
+            module_requires: requires.map(runtime.get_identifier_string),
+            module_bindings: module_bindings,
+            module_provides: provides.map(runtime.get_identifier_string),
+            module_provide_internal_ids: provide_internal_ids,
+            block_defs: parsed_defs.get("block_defs")
+        });
     }
 
-    function test_parse_exp() {
+    function test_parser() {
         function read_and_parse(str) {
             gensym_counter = 0;
             const sexp = reader.read(str).get(0)
@@ -258,10 +322,27 @@
                            if_e: Map({ number_literal: 8 })
                        })
                  }));
+
+        function read_and_parse_module(str) {
+            gensym_counter = 0;
+            const sexp = reader.read(str)
+            return parse_module(sexp, (m) => ({exports: ["a", "b"]}));
+        }
+
+        assert_is(read_and_parse_module("(require foo) (provide c) (def c a)"),
+                 Map({
+                     module_requires: List(["foo"]),
+                     module_provides: List(["c"]),
+                     module_provide_internal_ids: List(["c2"]),
+                     module_bindings: List(["foo1"]),
+                     block_defs: List([
+                         Map({ id: "c2", rhs: Map({ module_ref_sym: "foo1", module_ref_field: "a" }) })
+                     ])
+                 }));
     }
 
     return {
-        test_parse_exp: test_parse_exp,
+        test_parser: test_parser,
         parse_module: parse_module
     };
 })

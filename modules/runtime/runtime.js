@@ -1,5 +1,5 @@
 // require: vendor/immutable
-// provide: is_identifier, is_number, is_string, is_js_object, is_js_array, make_identifier
+// provide: is_identifier, is_number, is_string, is_js_object, is_js_array, make_identifier, get_identifier_string
 (function (Immutable) {
     function is_string(arg) {
         if (typeof arg === 'string' || arg instanceof String) {
@@ -25,12 +25,17 @@
         return Immutable.Map({identifier: str});
     }
 
+    function get_identifier_string(id) {
+        return id.get("identifier");
+    }
+
     return {
         is_identifier: is_identifier,
         is_number: is_number,
         is_string: is_string,
         is_js_object: is_js_object,
         is_js_array: Array.isArray,
-        make_identifier: make_identifier
+        make_identifier: make_identifier,
+        get_identifier_string: get_identifier_string
     }
 })
