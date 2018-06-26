@@ -1,4 +1,4 @@
-#lang lang/js
+#lang js
 // require:
 // provide: main
 (function () {

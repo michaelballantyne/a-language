@@ -1,12 +1,8 @@
-// require: compile/runner, node/resolve
+// require: compile/runner, node/platform
 // provide: main
-(function (runner, noderesolve) {
+(function (runner, nodeplatform) {
     const fs = require("fs");
     const vm = require("vm");
-
-    function eval_module(text) {
-        return vm.runInNewContext(text, {setImmediate: setImmediate, console: console, require: require, process: process});
-    }
 
     function usage() {
         console.log("Usage: node run.js <module-name> <function>");
@@ -15,7 +11,7 @@
 
     function main(args) {
         if (args.length >= 2) {
-            const module_instance = runner.run(noderesolve.resolve, eval_module, args[0])
+            const module_instance = runner.make_runner(nodeplatform).run(args[0]);
             module_instance[args[1]](args.slice(2));
         } else {
             usage();

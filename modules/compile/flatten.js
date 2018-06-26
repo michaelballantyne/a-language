@@ -1,6 +1,6 @@
-// require: vendor/immutable, compile/js, vendor/escodegen
+// require: vendor/immutable, compile/lang, vendor/escodegen
 // provide: flatten
-(function (Immutable, compilejs, escodegen) {
+(function (Immutable, lang, escodegen) {
     function escapeModuleName(name) {
         return name.replace("/", "_");
     }
@@ -51,7 +51,7 @@
         };
     }
 
-    function flatten(resolve, main_module_name) {
+    function flatten(runner, main_module_name) {
         if (!(typeof main_module_name === "string" || main_module_name instanceof String)) {
             throw "malformed module name; should be a string: " + asString(module_name);
         }
@@ -61,8 +61,7 @@
                 return [declarations, visited];
             }
 
-            const source = resolve(module_name);
-            const compiled = compilejs.compileJS(source);
+            const compiled = runner.load(module_name);
 
             const [declarationsAfterImports, visitedAfterImports] =
                 compiled.imports.reduce(flatten_internal, [declarations, visited])

@@ -1,10 +1,10 @@
-// require: compile/flatten, node/resolve
+// require: compile/flatten, node/platform, compile/runner
 // provide: main
-(function (flatten, noderesolve) {
+(function (flatten, nodeplatform, runner) {
     const fs = require("fs");
 
     function main(args) {
-        const text = flatten.flatten(noderesolve.resolve, "node/cli")
+        const text = flatten.flatten(runner.make_runner(nodeplatform), "node/cli")
         fs.writeFileSync("bootfiles/nodecli.js", text)
     }
 
