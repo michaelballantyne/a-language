@@ -1,9 +1,15 @@
-// require: vendor/immutable, compile/js
+// require: vendor/immutable, compile/lang
 // provide: run
-(function (Immutable, compilejs) {
+(function (Immutable, lang) {
     const run = function(resolve, eval_module, module_name) {
         if (!(typeof module_name === "string" || module_name instanceof String)) {
             throw "malformed module name; should be a string: " + module_name;
+        }
+
+        function load(module_name) {
+            const module_source = resolve(module_name);
+            const module_declaration = lang.compile_via_lang(module_source, load, (m) => run(resolve, eval_module, m));
+            return module_declaration;
         }
 
         const run_module_internal = function (instance_map, module_name) {
@@ -11,8 +17,7 @@
                 return instance_map;
             }
 
-            const module_source = resolve(module_name);
-            const module_declaration = compilejs.compileJS(module_source);
+            const module_declaration = load(module_name)
 
             const imports = module_declaration.imports
 

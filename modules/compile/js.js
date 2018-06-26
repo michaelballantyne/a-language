@@ -1,5 +1,5 @@
 // require: compile/module
-// provide: compileJS
+// provide: compile_js
 (function (compiledmodule) {
     function parseDecl(name, line) {
         function malformed() {
@@ -26,7 +26,7 @@
     }
 
     // source string -> CompiledModule
-    function compileJS(source) {
+    function compile_js(source) {
         const lines = source.split('\n');
         const imports = parseDecl("require", lines[0]);
         const exports = parseDecl("provide", lines[1]);
@@ -36,5 +36,5 @@
         return module_declaration;
     }
 
-    return { compileJS: compileJS }
+    return { compile_js: compile_js }
 })
