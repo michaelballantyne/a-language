@@ -5896,20 +5896,20 @@
             return [lang_line_split[1], body];
         }
     
-        function compile_via_lang(source, load_decl, run) {
+        function compile_via_lang(source, runner) {
             const [lang, body] = parse_lang_file(source)
     
             if (lang === "js") {
                 return compilejs.compile_js(body);
             } else {
-                const module_instance = run(lang)
+                const module_instance = runner.run(lang)
     
                 const compile_f = module_instance["compile_language"];
                 if (compile_f === undefined) {
                     throw "#lang module does not implement compile_language"
                 }
     
-                return compile_f(load);
+                return compile_f(body, runner);
             }
         }
     
@@ -5922,7 +5922,7 @@
         function make_runner(platform) {
             function load(module_name) {
                 const module_source = platform.resolve(module_name);
-                const module_declaration = lang.compile_via_lang(module_source, load, run);
+                const module_declaration = lang.compile_via_lang(module_source, {load: load, run: run});
                 return module_declaration;
             }
     

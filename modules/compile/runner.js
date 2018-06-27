@@ -5,7 +5,7 @@
     function make_runner(platform) {
         function load(module_name) {
             const module_source = platform.resolve(module_name);
-            const module_declaration = lang.compile_via_lang(module_source, load, run);
+            const module_declaration = lang.compile_via_lang(module_source, {load: load, run: run});
             return module_declaration;
         }
 
