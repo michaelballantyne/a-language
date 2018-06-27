@@ -1,3 +1,4 @@
+#lang js
 // require: vendor/immutable, compile/js
 // provide: compile_via_lang
 (function (Immutable, compilejs) {

@@ -1,3 +1,4 @@
+#lang js
 // require: vendor/immutable, compile/lang, vendor/escodegen, compile/js
 // provide: flatten
 (function (Immutable, lang, escodegen, compilejs) {
@@ -51,7 +52,7 @@
         };
     }
 
-    function flatten(platform, runner, main_module_name) {
+    function flatten(runner, main_module_name) {
         if (!(typeof main_module_name === "string" || main_module_name instanceof String)) {
             throw "malformed module name; should be a string: " + asString(module_name);
         }
@@ -61,9 +62,7 @@
                 return [declarations, visited];
             }
 
-            const source = platform.resolve(module_name);
-            const compiled = compilejs.compile_js(source);
-            //const compiled = runner.load(module_name);
+            const compiled = runner.load(module_name);
 
             const [declarationsAfterImports, visitedAfterImports] =
                 compiled.imports.reduce(flatten_internal, [declarations, visited])

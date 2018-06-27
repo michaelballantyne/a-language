@@ -1,3 +1,4 @@
+#lang js
 // require: vendor/immutable, compile/lang
 // provide: make_runner
 (function (Immutable, lang) {

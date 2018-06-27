@@ -1,3 +1,4 @@
+#lang js
 // require: compile/module
 // provide: compile_js
 (function (compiledmodule) {

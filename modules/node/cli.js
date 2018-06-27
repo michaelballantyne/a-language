@@ -1,3 +1,4 @@
+#lang js
 // require: compile/runner, node/platform
 // provide: main
 (function (runner, nodeplatform) {
@@ -12,7 +13,6 @@
     function main(args) {
         if (args.length >= 2) {
             const module_instance = runner.make_runner(nodeplatform).run(args[0]);
-            console.log(module_instance)
             module_instance[args[1]](args.slice(2));
         } else {
             usage();

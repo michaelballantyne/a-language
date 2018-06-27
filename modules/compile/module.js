@@ -1,3 +1,4 @@
+#lang js
 // require:
 // provide: CompiledModule
 (function () {

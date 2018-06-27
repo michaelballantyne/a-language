@@ -1,3 +1,4 @@
+#lang js
 // require: vendor/immutable
 // provide: is_identifier, is_number, is_string, is_js_object, is_js_array, make_identifier, get_identifier_string
 (function (Immutable) {

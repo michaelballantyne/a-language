@@ -1,3 +1,4 @@
+#lang js
 // require: vendor/immutable, runtime/runtime
 // provide: read, main, test
 (function (Immutable, runtime) {

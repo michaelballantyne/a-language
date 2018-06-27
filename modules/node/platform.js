@@ -1,3 +1,4 @@
+#lang js
 // require:
 // provide: resolve, eval_module
 (function () {

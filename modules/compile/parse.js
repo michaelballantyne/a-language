@@ -1,3 +1,4 @@
+#lang js
 // require: vendor/immutable, compile/reader, runtime/runtime
 // provide: test_parser, parse_module
 (function (Immutable, reader, runtime) {
@@ -339,6 +340,8 @@
                          Map({ id: "c2", rhs: Map({ module_ref_sym: "foo1", module_ref_field: "a" }) })
                      ])
                  }));
+
+        console.log("tests passed")
     }
 
     return {

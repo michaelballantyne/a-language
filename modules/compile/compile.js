@@ -1,3 +1,4 @@
+#lang js
 // require: vendor/immutable
 // provide:
 (function (Immutable, escodegen) {
