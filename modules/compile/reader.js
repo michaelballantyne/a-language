@@ -14,7 +14,7 @@
         }
     }
 
-    let c = (to_match) => c_pred(ch => ch === to_match, `c ${to_match}`);
+    let c = (to_match) => c_pred(ch => ch === to_match, `character ${to_match}`);
     let c_not = (...to_match) => c_pred(ch => !(to_match.includes(ch)), `not ${to_match}`);
     let c_range = (lower, upper) => c_pred((ch) => lower <= ch && ch <=upper, `range ${lower} to ${upper}`);
 
@@ -178,7 +178,7 @@
     let id = nonterm("identifier", () =>
         action(capture_string(one_or_more(or(c_range("a", "z"),
                                              c_range("A","Z"),
-                                             c("-"), c("?")))),
+                                             c("-"), c("/"), c("?")))),
               (str) => runtime.make_identifier(str)));
 
     let integer = nonterm("integer", () =>
@@ -204,9 +204,15 @@
     let top = seq(sexp_list, eof);
 
     let read = function (string) {
+        const util = require("util");
+
+        function print(obj) {
+            return util.inspect(obj, false, null);
+        }
+
         let res = parse(top, string)
         if (res.position === undefined) {
-            throw { msg: "Parse error", details: res}
+            throw "read error: " + print(res);
         } else {
             return res.result;
         }

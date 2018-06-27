@@ -226,7 +226,7 @@
     }
 
     // module registry (for loading dependencies), sexp -> stree
-    function parse_module(sexp, load) {
+    function parse_module(sexp, runner) {
         function module_syntax_error() {
             throw "syntax error: module must start with require and provide forms"
         }
@@ -260,7 +260,7 @@
         let module_bindings = List();
         const module_env = requires.reduce((env,modname) => {
             const binding = gensym(modname);
-            const decl = load(modname);
+            const decl = runner.load(runtime.get_identifier_string(modname));
             module_bindings = module_bindings.push(binding);
             return decl.exports.reduce((env, name) => {
                 return env.set(runtime.make_identifier(name), Map({ module_ref_sym: binding,
