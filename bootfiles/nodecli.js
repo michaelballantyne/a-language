@@ -5824,7 +5824,7 @@
     })
     )();
     const compile_js = (// require: compile/module
-    // provide: compileJS
+    // provide: compile_js
     (function (compiledmodule) {
         function parseDecl(name, line) {
             function malformed() {
@@ -5851,7 +5851,7 @@
         }
     
         // source string -> CompiledModule
-        function compileJS(source) {
+        function compile_js(source) {
             const lines = source.split('\n');
             const imports = parseDecl("require", lines[0]);
             const exports = parseDecl("provide", lines[1]);
@@ -5861,52 +5861,114 @@
             return module_declaration;
         }
     
-        return { compileJS: compileJS }
+        return { compile_js: compile_js }
     })
     )(compile_module);
-    const compile_runner = (// require: vendor/immutable, compile/js
-    // provide: run
+    const compile_lang = (// require: vendor/immutable, compile/js
+    // provide: compile_via_lang
     (function (Immutable, compilejs) {
-        const run = function(resolve, eval_module, module_name) {
-            if (!(typeof module_name === "string" || module_name instanceof String)) {
-                throw "malformed module name; should be a string: " + module_name;
-            }
-    
-            const run_module_internal = function (instance_map, module_name) {
-                if (instance_map.has(module_name)) {
-                    return instance_map;
-                }
-    
-                const module_source = resolve(module_name);
-                const module_declaration = compilejs.compileJS(module_source);
-    
-                const imports = module_declaration.imports
-    
-                const imports_instantiated =
-                    imports.reduce(run_module_internal, instance_map);
-    
-                const body_function = eval_module(module_declaration.body_code);
-                const instance =
-                    body_function.apply(undefined, imports.map(i => imports_instantiated.get(i)));
-    
-                if (!(Immutable.Collection(module_declaration.exports).isSubset(Immutable.Collection(Object.keys(instance))))) {
-                    throw "Module instance does not include all keys listed in exports: " + module_name;
-                }
-    
-                return imports_instantiated.set(module_name, instance);
-            }
-    
-            const instance_map = run_module_internal(Immutable.Map(), module_name)
-            return instance_map.get(module_name);
+        function lang_syntax_error(source) {
+            throw "bad syntax while parsing module. Expected a #lang declaration followed by module body: \n" + source;
         }
     
-        return { run: run}
+        function is_legal_module_name(name) {
+            return /^[a-zA-Z_\/]+$/.test(name);
+        }
+    
+        function parse_lang_file(source) {
+            const newline_index = source.indexOf("\n");
+    
+            if (newline_index === -1) {
+                lang_syntax_error(source);
+            }
+    
+            const lang_line = source.substring(0, newline_index);
+            const body = source.substring(newline_index + 1);
+    
+            const lang_line_split = lang_line.split(" ")
+    
+            if (!(lang_line_split.length === 2
+                  && lang_line_split[0] === "#lang"
+                  && is_legal_module_name(lang_line_split[1]))) {
+                lang_syntax_error(source);
+            }
+    
+            return [lang_line_split[1], body];
+        }
+    
+        function compile_via_lang(source, load_decl, run) {
+            const [lang, body] = parse_lang_file(source)
+    
+            if (lang === "js") {
+                return compilejs.compile_js(body);
+            } else {
+                const module_instance = run(lang)
+    
+                const compile_f = module_instance["compile_language"];
+                if (compile_f === undefined) {
+                    throw "#lang module does not implement compile_language"
+                }
+    
+                return compile_f(load);
+            }
+        }
+    
+        return { compile_via_lang: compile_via_lang };
     })
     )(vendor_immutable, compile_js);
-    const node_resolve = (// require:
-    // provide: resolve
+    const compile_runner = (// require: vendor/immutable, compile/lang
+    // provide: make_runner
+    (function (Immutable, lang) {
+        function make_runner(platform) {
+            function load(module_name) {
+                const module_source = platform.resolve(module_name);
+                const module_declaration = lang.compile_via_lang(module_source, load, run);
+                return module_declaration;
+            }
+    
+            function run(module_name) {
+                if (!(typeof module_name === "string" || module_name instanceof String)) {
+                    throw "malformed module name; should be a string: " + module_name;
+                }
+    
+                const run_module_internal = function (instance_map, module_name) {
+                    if (instance_map.has(module_name)) {
+                        return instance_map;
+                    }
+    
+                    const module_declaration = load(module_name)
+    
+                    const imports = module_declaration.imports
+    
+                    const imports_instantiated =
+                        imports.reduce(run_module_internal, instance_map);
+    
+                    const body_function = platform.eval_module(module_declaration.body_code);
+                    const instance =
+                        body_function.apply(undefined, imports.map(i => imports_instantiated.get(i)));
+    
+                    if (!(Immutable.Collection(module_declaration.exports).isSubset(Immutable.Collection(Object.keys(instance))))) {
+                        throw "Module instance does not include all keys listed in exports: " + module_name;
+                    }
+    
+                    return imports_instantiated.set(module_name, instance);
+                }
+    
+                const instance_map = run_module_internal(Immutable.Map(), module_name)
+                return instance_map.get(module_name);
+            }
+    
+            return {load: load, run: run};
+        }
+    
+        return { make_runner: make_runner}
+    })
+    )(vendor_immutable, compile_lang);
+    const node_platform = (// require:
+    // provide: resolve, eval_module
     (function () {
         const fs = require("fs")
+        const vm = require("vm");
     
         function resolve(name) {
             const text = fs.readFileSync("modules/" + name + ".js").toString();
@@ -5914,18 +5976,19 @@
             return text;
         }
     
-        return { resolve: resolve }
-    })
-    )();
-    const node_cli = (// require: compile/runner, node/resolve
-    // provide: main
-    (function (runner, noderesolve) {
-        const fs = require("fs");
-        const vm = require("vm");
-    
         function eval_module(text) {
             return vm.runInNewContext(text, {setImmediate: setImmediate, console: console, require: require, process: process});
         }
+    
+        return { resolve: resolve,
+                 eval_module: eval_module }
+    })
+    )();
+    const node_cli = (// require: compile/runner, node/platform
+    // provide: main
+    (function (runner, nodeplatform) {
+        const fs = require("fs");
+        const vm = require("vm");
     
         function usage() {
             console.log("Usage: node run.js <module-name> <function>");
@@ -5934,7 +5997,8 @@
     
         function main(args) {
             if (args.length >= 2) {
-                const module_instance = runner.run(noderesolve.resolve, eval_module, args[0])
+                const module_instance = runner.make_runner(nodeplatform).run(args[0]);
+                console.log(module_instance)
                 module_instance[args[1]](args.slice(2));
             } else {
                 usage();
@@ -5943,6 +6007,6 @@
     
         return { main: main };
     })
-    )(compile_runner, node_resolve);
+    )(compile_runner, node_platform);
     return node_cli;
 });
