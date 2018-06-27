@@ -279,7 +279,7 @@
 
         return Map({
             module_requires: requires.map(runtime.get_identifier_string),
-            module_bindings: module_bindings,
+            module_require_internal_ids: module_bindings,
             module_provides: provides.map(runtime.get_identifier_string),
             module_provide_internal_ids: provide_internal_ids,
             block_defs: parsed_defs.get("block_defs")
@@ -335,7 +335,7 @@
                      module_requires: List(["foo"]),
                      module_provides: List(["c"]),
                      module_provide_internal_ids: List(["c2"]),
-                     module_bindings: List(["foo1"]),
+                     module_require_internal_ids: List(["foo1"]),
                      block_defs: List([
                          Map({ id: "c2", rhs: Map({ module_ref_sym: "foo1", module_ref_field: "a" }) })
                      ])

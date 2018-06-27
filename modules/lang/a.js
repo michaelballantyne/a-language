@@ -6,8 +6,8 @@
         const sexp = reader.read(source)
         const ast = parse.parse_module(sexp, load)
         console.log(ast);
-        return module.CompiledModule([],[], "(function () { return {main: function () {}}; })");
-        //return compile.compile_module(ast);
+        //return module.CompiledModule([],[], "(function () { return {main: function () {}}; })");
+        return compile.compile_module(ast);
     }
 
     return { compile_language: compile_language }
