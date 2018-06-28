@@ -216,7 +216,15 @@
             syntax_error(exp);
         }
 
-        return Map({recur_exps: exp.shift().map((exp) => parse_exp(exp, env))});
+        const recur_exps = exp.shift().map((exp) => parse_exp(exp, env));
+
+        // The toList is important---otherwise this is a lazy sequence that gets repeatedly evaluated
+        // and the gensym gives different answers on each reference!
+        const recur_temps = Immutable.Range(0, recur_exps.size)
+                             .map((n) => gensym(Immutable.Map({identifier:"tmp"})))
+                             .toList();
+
+        return Map({recur_exps: recur_exps, recur_temps: recur_temps})
     }
 
     const def_env_rhs = Map({def: true});

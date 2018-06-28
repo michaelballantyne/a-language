@@ -175,15 +175,19 @@
     let whitespace = nonterm("whitespace", () =>
         one_or_more(or(c(" "), c("\n"))));
 
+    let digit = c_range("0", "9")
+
+    let idchar = or(c_range("a", "z"),
+                    c_range("A","Z"),
+                    c("-"), c("/"), c("?"))
+
     let id = nonterm("identifier", () =>
-        action(capture_string(one_or_more(or(c_range("a", "z"),
-                                             c_range("A","Z"),
-                                             c("-"), c("/"), c("?")))),
+        action(capture_string(seq(idchar,zero_or_more(or(digit, idchar)))),
               (str) => runtime.make_identifier(str)));
 
     let integer = nonterm("integer", () =>
         action(capture_string(seq(c_range("1", "9"),
-                                  zero_or_more(c_range("0", "9")))),
+                                  zero_or_more(digit))),
                (str) => parseInt(str)));
 
     let string = nonterm("string", () =>
