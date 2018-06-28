@@ -31,8 +31,9 @@
         const lines = source.split('\n');
         const imports = parseDecl("require", lines[0]);
         const exports = parseDecl("provide", lines[1]);
+        const body = lines.slice(2).join("\n")
 
-        const module_declaration = compiledmodule.CompiledModule(imports, exports, source);
+        const module_declaration = compiledmodule.CompiledModule(imports, exports, body);
 
         return module_declaration;
     }
