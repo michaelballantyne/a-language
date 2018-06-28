@@ -5,6 +5,97 @@
     const Map = Immutable.Map;
     const List = Immutable.List;
 
+    const reserved = Immutable.Set([
+        "break",
+        "case",
+        "catch",
+        "class",
+        "const",
+        "continue",
+        "debugger",
+        "default",
+        "delete",
+        "do",
+        "else",
+        "export",
+        "extends",
+        "finally",
+        "for",
+        "function",
+        "if",
+        "import",
+        "in",
+        "instanceof",
+        "new",
+        "return",
+        "super",
+        "switch",
+        "this",
+        "throw",
+        "try",
+        "typeof",
+        "var",
+        "void",
+        "while",
+        "with",
+        "yield",
+        "null",
+        "true",
+        "false",
+        "abstract",
+        "boolean",
+        "byte",
+        "char",
+        "double",
+        "final",
+        "float",
+        "goto",
+        "int",
+        "long",
+        "native",
+        "short",
+        "synchronized",
+        "throws",
+        "transient",
+        "volatile",
+        "await",
+        "implements",
+        "interface",
+        "let",
+        "package",
+        "private",
+        "protected",
+        "public",
+        "static",
+        "enum"
+    ])
+
+    function transform_reserved_out(str) {
+        if (reserved.includes(str)) {
+            return "_" + str
+        } else {
+           return str;
+        }
+    }
+
+    function transform_fieldname_out(str) {
+        const res = transform_reserved_out(str.replace(/-/g, "_"));
+        return res
+    }
+
+    function transform_reserved_in(str) {
+        if (str[0] === "_" && reserved.includes(str.substring(1))) {
+            return str.substring(1)
+        } else {
+           return str;
+        }
+    }
+
+    function transform_fieldname_in(str) {
+        const res = transform_reserved_in(str).replace(/_/g, "-");
+        return res
+    }
+
     function syntax_error(exp) {
         throw "bad syntax: " + exp.toString();
     }
@@ -143,7 +234,7 @@
             if (unwrapped.size === 3
                 && runtime.is_identifier(unwrapped.get(1))) { // is it well formed?
                 return Map({id: unwrapped.get(1), exp: unwrapped.get(2)});
-            } else {
+            } else {name_converted_specials
                 syntax_error(form);
             }
         } else {
@@ -263,8 +354,10 @@
             const decl = runner.load(runtime.get_identifier_string(modname));
             module_bindings = module_bindings.push(binding);
             return decl.exports.reduce((env, name) => {
-                return env.set(runtime.make_identifier(name), Map({ module_ref_sym: binding,
-                                                                    module_ref_field: name }));
+                const dashed_name = transform_fieldname_in(name);
+                return env.set(runtime.make_identifier(dashed_name),
+                               Map({ module_ref_sym: binding,
+                                     module_ref_field: name }));
             }, env);
         }, initial_env);
 
@@ -280,7 +373,7 @@
         return Map({
             module_requires: requires.map(runtime.get_identifier_string),
             module_require_internal_ids: module_bindings,
-            module_provides: provides.map(runtime.get_identifier_string),
+            module_provides: provides.map(runtime.get_identifier_string).map(transform_fieldname_out),
             module_provide_internal_ids: provide_internal_ids,
             block_defs: parsed_defs.get("block_defs")
         });
