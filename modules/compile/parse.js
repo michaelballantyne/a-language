@@ -174,7 +174,11 @@
             new_env = new_env.set(arg, Map({ local_ref: new_id }));
         })
 
-        return parse_block(exp.shift().shift(), new_env).set("fn_args", new_args);
+        // A hack: the compiler only needs temporaries for this one transform,
+        // so we'll generate them here.
+        const temps = arg_list.map(gensym)
+
+        return parse_block(exp.shift().shift(), new_env).set("fn_args", new_args).set("fn_temps", temps);
     }
 
     function loop_parser(exp, env) {
