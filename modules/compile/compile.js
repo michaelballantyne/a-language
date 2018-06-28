@@ -122,7 +122,7 @@
             const if_e = compile_expression(e.get(), ctx);
 
             return {
-                type: "IfStatement"
+                type: "IfStatement",
                 test: {
                     type: "BinaryExpression",
                     operator: "!==",
