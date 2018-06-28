@@ -117,7 +117,24 @@
         }
 
         if (e.has("if_c") && is_stmt(ctx)) {
-            
+            const if_c = compile_expression(e.get(), in_expr(ctx));
+            const if_t = compile_expression(e.get(), ctx);
+            const if_e = compile_expression(e.get(), ctx);
+
+            return {
+                type: "IfStatement"
+                test: {
+                    type: "BinaryExpression",
+                    operator: "!==",
+                    left: {
+                        type: "Literal",
+                        value: false
+                    },
+                    right: if_c
+                },
+                consequent: if_t,
+                alternate: if_e
+            };
         }
 
         throw "unhandled: " + e
@@ -136,7 +153,6 @@
             type: "ReturnStatement",
             argument: {
                 type: "ObjectExpression",
-                
                 properties: stree.get("module_provide_internal_ids").zip(stree.get("module_provides")).map(compile_provide).toArray()
             }
         }
