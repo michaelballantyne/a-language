@@ -341,7 +341,7 @@
         if (!(List.isList(requnwrap)
               && requnwrap.size > 0
               && Immutable.is(requnwrap.get(0), runtime["make-identifier"]("require"))
-              && requnwrap.shift().every(runtime["identifier?"]))) {
+              && requnwrap.shift().every((v, ignore1, ignore2) => runtime["identifier?"](v)))) {
             module_syntax_error();
         }
 
@@ -349,7 +349,7 @@
         if (!(List.isList(provunwrap)
               && provunwrap.size > 0
               && Immutable.is(provunwrap.get(0), runtime["make-identifier"]("provide"))
-              && provunwrap.shift().every(runtime["identifier?"]))) {
+              && provunwrap.shift().every((v, ignore1, ignore2) => runtime["identifier?"](v)))) {
             module_syntax_error();
         }
 
@@ -379,9 +379,9 @@
         const provide_internal_ids = provides.map((prov) => surface_to_internal.get(prov))
 
         return Map({
-            module_requires: requires.map(runtime["identifier-string"]),
+            module_requires: requires.map((v, ignore1, ignore2) => runtime["identifier-string"](v)),
             module_require_internal_ids: module_bindings,
-            module_provides: provides.map(runtime["identifier-string"]),
+            module_provides: provides.map((v, ignore1, ignore2) => runtime["identifier-string"](v)),
             module_provide_internal_ids: provide_internal_ids,
             block_defs: parsed_defs.get("block_defs")
         });

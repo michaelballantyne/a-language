@@ -23,7 +23,8 @@
 
 (def main
   (fn ()
-    (displayln (factorial2 5))))
+   (displayln (factorial 5))
+    ))
 
 (def main2
      (fn ()
