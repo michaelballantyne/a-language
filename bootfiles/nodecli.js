@@ -5849,13 +5849,13 @@
         }
     
         return {
-            is_identifier: is_identifier,
-            is_number: is_number,
-            is_string: is_string,
-            is_js_object: is_js_object,
-            is_js_array: Array.isArray,
-            make_identifier: make_identifier,
-            get_identifier_string: get_identifier_string
+            "number?": is_number,
+            "string?": is_string,
+            "identifier?": is_identifier,
+            "js-object?": is_js_object,
+            "js-array?": Array.isArray,
+            "make-identifier": make_identifier,
+            "identifier-string": get_identifier_string
         }
     })
     )(vendor_immutable);
@@ -6005,17 +6005,17 @@
                 integer,
                 string,
                 dsl_string,
-                wrap("parens", runtime.make_identifier("#%round"),
+                wrap("parens", runtime["make-identifier"]("#%round"),
                     seq(c("("), sexp_list, c(")"))),
-                wrap("square brackets", runtime.make_identifier("#%square"),
+                wrap("square brackets", runtime["make-identifier"]("#%square"),
                     seq(c("["), sexp_list, c("]"))),
-                wrap("curly brackets", runtime.make_identifier("#%curly"),
+                wrap("curly brackets", runtime["make-identifier"]("#%curly"),
                     seq(c("{"), sexp_list, c("}"))),
-                wrap("tick", runtime.make_identifier("#%tick"),
+                wrap("tick", runtime["make-identifier"]("#%tick"),
                     seq(c("'"), sexp)),
-                wrap("backtick", runtime.make_identifier("#%backtick"),
+                wrap("backtick", runtime["make-identifier"]("#%backtick"),
                     seq(c("`"), sexp)),
-                wrap("comma", runtime.make_identifier("#%comma"),
+                wrap("comma", runtime["make-identifier"]("#%comma"),
                     seq(c(","), sexp))
             ));
     
@@ -6047,7 +6047,7 @@
     
         let id = nonterm("identifier", () =>
             action(capture_string(seq(idchar,zero_or_more(or(digit, idchar)))),
-                  (str) => runtime.make_identifier(str)));
+                  (str) => runtime["make-identifier"](str)));
     
         let integer = nonterm("integer", () =>
             action(capture_string(seq(c_range("1", "9"),

@@ -1,7 +1,7 @@
 #lang js
-// require: vendor/immutable, vendor/escodegen, compile/module, runtime/runtime
+// require: vendor/immutable, vendor/escodegen, compile/module
 // provide: compile_module
-(function (Immutable, escodegen, module, runtime) {
+(function (Immutable, escodegen, module) {
     initial_exp_ctx = "exp"
     function in_exp(ctx) {
         return initial_exp_ctx;

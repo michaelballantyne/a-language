@@ -1,10 +1,11 @@
 #lang lang/a
 
-(require vendor/immutable test/id)
+(require vendor/immutable runtime/runtime)
 (provide main true)
 
 (def x 5)
 
+(def id (fn (x) x))
 
 (def factorial
   (fn (n)
@@ -21,15 +22,16 @@
         (recur (- n 1) (* n c))))))
 
 (def main
-    (make-print
-       (factorial2 5)))
+  (fn ()
+    (displayln (factorial2 5))))
 
 (def main2
-     (make-print (if false
-                   1
-                   (if 1
-                     (+ 3 (id x))
-                     2))))
+     (fn ()
+         (displayln (if false
+                      1
+                      (if 1
+                        (+ 3 (id x))
+                        2)))))
 
 (def main3
     (fn (x)

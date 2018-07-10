@@ -94,7 +94,7 @@
     }
 
     function unbound_error(exp) {
-        throw "unbound reference: " + runtime.get_identifier_string(exp);
+        throw "unbound reference: " + runtime["identifier-string"](exp);
     }
 
     function transform_reserved(s) {
@@ -104,11 +104,11 @@
     let gensym_counter = 0;
     function gensym(id) {
         gensym_counter = gensym_counter + 1;
-        return transform_reserved(runtime.get_identifier_string(id)) + gensym_counter.toString();
+        return transform_reserved(runtime["identifier-string"](id)) + gensym_counter.toString();
     }
 
     function match_wrapper(wrapper, sexp) {
-        if (List.isList(sexp) && Immutable.is(sexp.get(0), runtime.make_identifier(wrapper)) && sexp.size === 2) {
+        if (List.isList(sexp) && Immutable.is(sexp.get(0), runtime["make-identifier"](wrapper)) && sexp.size === 2) {
             return sexp.get(1);
         } else {
             return false;
@@ -158,7 +158,7 @@
         const arg_list = match_wrapper("#%round", exp.get(1))
 
         if (!(List.isList(arg_list)
-              && arg_list.every((element) => runtime.is_identifier(element)))) {
+              && arg_list.every((element) => runtime["identifier?"](element)))) {
             syntax_error(exp)
         }
 
@@ -226,13 +226,13 @@
 
     const def_env_rhs = Map({def: true});
 
-    const initial_env = Map([[runtime.make_identifier("def"), def_env_rhs],
-                            [runtime.make_identifier("fn"), Map({core_form: fn_parser})],
-                            [runtime.make_identifier("if"), Map({core_form: if_parser})],
-                            [runtime.make_identifier("loop"), Map({core_form: loop_parser})],
-                            [runtime.make_identifier("block"), Map({core_form: block_parser})],
-                            [runtime.make_identifier("recur"), Map({core_form: recur_parser})],
-                            [runtime.make_identifier("quote"), Map({core_form: quote_parser})]]);
+    const initial_env = Map([[runtime["make-identifier"]("def"), def_env_rhs],
+                            [runtime["make-identifier"]("fn"), Map({core_form: fn_parser})],
+                            [runtime["make-identifier"]("if"), Map({core_form: if_parser})],
+                            [runtime["make-identifier"]("loop"), Map({core_form: loop_parser})],
+                            [runtime["make-identifier"]("block"), Map({core_form: block_parser})],
+                            [runtime["make-identifier"]("recur"), Map({core_form: recur_parser})],
+                            [runtime["make-identifier"]("quote"), Map({core_form: quote_parser})]]);
 
     function match_def(form, env) {
         const unwrapped = match_wrapper("#%round", form);
@@ -241,7 +241,7 @@
             && Immutable.is(env.get(unwrapped.get(0)), def_env_rhs)) { // is it a def?
 
             if (unwrapped.size === 3
-                && runtime.is_identifier(unwrapped.get(1))) { // is it well formed?
+                && runtime["identifier?"](unwrapped.get(1))) { // is it well formed?
                 return Map({id: unwrapped.get(1), exp: unwrapped.get(2)});
             } else {name_converted_specials
                 syntax_error(form);
@@ -290,13 +290,13 @@
 
 
     function parse_exp(exp, env) {
-        if (runtime.is_string(exp)) {
+        if (runtime["string?"](exp)) {
             return Map({ string_literal: exp })
         }
-        if (runtime.is_number(exp)) {
+        if (runtime["number?"](exp)) {
             return Map({ number_literal: exp })
         }
-        if (runtime.is_identifier(exp)) { // Variable reference
+        if (runtime["identifier?"](exp)) { // Variable reference
             const env_entry = env.get(exp, false);
             if (env_entry === false) {
                 unbound_error(exp);
@@ -314,7 +314,7 @@
         if (match_wrapper("#%round", exp) && exp.size > 0) {
             const list = match_wrapper("#%round", exp);
             const rator = list.get(0)
-            if (runtime.is_identifier(rator) && env.has(rator) && env.get(rator).has("core_form")) { // Core syntactic form
+            if (runtime["identifier?"](rator) && env.has(rator) && env.get(rator).has("core_form")) { // Core syntactic form
                 const core_form_parser = env.get(rator).get("core_form");
                 return core_form_parser(list, env);
             } else { // Application
@@ -340,16 +340,16 @@
         const requnwrap = match_wrapper("#%round", sexp.get(0));
         if (!(List.isList(requnwrap)
               && requnwrap.size > 0
-              && Immutable.is(requnwrap.get(0), runtime.make_identifier("require"))
-              && requnwrap.shift().every(runtime.is_identifier))) {
+              && Immutable.is(requnwrap.get(0), runtime["make-identifier"]("require"))
+              && requnwrap.shift().every(runtime["identifier?"]))) {
             module_syntax_error();
         }
 
         const provunwrap = match_wrapper("#%round", sexp.get(1));
         if (!(List.isList(provunwrap)
               && provunwrap.size > 0
-              && Immutable.is(provunwrap.get(0), runtime.make_identifier("provide"))
-              && provunwrap.shift().every(runtime.is_identifier))) {
+              && Immutable.is(provunwrap.get(0), runtime["make-identifier"]("provide"))
+              && provunwrap.shift().every(runtime["identifier?"]))) {
             module_syntax_error();
         }
 
@@ -360,10 +360,10 @@
         let module_bindings = List();
         const module_env = requires.reduce((env,modname) => {
             const binding = gensym(modname);
-            const decl = runner.load(runtime.get_identifier_string(modname));
+            const decl = runner.load(runtime["identifier-string"](modname));
             module_bindings = module_bindings.push(binding);
             return decl.exports.reduce((env, name) => {
-                return env.set(runtime.make_identifier(name),
+                return env.set(runtime["make-identifier"](name),
                                Map({ module_ref_sym: binding,
                                      module_ref_field: name }));
             }, env);
@@ -379,9 +379,9 @@
         const provide_internal_ids = provides.map((prov) => surface_to_internal.get(prov))
 
         return Map({
-            module_requires: requires.map(runtime.get_identifier_string),
+            module_requires: requires.map(runtime["identifier-string"]),
             module_require_internal_ids: module_bindings,
-            module_provides: provides.map(runtime.get_identifier_string),
+            module_provides: provides.map(runtime["identifier-string"]),
             module_provide_internal_ids: provide_internal_ids,
             block_defs: parsed_defs.get("block_defs")
         });

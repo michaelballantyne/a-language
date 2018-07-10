@@ -1,6 +1,6 @@
 #lang js
 // require: vendor/immutable
-// provide: is_identifier, is_number, is_string, is_js_object, is_js_array, make_identifier, get_identifier_string
+// provide: identifier?, number?, string?, js-object?, js-array?, make-identifier, identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln
 (function (Immutable) {
     function is_string(arg) {
         if (typeof arg === 'string' || arg instanceof String) {
@@ -30,13 +30,41 @@
         return id.get("identifier");
     }
 
+    function number_c(v, name) {
+        if (!is_number(v)) {
+            throw name + ": contract violation\n  expected: number?\n  given: " + v
+        }
+    }
+
+    function checked_num_binop(name, f) {
+        function wrapped(a, b) {
+            number_c(a, name);
+            number_c(b, name);
+            return f(a, b);
+        }
+        return wrapped;
+    }
+
     return {
-        is_identifier: is_identifier,
-        is_number: is_number,
-        is_string: is_string,
-        is_js_object: is_js_object,
-        is_js_array: Array.isArray,
-        make_identifier: make_identifier,
-        get_identifier_string: get_identifier_string
+        "number?": is_number,
+        "string?": is_string,
+        "identifier?": is_identifier,
+        "js-object?": is_js_object,
+        "js-array?": Array.isArray,
+        "make-identifier": make_identifier,
+        "identifier-string": get_identifier_string,
+        "true": true,
+        "false": false,
+        "+": checked_num_binop("+", (a, b) => a + b),
+        "-": checked_num_binop("-", (a, b) => a - b),
+        "*": checked_num_binop("*", (a, b) => a * b),
+        "/": checked_num_binop("/", (a, b) => a / b),
+        "%": checked_num_binop("%", (a, b) => a % b),
+        "<": checked_num_binop("<", (a, b) => a < b),
+        ">": checked_num_binop(">", (a, b) => a > b),
+        ">=": checked_num_binop(">=", (a, b) => a >= b),
+        "<=": checked_num_binop("<=", (a, b) => a <= b),
+        "=": checked_num_binop("=", (a, b) => a = b),
+        "displayln": console.log
     }
 })
