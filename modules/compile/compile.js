@@ -26,10 +26,9 @@
     }
 
     function compile_identifier(str) {
-        const name_converted_specials = str.replace(/-/g, "_").replace(/\//g, "__")
         return {
             type: "Identifier",
-            name: name_converted_specials
+            name: str
         };
     }
 
@@ -88,8 +87,11 @@
             return maybe_return({
                 type: "MemberExpression",
                 object: compile_identifier(e.get("module_ref_sym")),
-                property: compile_identifier(e.get("module_ref_field")),
-                computed: false
+                property: {
+                    type: "Literal",
+                    value: e.get("module_ref_field"),
+                },
+                computed: true
             });
         }
 

@@ -5,6 +5,8 @@
     const Map = Immutable.Map;
     const List = Immutable.List;
 
+    // Currently unused, becuase local names are always postfixed with a gensym counter.
+    // In the future I might want to minimize name mangling, so I'll keep the list for now.
     const reserved = Immutable.Set([
         "break",
         "case",
@@ -70,31 +72,22 @@
         "enum"
     ])
 
-    function transform_reserved_out(str) {
-        if (reserved.includes(str)) {
-            return "_" + str
-        } else {
-           return str;
-        }
-    }
-
-    function transform_fieldname_out(str) {
-        const res = transform_reserved_out(str.replace(/-/g, "_"));
-        return res
-    }
-
-    function transform_reserved_in(str) {
-        if (str[0] === "_" && reserved.includes(str.substring(1))) {
-            return str.substring(1)
-        } else {
-           return str;
-        }
-    }
-
-    function transform_fieldname_in(str) {
-        const res = transform_reserved_in(str).replace(/_/g, "-");
-        return res
-    }
+    const operators = Immutable.Map({
+        // printed this way because they are often used as separators.
+        "-": "_",
+        "/": "__",
+        "+": "_plus_",
+        "*": "_mul_",
+        "%": "_mod_",
+        ">": "_gt_",
+        "<": "_lt_",
+        "=": "_eq_",
+        "!": "_bang_",
+        "?": "_huh_"
+        // These two are currently not permitted by the reader.
+        //"~": "_not_",
+        //"^": "_xor_",
+    });
 
     function syntax_error(exp) {
         throw "bad syntax: " + exp.toString();
@@ -104,10 +97,14 @@
         throw "unbound reference: " + runtime.get_identifier_string(exp);
     }
 
+    function transform_reserved(s) {
+        return s.split("").map(c => operators.get(c, c)).join("");
+    }
+
     let gensym_counter = 0;
     function gensym(id) {
         gensym_counter = gensym_counter + 1;
-        return runtime.get_identifier_string(id) + gensym_counter.toString();
+        return transform_reserved(runtime.get_identifier_string(id)) + gensym_counter.toString();
     }
 
     function match_wrapper(wrapper, sexp) {
@@ -366,8 +363,7 @@
             const decl = runner.load(runtime.get_identifier_string(modname));
             module_bindings = module_bindings.push(binding);
             return decl.exports.reduce((env, name) => {
-                const dashed_name = transform_fieldname_in(name);
-                return env.set(runtime.make_identifier(dashed_name),
+                return env.set(runtime.make_identifier(name),
                                Map({ module_ref_sym: binding,
                                      module_ref_field: name }));
             }, env);
@@ -385,7 +381,7 @@
         return Map({
             module_requires: requires.map(runtime.get_identifier_string),
             module_require_internal_ids: module_bindings,
-            module_provides: provides.map(runtime.get_identifier_string).map(transform_fieldname_out),
+            module_provides: provides.map(runtime.get_identifier_string),
             module_provide_internal_ids: provide_internal_ids,
             block_defs: parsed_defs.get("block_defs")
         });

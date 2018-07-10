@@ -1,8 +1,8 @@
 #lang js
-// require: compile/module
+// require: compile/module, compile/reader
 // provide: compile_js
-(function (compiledmodule) {
-    function parseDecl(name, line) {
+(function (compiledmodule, reader) {
+    function parseDecl(name, line, valid_name) {
         function malformed() {
             throw "malformed " + name + ": " + line;
         }
@@ -19,7 +19,7 @@
 
         const s2 = s1[1].split(",").map(i => i.trim());
 
-        if (!s2.every(s => /^[a-zA-Z_\/]+$/.test(s))) {
+        if (!s2.every(valid_name)) {
             malformed()
         }
 
@@ -29,8 +29,8 @@
     // source string -> CompiledModule
     function compile_js(source) {
         const lines = source.split('\n');
-        const imports = parseDecl("require", lines[0]);
-        const exports = parseDecl("provide", lines[1]);
+        const imports = parseDecl("require", lines[0], reader.valid_module_name);
+        const exports = parseDecl("provide", lines[1], reader.valid_id_name);
         const body = lines.slice(2).join("\n")
 
         const module_declaration = compiledmodule.CompiledModule(imports, exports, body);

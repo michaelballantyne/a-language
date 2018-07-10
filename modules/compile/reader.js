@@ -1,6 +1,6 @@
 #lang js
 // require: vendor/immutable, runtime/runtime
-// provide: read, main, test
+// provide: read, main, test, valid_module_name, valid_id_name
 (function (Immutable, runtime) {
     'use strict';
 
@@ -177,9 +177,15 @@
 
     let digit = c_range("0", "9")
 
-    let idchar = or(c_range("a", "z"),
-                    c_range("A","Z"),
-                    c("-"), c("/"), c("?"))
+    let alpha = or(c_range("a", "z"),
+                   c_range("A", "Z"))
+
+    let module_segment = seq(alpha, zero_or_more(or(alpha, digit)))
+    let module_name = seq(module_segment, zero_or_more(seq(c("/"), module_segment)))
+
+    let idchar = or(c_range("a", "z"), c_range("A","Z"),
+                    c("+"), c("-"), c("*"), c("%"), c("="),
+                    c("<"), c(">"), c("-"), c("/"), c("?"))
 
     let id = nonterm("identifier", () =>
         action(capture_string(seq(idchar,zero_or_more(or(digit, idchar)))),
@@ -206,6 +212,16 @@
         ));
 
     let top = seq(sexp_list, eof);
+
+    let valid_module_name = function (s) {
+        let res = parse(module_name, s);
+        return (res.position !== undefined);
+    }
+
+    let valid_id_name = function (s) {
+        let res = parse(id, s);
+        return (res.position !== undefined);
+    }
 
     let read = function (string) {
         const util = require("util");
@@ -371,7 +387,9 @@
         test: test,
         main: main,
         example: example,
-        read: read
+        read: read,
+        valid_module_name: valid_module_name,
+        valid_id_name: valid_id_name
     }
 })
 

@@ -8,17 +8,17 @@
 
 (def factorial
   (fn (n)
-    (if (lessthan n 1)
+    (if (< n 1)
       1
-      (mult n (factorial (minus n 1))))))
+      (* n (factorial (- n 1))))))
 
 (def factorial2
   (fn (n)
     (loop ([n n]
            [c 1])
-       (if (lessthan n 1)
+       (if (< n 1)
         c
-        (recur (minus n 1) (mult n c))))))
+        (recur (- n 1) (* n c))))))
 
 (def main
     (make-print
@@ -28,7 +28,7 @@
      (make-print (if false
                    1
                    (if 1
-                     (plus 3 (id x))
+                     (+ 3 (id x))
                      2))))
 
 (def main3
