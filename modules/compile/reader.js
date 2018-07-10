@@ -192,8 +192,9 @@
               (str) => runtime["make-identifier"](str)));
 
     let integer = nonterm("integer", () =>
-        action(capture_string(seq(c_range("1", "9"),
-                                  zero_or_more(digit))),
+        action(capture_string(or(c("0"),
+                                  seq(c_range("1", "9"),
+                                      zero_or_more(digit)))),
                (str) => parseInt(str)));
 
     let string = nonterm("string", () =>
