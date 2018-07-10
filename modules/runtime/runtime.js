@@ -1,6 +1,6 @@
 #lang js
 // require: vendor/immutable
-// provide: identifier?, number?, string?, js-object?, js-array?, make-identifier, identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, identifier/c, get, testm, testo, testa
+// provide: identifier?, number?, string?, js-object?, js-array?, make-identifier, identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, identifier/c, get
 (function (Immutable) {
     function is_string(arg) {
         if (1 !== arguments.length) {
@@ -122,20 +122,33 @@
         console.log(v);
     }
 
+    function has(c, k) {
+        if (2 !== arguments.length) {
+            raise_arity_error("has", 2, arguments.length);
+        }
+
+        if (!(Immutable.isCollection(c))) {
+            throw Error("has: contract violation\n  expected: collection/c\n given: " + c)
+        }
+
+        return c.has(k);
+    }
+
+
     function get(c, k) {
         if (2 !== arguments.length) {
             raise_arity_error("get", 2, arguments.length);
         }
 
-        if (!(Immutable.isCollection(c) || is_js_object(c) || is_js_array(c))) {
-            throw Error("get: contract violation\n  expected: (or/c collection/c js-object/c js-array/c)\n given: " + c)
+        if (!(Immutable.isCollection(c))) {
+            throw Error("get: contract violation\n  expected: collection/c\n given: " + c)
         }
 
-        if (!(Immutable.has(c, k))) {
+        if (!(c.has(k))) {
             throw Error("get: no value found for key\n  key: " + k);
         }
 
-        return Immutable.get(c, k);
+        return c.get(k);
     }
 
     return {
@@ -163,9 +176,6 @@
         "number/c": number_c,
         "string/c": string_c,
         "identifier/c": identifier_c,
-        "get": get,
-        "testm": Immutable.Map([["a", "1"]]),
-        "testo": {"a": 1},
-        "testa": ["a"]
+        "get": get
     }
 })

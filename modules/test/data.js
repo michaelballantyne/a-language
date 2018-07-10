@@ -5,4 +5,4 @@
 
 (def main
   (fn (args)
-    (displayln (get testo "a"))))
+    (displayln 0)))

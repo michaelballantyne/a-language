@@ -3,13 +3,13 @@
 // provide: version, Collection, Iterable, Seq, Map, OrderedMap, List, Stack, Set, OrderedSet, Record, Range, Repeat, is, fromJS, hash, isImmutable, isCollection, isKeyed, isIndexed, isAssociative, isOrdered, isValueObject, get, getIn, has, hasIn, merge, mergeDeep, mergeWith, mergeDeepWith, remove, removeIn, set, setIn, update, updateIn
 (function () {
 'use strict';
+const exports = {}
 /**
  * Copyright (c) 2014-present, Facebook, Inc.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-const exports = {}
 
 // Used for setting prototype methods that IE8 chokes on.
 var DELETE = 'delete';
@@ -5798,5 +5798,5 @@ exports.updateIn = updateIn;
 Object.defineProperty(exports, '__esModule', { value: true });
 
 return exports;
-})
 
+})
