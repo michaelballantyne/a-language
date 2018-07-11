@@ -1,6 +1,6 @@
 #lang js
 // require: vendor/immutable, runtime/minimal
-// provide: identifier?, number?, string?, js-object?, js-array?, make-identifier, identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, list
+// provide: identifier?, number?, string?, js-object?, js-array?, make-identifier, identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, list, assoc, empty?, append
 (function (Immutable, runtime__minimal) {
     let raise_arity_error = runtime__minimal["raise-arity-error"]
 
@@ -32,12 +32,13 @@
         return Immutable.Map.isMap(arg) && arg.has("identifier");
     }
 
+    // Arrays are objects in JS, but I'm going to treat them as disjoint.
     function is_js_object(arg) {
         if (1 !== arguments.length) {
             raise_arity_error("js-object?", 1, arguments.length);
         }
 
-        return arg !== null && typeof arg === 'object';
+        return arg !== null && typeof arg === 'object' && !Array.isArray(arg);
     }
 
     function is_js_array(arg) {
@@ -125,11 +126,15 @@
             raise_arity_error("has", 2, arguments.length);
         }
 
-        if (!(Immutable.isCollection(c))) {
-            throw Error("has: contract violation\n  expected: collection/c\n given: " + c)
+        if (Immutable.isCollection(c)) {
+            return c.has(k);
+        } else if (is_js_object(c)) {
+            return c[k] !== undefined;
+        } else if (is_js_array(c)) {
+            return c[k] !== undefined;
+        } else {
+            throw Error("has: contract violation\n  expected: (or/c collection/c array/c object/c) \n given: " + c)
         }
-
-        return c.has(k);
     }
 
 
@@ -138,15 +143,24 @@
             raise_arity_error("get", 2, arguments.length);
         }
 
-        if (!(Immutable.isCollection(c))) {
-            throw Error("get: contract violation\n  expected: collection/c\n given: " + c)
+        if (!(Immutable.isCollection(c) || is_js_array(c) || is_js_object(c))) {
+            throw Error("get: contract violation\n  expected: (or/c collection/c array/c object/c) \n given: " + c)
         }
 
-        if (!(c.has(k))) {
+        function no_value() {
+        }
+
+        var res;
+        if (Immutable.isCollection(c)) {
+            res = c.get(k)
+        } else {
+            res = c[k];
+        }
+
+        if (res === undefined) {
             throw Error("get: no value found for key\n  key: " + k);
         }
-
-        return c.get(k);
+        return res;
     }
 
     function error(name, message) {
@@ -206,7 +220,7 @@
 
     function hash() {
         if (arguments.length % 2 !== 0) {
-            throw Error("obj: expected an even number of arguments")
+            throw Error("hash: expected an even number of arguments")
         }
 
         let res = Immutable.Map();
@@ -222,20 +236,79 @@
         return Immutable.List(arguments);
     }
 
-//;   ===
-//;   first
-//;   rest
-//;   append
+    function assoc(c, k, v) {
+        if (3 !== arguments.length) {
+            raise_arity_error("assoc", 3, arguments.length);
+        }
 
-//;   generic get, has, empty? Or do I want to use list-ref, hash-ref, obj-ref, etc?
-//;   Would still be interfaces, but more specific.
-//;   These are variadic, but defined in JS so don't need to add to compiler:
-//;     has
-//;     get
-//;     obj
-//;     list
-//;     hash
-//;     put
+        if (Immutable.isKeyed(c)) {
+            return c.set(k, v);
+        } else if (Immutable.isIndexed(c)) {
+            if (!is_number(k)) {
+                throw Error("assoc: collection is indexed, but key is not a number\n  key: " + k);
+            }
+            if (!(k <= c.size)) {
+                throw Error("assoc: assignment would leave undefined indices");
+            }
+            return c.set(k, v);
+        } else if (is_js_object(c)) {
+            var res = Object.assign({}, c)
+            res[k] = v;
+            return res;
+        } else {
+            throw Error("assoc: contract violation\n  expected: (or/c collection/c object/c) \n given: " + c)
+        }
+    }
+
+    function empty(c) {
+        if (1 !== arguments.length) {
+            raise_arity_error("empty?", 1, arguments.length);
+        }
+
+        if (Immutable.isCollection(c)) {
+            return c.isEmpty();
+        } else if (is_js_array(c)) {
+            return c.length === 0;
+        } else {
+            throw Error("empty?: contract violation\n  expected: (or/c collection/c array/c)\n  given: " + c)
+        }
+    }
+
+    function first(l) {
+        if (1 !== arguments.length) {
+            raise_arity_error("first", 1, arguments.length);
+        }
+
+        if (!Immutable.List.isList(l)) {
+            throw Error("first: contract violation\n  expected: list/c\n  given: " + l)
+        }
+        return l.first();
+    }
+
+    function rest(l) {
+        if (1 !== arguments.length) {
+            raise_arity_error("rest", 1, arguments.length);
+        }
+
+        if (!Immutable.List.isList(l)) {
+            throw Error("rest: contract violation\n  expected: list/c\n  given: " + l)
+        }
+        return l.rest();
+    }
+
+    function append(l1, l2) {
+        if (2 !== arguments.length) {
+            raise_arity_error("append", 2, arguments.length);
+        }
+
+        if (!Immutable.List.isList(l1)) {
+            throw Error("rest: contract violation\n  expected: list/c\n  given: " + l1)
+        }
+        if (!Immutable.List.isList(l2)) {
+            throw Error("rest: contract violation\n  expected: list/c\n  given: " + l2)
+        }
+        return l1.concat(l2);
+    }
 
     return {
         "number?": is_number,
@@ -272,6 +345,9 @@
         "!==": threeneq,
         "obj": obj,
         "hash": hash,
-        "list": list
+        "list": list,
+        "assoc": assoc,
+        "empty?": empty,
+        "append": append
     }
 })
