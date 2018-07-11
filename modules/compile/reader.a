@@ -21,8 +21,6 @@
 
 
 ;   Best as macros, but I might want to hack into the parser for now:
-;     and
-;     or
 ;     cond
 ;     defn
 
@@ -62,6 +60,13 @@
     [(> (get (first r) :position) (get (first l) :position)) r]
     [(> (get (first l) :position) (get (first r) :position)) r]
     [:else (append l r)]))
+
+(defn (merge-failures l r)
+  (if (empty? l) r
+    (if (empty? r) l
+      (if (> (get (first r) :position) (get (first l) :position)) r
+        (if (> (get (first l) :position) (get (first r) :position)) l
+          (append l r))))))
 
 (defn (seq parsers ...)
   (fn (input index)

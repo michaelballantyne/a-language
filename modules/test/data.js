@@ -5,4 +5,4 @@
 
 (def main
   (fn (args)
-    (displayln 0)))
+    (displayln (list :a 5 :b 6))))

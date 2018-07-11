@@ -5992,12 +5992,85 @@
             throw Error(name + ": " + message);
         }
     
-        //;   ===
-        //;   string-append
-        //;   not
-        //;   first
-        //;   rest
-        //;   append
+        function string_append() {
+            let res = "";
+            for (var i = 0; i < arguments.length; i++) {
+                string_c("string-append", arguments[i]);
+                res = res + arguments[i];
+            }
+            return res;
+        }
+    
+        function not(arg) {
+            if (1 !== arguments.length) {
+                raise_arity_error("not", 1, arguments.length);
+            }
+            return arg === false;
+        }
+    
+        function threeeq(a, b) {
+            if (2 !== arguments.length) {
+                raise_arity_error("===", 2, arguments.length);
+            }
+    
+            return a === b;
+        }
+    
+        function threeneq(a, b) {
+            if (2 !== arguments.length) {
+                raise_arity_error("!==", 2, arguments.length);
+            }
+    
+            return a !== b;
+        }
+    
+        function obj() {
+            if (arguments.length % 2 !== 0) {
+                throw Error("obj: expected an even number of arguments")
+            }
+    
+            let res = {};
+    
+            for (var i = 0; i < arguments.length; i = i + 2) {
+                string_c("obj", arguments[i]);
+                res[arguments[i]] = arguments[i + 1];
+            }
+    
+            return res;
+        }
+    
+        function hash() {
+            if (arguments.length % 2 !== 0) {
+                throw Error("obj: expected an even number of arguments")
+            }
+    
+            let res = Immutable.Map();
+    
+            for (var i = 0; i < arguments.length; i = i + 2) {
+                res = res.set(arguments[i], arguments[i + 1]);
+            }
+    
+            return res;
+        }
+    
+        function list() {
+            return Immutable.List(arguments);
+        }
+    
+    //;   ===
+    //;   first
+    //;   rest
+    //;   append
+    
+    //;   generic get, has, empty? Or do I want to use list-ref, hash-ref, obj-ref, etc?
+    //;   Would still be interfaces, but more specific.
+    //;   These are variadic, but defined in JS so don't need to add to compiler:
+    //;     has
+    //;     get
+    //;     obj
+    //;     list
+    //;     hash
+    //;     put
     
         return {
             "number?": is_number,
@@ -6028,6 +6101,13 @@
             "get": get,
             "make-keyword": make_keyword,
             "error": error,
+            "string-append": string_append,
+            "not": not,
+            "===": threeeq,
+            "!==": threeneq,
+            "obj": obj,
+            "hash": hash,
+            "list": list
         }
     })
     )(vendor_immutable, runtime_minimal);
@@ -6221,7 +6301,7 @@
         let module_name = seq(module_segment, zero_or_more(seq(c("/"), module_segment)))
     
         let idchar = or(c_range("a", "z"), c_range("A","Z"),
-                        c("+"), c("-"), c("*"), c("%"), c("="),
+                        c("+"), c("-"), c("*"), c("%"), c("="), c("!"),
                         c("<"), c(">"), c("-"), c("/"), c("?"), c("_"))
     
         let id = nonterm("identifier", () =>
