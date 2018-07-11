@@ -1,6 +1,6 @@
 #lang js
 // require: vendor/immutable, runtime/minimal
-// provide: identifier?, number?, string?, js-object?, js-array?, make-identifier, identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, identifier/c, has, get
+// provide: identifier?, number?, string?, js-object?, js-array?, make-identifier, identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, identifier/c, has, get, make-keyword, error
 (function (Immutable, runtime__minimal) {
     let raise_arity_error = runtime__minimal["raise-arity-error"]
 
@@ -46,6 +46,10 @@
         }
 
         return Array.isArray(arg);
+    }
+
+    function make_keyword(str) {
+        return str;
     }
 
     function make_identifier(str) {
@@ -97,7 +101,6 @@
         }
     }
 
-
     function checked_num_binop(name, f) {
         function wrapped(a, b) {
             if (2 !== arguments.length) {
@@ -146,6 +149,21 @@
         return c.get(k);
     }
 
+    function error(name, message) {
+        if (2 !== arguments.length) {
+            raise_arity_error("error", 2, arguments.length);
+        }
+
+        throw Error(name + ": " + message);
+    }
+
+    //;   ===
+    //;   string-append
+    //;   not
+    //;   first
+    //;   rest
+    //;   append
+
     return {
         "number?": is_number,
         "string?": is_string,
@@ -172,6 +190,8 @@
         "string/c": string_c,
         "identifier/c": identifier_c,
         "has": has,
-        "get": get
+        "get": get,
+        "make-keyword": make_keyword,
+        "error": error,
     }
 })

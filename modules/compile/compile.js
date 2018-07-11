@@ -36,7 +36,7 @@
         [internal, external] = p;
         return {
             type: "Property",
-            key: compile_identifier(external),
+            key: {type: "Literal", value: external},
             value: compile_identifier(internal)
         };
     }
@@ -65,17 +65,10 @@
             }
         }
 
-        if (e.has("string_literal")) {
+        if (e.has("literal")) {
             return maybe_return({
                 type: "Literal",
-                value: e.get("string_literal")
-            });
-        }
-
-        if (e.has("number_literal")) {
-            return maybe_return({
-                type: "Literal",
-                value: e.get("number_literal")
+                value: e.get("literal")
             });
         }
 

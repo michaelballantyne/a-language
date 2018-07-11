@@ -9,9 +9,6 @@
 ;   rest
 ;   append
 
-;   ; comments
-;   either :keywords or 'quotes all the way through the compiler
-
 ;   generic get, has, empty? Or do I want to use list-ref, hash-ref, obj-ref, etc?
 ;   Would still be interfaces, but more specific.
 ;   These are variadic, but defined in JS so don't need to add to compiler:
@@ -28,8 +25,6 @@
 ;     or
 ;     cond
 ;     defn
-
-;   check behavior of \n in string literals
 
 ;   variadic functions. I like the idea of ... syntax for defn.
 

@@ -125,13 +125,35 @@
                      if_e: parse_exp(exp.get(3), env) });
     }
 
-    function quote_parser(exp, env) {
-        if (exp.size !== 2) {
+    function and_parser(exp, env) {
+        if (exp.size !== 3) {
             syntax_error(exp);
         }
 
-        return Map({ quoted_datum: exp.get(1) });
+        return Map({ if_c: parse_exp(exp.get(1), env),
+                     if_t: parse_exp(exp.get(2), env),
+                     if_e: Map({ literal: false }) });
     }
+
+
+    function or_parser(exp, env) {
+        if (exp.size !== 3) {
+            syntax_error(exp);
+        }
+
+        const tmp = gensym(runtime["make-identifier"]("tmp"))
+
+        return Map({
+            block_exp: true,
+            block_defs: List([Map({id: tmp, rhs: parse_exp(exp.get(1), env)})]),
+            block_ret: Map({
+                if_c: Map({ reference: tmp }),
+                if_t: Map({ reference: tmp }),
+                if_e: parse_exp(exp.get(2), env)
+            })
+        })
+    }
+
 
     function block_parser(exp, env) {
         const parsed_block = parse_block(exp.shift(), env);
@@ -218,10 +240,11 @@
     const initial_env = Map([[runtime["make-identifier"]("def"), def_env_rhs],
                             [runtime["make-identifier"]("fn"), Map({core_form: fn_parser})],
                             [runtime["make-identifier"]("if"), Map({core_form: if_parser})],
+                            [runtime["make-identifier"]("or"), Map({core_form: or_parser})],
+                            [runtime["make-identifier"]("and"), Map({core_form: and_parser})],
                             [runtime["make-identifier"]("loop"), Map({core_form: loop_parser})],
                             [runtime["make-identifier"]("block"), Map({core_form: block_parser})],
-                            [runtime["make-identifier"]("recur"), Map({core_form: recur_parser})],
-                            [runtime["make-identifier"]("quote"), Map({core_form: quote_parser})]]);
+                            [runtime["make-identifier"]("recur"), Map({core_form: recur_parser})]]);
 
     function match_def(form, env) {
         if (form !== false
@@ -231,7 +254,7 @@
             if (form.size === 3
                 && runtime["identifier?"](form.get(1))) { // is it well formed?
                 return Map({id: form.get(1), exp: form.get(2)});
-            } else {name_converted_specials
+            } else {
                 syntax_error(form);
             }
         } else {
@@ -279,10 +302,10 @@
 
     function parse_exp(exp, env) {
         if (runtime["string?"](exp)) {
-            return Map({ string_literal: exp })
+            return Map({ literal: exp })
         }
         if (runtime["number?"](exp)) {
-            return Map({ number_literal: exp })
+            return Map({ literal: exp })
         }
         if (runtime["identifier?"](exp)) { // Variable reference
             const env_entry = env.get(exp, false);
@@ -388,28 +411,28 @@
             }
         }
 
-        assert_is(read_and_parse("103"), Map({number_literal: 103}));
-        assert_is(read_and_parse("\"foo\""), Map({string_literal: "foo"}));
+        assert_is(read_and_parse("103"), Map({literal: 103}));
+        assert_is(read_and_parse("\"foo\""), Map({literal: "foo"}));
         assert_is(read_and_parse("(block (def x 5) (def y x) y)"),
-                  Map({ block_defs: List([Map({id: "x1", rhs: Map({ number_literal: 5 })}),
+                  Map({ block_defs: List([Map({id: "x1", rhs: Map({ literal: 5 })}),
                                           Map({id: "y2", rhs: Map({ reference: "x1" })})]),
                         block_ret: Map({ reference: "y2" }),
                         block_exp: true}));
         assert_is(read_and_parse("(fn (x y) (def x 5) x)"),
                   Map({ fn_args: List(["x1", "y2"]),
-                        block_defs: List([Map({id: "x3", rhs: Map({ number_literal: 5 })})]),
+                        block_defs: List([Map({id: "x3", rhs: Map({ literal: 5 })})]),
                         block_ret: Map({ reference: "x3" })}));
         assert_is(read_and_parse("(block 5)"),
-                  Map({ number_literal: 5 }));
+                  Map({ literal: 5 }));
 
         assert_is(read_and_parse("(loop ([x 7]) (if x (recur x) 8))"),
                  Map({ loop_vars: List(["x1"]),
-                       loop_inits: List([Map({ number_literal: 7 })]),
+                       loop_inits: List([Map({ literal: 7 })]),
                        block_defs: List(),
                        block_ret: Map({
                            if_c: Map({ reference: "x1" }),
                            if_t: Map({ recur_exps: List([Map({ reference: "x1" })]) }),
-                           if_e: Map({ number_literal: 8 })
+                           if_e: Map({ literal: 8 })
                        })
                  }));
 

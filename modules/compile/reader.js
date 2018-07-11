@@ -146,6 +146,7 @@
             id,
             integer,
             string,
+            keyword,
             seq(c("("), sexp_list, c(")")),
             seq(c("["), sexp_list, c("]"))
             //dsl_string,
@@ -190,12 +191,16 @@
     let module_name = seq(module_segment, zero_or_more(seq(c("/"), module_segment)))
 
     let idchar = or(c_range("a", "z"), c_range("A","Z"),
-                    c("+"), c("-"), c("*"), c("%"), c("="),
-                    c("<"), c(">"), c("-"), c("/"), c("?"))
+                    c("+"), c("-"), c("*"), c("%"), c("="), c("!"),
+                    c("<"), c(">"), c("-"), c("/"), c("?"), c("_"))
 
     let id = nonterm("identifier", () =>
         action(capture_string(seq(idchar,zero_or_more(or(digit, idchar)))),
               (str) => runtime["make-identifier"](str)));
+
+    let keyword = nonterm("keyword", () =>
+        action(seq(c(":"), capture_string(one_or_more(or(digit, idchar)))),
+               (str) => runtime["make-keyword"](str)));
 
     let integer = nonterm("integer", () =>
         action(capture_string(or(c("0"),
@@ -365,106 +370,11 @@
         });
     };
 
-
-    function example(args) {
-        const ex =
-`
-(hello
-  ‹‹world ‹‹nested›› end››
-  "other string"
-  'quoted
-  '(quoted)
-  \`quasi
-  \`(quasi ,unquote)
-  (more (deeply nested)))
-
-(second form)
-`
-
-        const util = require("util");
-
-        function print(obj) {
-            console.log(util.inspect(obj, false, null));
-        }
-
-        print(read(ex))
-    }
-
     return {
         test: test,
         main: main,
-        example: example,
         read: read,
         valid_module_name: valid_module_name,
         valid_id_name: valid_id_name
     }
 })
-
-// grammar:
-//
-// sexpr := id
-//        | integer
-//        | string
-//        | dsl-string
-//        | "(" sexp-list ")"
-//        | "[" sexp-list "]"
-//        | "{" sexp-list "}"
-//        | "'" sexp
-//        | "`" sexp
-//        | "," sexp
-//
-// sexp-list := whitespace sexp-list
-//            | sexp (whitespace sexp-list
-//                   | "")
-//            | ""
-//
-// whitespace := (" " | "\n")+
-//
-// id := (a-z | A-Z | "-" | "?")+
-//
-// integer := 1-9 0-9*
-//
-// string = ‹‹"›› (!‹‹"››)* ‹‹"››
-//
-// dsl-string := "‹" "‹" dsl-string-contents "›" "›"
-//
-// dsl-string-contents := "‹" !"‹" dsl-string-contents
-//                      | "›" !"›" dsl-string-contents
-//                      | (!"‹" & !"›") dsl-string-contents
-//                      | dsl-string dsl-string-contents
-//                      | ""
-//
-// (grammar
-//   (sexp
-//    (or id
-//        integer
-//        string
-//        dsl-string
-//        (seq "(" sexp-list ")")
-//        (seq "[" sexp-list "]")
-//        (seq "{" sexp-list "}")
-//        (seq "'" sexp)
-//        (seq "`" sexp)
-//        (seq "," sexp)))
-//   (sexp-list
-//    (or (seq whitespace sexp-list)
-//        (seq sexp (or (seq space sexp-list)
-//                      ""))
-//        ""))
-//   (whitespace
-//    (one-or-more (or " " "\n")))
-//   (id
-//    (one-or-more (or (c-range "a" "z") (c-range "A" "Z") "-" "?")))
-//   (integer
-//    (seq (c-range "1" "9") (zero-or-more (c-range "0" "9"))))
-//   (string
-//    (seq ‹‹"›› (zero-or-more (c-not ‹‹"››)) ‹‹"››))
-//   (dsl-string
-//    (seq "‹" "‹" dsl-string-contents "›" "›"))
-//   (dsl-string-contents
-//    (or (seq "‹" (c-not "‹") dsl-string-contents)
-//        (seq "›" (c-not "›") dsl-string-contents)
-//        (seq (c-and (c-not "‹") (c-not "›")) dsl-string-contents)
-//        (seq dsl-string dsl-string-contents)
-//        "")))
-//

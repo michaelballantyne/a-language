@@ -24,6 +24,7 @@
 
 (def main
   (fn (args)
+   (def x (displayln "foo"))
    (displayln (factorial 5))
     ))
 

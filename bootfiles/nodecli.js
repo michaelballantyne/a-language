@@ -1,13 +1,13 @@
 (function () {
     const vendor_immutable = ((function () {
     'use strict';
+    const exports = {}
     /**
      * Copyright (c) 2014-present, Facebook, Inc.
      *
      * This source code is licensed under the MIT license found in the
      * LICENSE file in the root directory of this source tree.
      */
-    const exports = {}
     
     // Used for setting prototype methods that IE8 chokes on.
     var DELETE = 'delete';
@@ -5796,8 +5796,8 @@
     Object.defineProperty(exports, '__esModule', { value: true });
     
     return exports;
-    })
     
+    })
     )();
     const compile_module = ((function () {
         const isString = i => typeof i === "string" || i instanceof String
@@ -5819,8 +5819,31 @@
         return { CompiledModule: CompiledModule }
     })
     )();
-    const runtime_runtime = ((function (Immutable) {
+    const runtime_minimal = (//
+    // References to this module and its exports are inserted by the compiler in every module.
+    //
+    (function () {
+        function raise_arity_error(name, expected, given) {
+            if (3 !== arguments.length) {
+                raise_arity_error("raise-arity-error", 3, arguments.length);
+            }
+    
+            throw Error(name + ": arity mismatch\n  expected: " + expected + "\n  given: " + given);
+        }
+    
+        return {
+            "raise-arity-error": raise_arity_error
+        };
+    })
+    )();
+    const runtime_runtime = ((function (Immutable, runtime__minimal) {
+        let raise_arity_error = runtime__minimal["raise-arity-error"]
+    
         function is_string(arg) {
+            if (1 !== arguments.length) {
+                raise_arity_error("string?", 1, arguments.length);
+            }
+    
             if (typeof arg === 'string' || arg instanceof String) {
                 return true;
             } else {
@@ -5829,36 +5852,185 @@
         }
     
         function is_number(arg) {
+            if (1 !== arguments.length) {
+                raise_arity_error("number?", 1, arguments.length);
+            }
+    
             return !isNaN(arg);
         }
     
         function is_identifier(arg) {
+            if (1 !== arguments.length) {
+                raise_arity_error("identifier?", 1, arguments.length);
+            }
+    
             return Immutable.Map.isMap(arg) && arg.has("identifier");
         }
     
         function is_js_object(arg) {
+            if (1 !== arguments.length) {
+                raise_arity_error("js-object?", 1, arguments.length);
+            }
+    
             return arg !== null && typeof arg === 'object';
         }
     
+        function is_js_array(arg) {
+            if (1 !== arguments.length) {
+                raise_arity_error("js-array?", 1, arguments.length);
+            }
+    
+            return Array.isArray(arg);
+        }
+    
+        function make_keyword(str) {
+            return str;
+        }
+    
         function make_identifier(str) {
+            if (1 !== arguments.length) {
+                raise_arity_error("make-identifier", 1, arguments.length);
+            }
+            string_c("make-identifier", str);
+    
             return Immutable.Map({identifier: str});
         }
     
         function get_identifier_string(id) {
+            if (1 !== arguments.length) {
+                raise_arity_error("identifier-string", 1, arguments.length);
+            }
+    
+            identifier_c("identifier-string", id);
+    
             return id.get("identifier");
         }
+    
+        function number_c(name, v) {
+            if (2 !== arguments.length) {
+                raise_arity_error("number/c", 2, arguments.length);
+            }
+    
+            if (!is_number(v)) {
+                throw Error(name + ": contract violation\n  expected: number?\n  given: " + v);
+            }
+        }
+    
+        function string_c(name, v) {
+            if (2 !== arguments.length) {
+                raise_arity_error("string/c", 2, arguments.length);
+            }
+    
+            if (!is_string(v)) {
+                throw Error(name + ": contract violation\n  expected: string?\n  given: " + v);
+            }
+        }
+    
+        function identifier_c(name, v) {
+            if (2 !== arguments.length) {
+                raise_arity_error("identifier/c", 2, arguments.length);
+            }
+    
+            if (!is_identifier(v)) {
+                throw Error(name + ": contract violation\n  expected: identifier?\n  given: " + v);
+            }
+        }
+    
+        function checked_num_binop(name, f) {
+            function wrapped(a, b) {
+                if (2 !== arguments.length) {
+                    raise_arity_error(name, 2, arguments.length);
+                }
+                number_c(name, a);
+                number_c(name, b);
+                return f(a, b);
+            }
+            return wrapped;
+        }
+    
+        function displayln(v) {
+            if (1 !== arguments.length) {
+                raise_arity_error("displayln", 1, arguments.length);
+            }
+            console.log(v);
+        }
+    
+        function has(c, k) {
+            if (2 !== arguments.length) {
+                raise_arity_error("has", 2, arguments.length);
+            }
+    
+            if (!(Immutable.isCollection(c))) {
+                throw Error("has: contract violation\n  expected: collection/c\n given: " + c)
+            }
+    
+            return c.has(k);
+        }
+    
+    
+        function get(c, k) {
+            if (2 !== arguments.length) {
+                raise_arity_error("get", 2, arguments.length);
+            }
+    
+            if (!(Immutable.isCollection(c))) {
+                throw Error("get: contract violation\n  expected: collection/c\n given: " + c)
+            }
+    
+            if (!(c.has(k))) {
+                throw Error("get: no value found for key\n  key: " + k);
+            }
+    
+            return c.get(k);
+        }
+    
+        function error(name, message) {
+            if (2 !== arguments.length) {
+                raise_arity_error("error", 2, arguments.length);
+            }
+    
+            throw Error(name + ": " + message);
+        }
+    
+        //;   ===
+        //;   string-append
+        //;   not
+        //;   first
+        //;   rest
+        //;   append
     
         return {
             "number?": is_number,
             "string?": is_string,
             "identifier?": is_identifier,
             "js-object?": is_js_object,
-            "js-array?": Array.isArray,
+            "js-array?": is_js_array,
             "make-identifier": make_identifier,
-            "identifier-string": get_identifier_string
+            "identifier-string": get_identifier_string,
+            "true": true,
+            "false": false,
+            "+": checked_num_binop("+", (a, b) => a + b),
+            "-": checked_num_binop("-", (a, b) => a - b),
+            "*": checked_num_binop("*", (a, b) => a * b),
+            "/": checked_num_binop("/", (a, b) => a / b),
+            "%": checked_num_binop("%", (a, b) => a % b),
+            "<": checked_num_binop("<", (a, b) => a < b),
+            ">": checked_num_binop(">", (a, b) => a > b),
+            ">=": checked_num_binop(">=", (a, b) => a >= b),
+            "<=": checked_num_binop("<=", (a, b) => a <= b),
+            "=": checked_num_binop("=", (a, b) => a = b),
+            "displayln": displayln,
+            "raise-arity-error": raise_arity_error,
+            "number/c": number_c,
+            "string/c": string_c,
+            "identifier/c": identifier_c,
+            "has": has,
+            "get": get,
+            "make-keyword": make_keyword,
+            "error": error,
         }
     })
-    )(vendor_immutable);
+    )(vendor_immutable, runtime_minimal);
     const compile_reader = ((function (Immutable, runtime) {
         'use strict';
     
@@ -5996,27 +6168,30 @@
             return grammar(input, 0);
         }
     
-        let wrap = (name, wrapper, body) =>
-            describe(name, action(body, (child) => Immutable.List([wrapper, child])));
+        //let wrap = (name, wrapper, body) =>
+            //describe(name, action(body, (child) => Immutable.List([wrapper, child])));
     
         let sexp = nonterm("sexp", () =>
             or(
                 id,
                 integer,
                 string,
-                dsl_string,
-                wrap("parens", runtime["make-identifier"]("#%round"),
-                    seq(c("("), sexp_list, c(")"))),
-                wrap("square brackets", runtime["make-identifier"]("#%square"),
-                    seq(c("["), sexp_list, c("]"))),
-                wrap("curly brackets", runtime["make-identifier"]("#%curly"),
-                    seq(c("{"), sexp_list, c("}"))),
-                wrap("tick", runtime["make-identifier"]("#%tick"),
-                    seq(c("'"), sexp)),
-                wrap("backtick", runtime["make-identifier"]("#%backtick"),
-                    seq(c("`"), sexp)),
-                wrap("comma", runtime["make-identifier"]("#%comma"),
-                    seq(c(","), sexp))
+                keyword,
+                seq(c("("), sexp_list, c(")")),
+                seq(c("["), sexp_list, c("]"))
+                //dsl_string,
+                //wrap("parens", runtime["make-identifier"]("#%round"),
+                    //seq(c("("), sexp_list, c(")"))),
+                //wrap("square brackets", runtime["make-identifier"]("#%square"),
+                    //seq(c("["), sexp_list, c("]"))),
+                //wrap("curly brackets", runtime["make-identifier"]("#%curly"),
+                    //seq(c("{"), sexp_list, c("}"))),
+                //wrap("tick", runtime["make-identifier"]("#%tick"),
+                    //seq(c("'"), sexp)),
+                //wrap("backtick", runtime["make-identifier"]("#%backtick"),
+                    //seq(c("`"), sexp)),
+                //wrap("comma", runtime["make-identifier"]("#%comma"),
+                    //seq(c(","), sexp))
             ));
     
         let empty_as_list = action(empty, (ignore) => Immutable.List([]));
@@ -6024,6 +6199,7 @@
         let sexp_list = nonterm("list of s-expressions", () =>
             or(
                 seq(whitespace, sexp_list),
+                seq(comment, sexp_list),
                 action(seq(sexp, or(seq(whitespace, sexp_list),
                                     empty_as_list)),
                        ([first, rest]) => Immutable.List([first]).concat(rest)),
@@ -6032,6 +6208,9 @@
     
         let whitespace = nonterm("whitespace", () =>
             one_or_more(or(c(" "), c("\n"))));
+    
+        let comment = nonterm("comment", () =>
+            seq(c(";"), zero_or_more(c_not("\n")), c("\n")));
     
         let digit = c_range("0", "9")
     
@@ -6043,31 +6222,36 @@
     
         let idchar = or(c_range("a", "z"), c_range("A","Z"),
                         c("+"), c("-"), c("*"), c("%"), c("="),
-                        c("<"), c(">"), c("-"), c("/"), c("?"))
+                        c("<"), c(">"), c("-"), c("/"), c("?"), c("_"))
     
         let id = nonterm("identifier", () =>
             action(capture_string(seq(idchar,zero_or_more(or(digit, idchar)))),
                   (str) => runtime["make-identifier"](str)));
     
+        let keyword = nonterm("keyword", () =>
+            action(seq(c(":"), capture_string(one_or_more(or(digit, idchar)))),
+                   (str) => runtime["make-keyword"](str)));
+    
         let integer = nonterm("integer", () =>
-            action(capture_string(seq(c_range("1", "9"),
-                                      zero_or_more(digit))),
+            action(capture_string(or(c("0"),
+                                      seq(c_range("1", "9"),
+                                          zero_or_more(digit)))),
                    (str) => parseInt(str)));
     
         let string = nonterm("string", () =>
             seq(c("\""), capture_string(zero_or_more(c_not("\""))), c("\"")));
     
-        let dsl_string = nonterm("dsl string", () =>
-            seq(seq(c("‹"), c("‹")), capture_string(dsl_string_contents), c("›"), c("›")));
+        //let dsl_string = nonterm("dsl string", () =>
+            //seq(seq(c("‹"), c("‹")), capture_string(dsl_string_contents), c("›"), c("›")));
     
-        let dsl_string_contents = nonterm("dsl string contents", () =>
-            or(
-                seq(seq(c("‹"), c_not("‹", "›")), dsl_string_contents),
-                seq(seq(c("›"), c_not("‹", "›")), dsl_string_contents),
-                seq(c_not("‹", "›"), dsl_string_contents),
-                seq(dsl_string, dsl_string_contents),
-                empty
-            ));
+        //let dsl_string_contents = nonterm("dsl string contents", () =>
+            //or(
+                //seq(seq(c("‹"), c_not("‹", "›")), dsl_string_contents),
+                //seq(seq(c("›"), c_not("‹", "›")), dsl_string_contents),
+                //seq(c_not("‹", "›"), dsl_string_contents),
+                //seq(dsl_string, dsl_string_contents),
+                //empty
+            //));
     
         let top = seq(sexp_list, eof);
     
@@ -6216,109 +6400,14 @@
             });
         };
     
-    
-        function example(args) {
-            const ex =
-    `
-    (hello
-      ‹‹world ‹‹nested›› end››
-      "other string"
-      'quoted
-      '(quoted)
-      \`quasi
-      \`(quasi ,unquote)
-      (more (deeply nested)))
-    
-    (second form)
-    `
-    
-            const util = require("util");
-    
-            function print(obj) {
-                console.log(util.inspect(obj, false, null));
-            }
-    
-            print(read(ex))
-        }
-    
         return {
             test: test,
             main: main,
-            example: example,
             read: read,
             valid_module_name: valid_module_name,
             valid_id_name: valid_id_name
         }
     })
-    
-    // grammar:
-    //
-    // sexpr := id
-    //        | integer
-    //        | string
-    //        | dsl-string
-    //        | "(" sexp-list ")"
-    //        | "[" sexp-list "]"
-    //        | "{" sexp-list "}"
-    //        | "'" sexp
-    //        | "`" sexp
-    //        | "," sexp
-    //
-    // sexp-list := whitespace sexp-list
-    //            | sexp (whitespace sexp-list
-    //                   | "")
-    //            | ""
-    //
-    // whitespace := (" " | "\n")+
-    //
-    // id := (a-z | A-Z | "-" | "?")+
-    //
-    // integer := 1-9 0-9*
-    //
-    // string = ‹‹"›› (!‹‹"››)* ‹‹"››
-    //
-    // dsl-string := "‹" "‹" dsl-string-contents "›" "›"
-    //
-    // dsl-string-contents := "‹" !"‹" dsl-string-contents
-    //                      | "›" !"›" dsl-string-contents
-    //                      | (!"‹" & !"›") dsl-string-contents
-    //                      | dsl-string dsl-string-contents
-    //                      | ""
-    //
-    // (grammar
-    //   (sexp
-    //    (or id
-    //        integer
-    //        string
-    //        dsl-string
-    //        (seq "(" sexp-list ")")
-    //        (seq "[" sexp-list "]")
-    //        (seq "{" sexp-list "}")
-    //        (seq "'" sexp)
-    //        (seq "`" sexp)
-    //        (seq "," sexp)))
-    //   (sexp-list
-    //    (or (seq whitespace sexp-list)
-    //        (seq sexp (or (seq space sexp-list)
-    //                      ""))
-    //        ""))
-    //   (whitespace
-    //    (one-or-more (or " " "\n")))
-    //   (id
-    //    (one-or-more (or (c-range "a" "z") (c-range "A" "Z") "-" "?")))
-    //   (integer
-    //    (seq (c-range "1" "9") (zero-or-more (c-range "0" "9"))))
-    //   (string
-    //    (seq ‹‹"›› (zero-or-more (c-not ‹‹"››)) ‹‹"››))
-    //   (dsl-string
-    //    (seq "‹" "‹" dsl-string-contents "›" "›"))
-    //   (dsl-string-contents
-    //    (or (seq "‹" (c-not "‹") dsl-string-contents)
-    //        (seq "›" (c-not "›") dsl-string-contents)
-    //        (seq (c-and (c-not "‹") (c-not "›")) dsl-string-contents)
-    //        (seq dsl-string dsl-string-contents)
-    //        "")))
-    //
     )(vendor_immutable, runtime_runtime);
     const compile_js = ((function (compiledmodule, reader) {
         function parseDecl(name, line, valid_name) {
