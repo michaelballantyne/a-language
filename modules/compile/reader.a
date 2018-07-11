@@ -2,29 +2,43 @@
 (provide read main test valid-module-name valid-id-name)
 
 ; Need to add:
-;   and
-;   ; comments
-;   obj
-;   list
-;   map / hash / dict
-;   generic get, has
 ;   ===
 ;   string-append
 ;   not
-
-; Eventually:
-;   defn
-;   variadic functions. I like the idea of ... syntax for defn.
-;   format (or borrow similar from JS)
-;   empty
 ;   first
 ;   rest
-;   concat or append
-;   cond
+;   append
 
+;   ; comments
+;   either :keywords or 'quotes all the way through the compiler
+
+;   generic get, has, empty? Or do I want to use list-ref, hash-ref, obj-ref, etc?
+;   Would still be interfaces, but more specific.
+;   These are variadic, but defined in JS so don't need to add to compiler:
+;     has
+;     get
+;     obj
+;     list
+;     hash
+;     put
+
+
+;   Best as macros, but I might want to hack into the parser for now:
+;     and
+;     or
+;     cond
+;     defn
+
+;   check behavior of \n in string literals
+
+;   variadic functions. I like the idea of ... syntax for defn.
+
+;   format
+
+; Maybe kill #lang loading for now and just special case, to make bootstrap simple
 
 ; So far I don't *really* need special paren, brace, and bracket syntax.
-; I could drop that for now, in the spirit of minimalism.
+; I could drop that for now, in the spirit of minimalism. Parsing it is a pain.
 
 (defn (c-pred pred description)
   (fn (input index)
