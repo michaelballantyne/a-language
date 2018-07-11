@@ -107,14 +107,6 @@
         return transform_reserved(runtime["identifier-string"](id)) + gensym_counter.toString();
     }
 
-    function match_wrapper(wrapper, sexp) {
-        if (List.isList(sexp) && Immutable.is(sexp.get(0), runtime["make-identifier"](wrapper)) && sexp.size === 2) {
-            return sexp.get(1);
-        } else {
-            return false;
-        }
-    }
-
     function app_parser(exps, env) {
         if (exps.size < 1) {
             syntax_error(exp);
@@ -155,7 +147,7 @@
             syntax_error(exp);
         }
 
-        const arg_list = match_wrapper("#%round", exp.get(1))
+        const arg_list = exp.get(1)
 
         if (!(List.isList(arg_list)
               && arg_list.every((element) => runtime["identifier?"](element)))) {
@@ -183,7 +175,7 @@
             syntax_error(exp);
         }
 
-        const binding_list = match_wrapper("#%round", exp.get(1))
+        const binding_list = exp.get(1)
 
         if (!(List.isList(binding_list))) {
             syntax_error(exp);
@@ -193,9 +185,8 @@
         let init_exps = List()
         let new_env = env;
         binding_list.forEach((binding_pr) => {
-            const unwrapped = match_wrapper("#%square", binding_pr)
-            const surface_id = unwrapped.get(0);
-            const init_exp = parse_exp(unwrapped.get(1), env);
+            const surface_id = binding_pr.get(0);
+            const init_exp = parse_exp(binding_pr.get(1), env);
             const new_id = gensym(surface_id);
 
             vars = vars.push(new_id);
@@ -204,8 +195,6 @@
         });
 
         return parse_block(exp.shift().shift(), new_env).set("loop_vars", vars).set("loop_inits", init_exps);
-
-        throw "loop parser not yet implemented";
     }
 
     function recur_parser(exp, env) {
@@ -235,14 +224,13 @@
                             [runtime["make-identifier"]("quote"), Map({core_form: quote_parser})]]);
 
     function match_def(form, env) {
-        const unwrapped = match_wrapper("#%round", form);
-        if (unwrapped !== false
-            && List.isList(unwrapped)
-            && Immutable.is(env.get(unwrapped.get(0)), def_env_rhs)) { // is it a def?
+        if (form !== false
+            && List.isList(form)
+            && Immutable.is(env.get(form.get(0)), def_env_rhs)) { // is it a def?
 
-            if (unwrapped.size === 3
-                && runtime["identifier?"](unwrapped.get(1))) { // is it well formed?
-                return Map({id: unwrapped.get(1), exp: unwrapped.get(2)});
+            if (form.size === 3
+                && runtime["identifier?"](form.get(1))) { // is it well formed?
+                return Map({id: form.get(1), exp: form.get(2)});
             } else {name_converted_specials
                 syntax_error(form);
             }
@@ -311,8 +299,8 @@
                 throw "internal error: malformed environment";
             }
         }
-        if (match_wrapper("#%round", exp) && exp.size > 0) {
-            const list = match_wrapper("#%round", exp);
+        if (exp && exp.size > 0) {
+            const list = exp
             const rator = list.get(0)
             if (runtime["identifier?"](rator) && env.has(rator) && env.get(rator).has("core_form")) { // Core syntactic form
                 const core_form_parser = env.get(rator).get("core_form");
@@ -337,7 +325,7 @@
         }
 
 
-        const requnwrap = match_wrapper("#%round", sexp.get(0));
+        const requnwrap = sexp.get(0);
         if (!(List.isList(requnwrap)
               && requnwrap.size > 0
               && Immutable.is(requnwrap.get(0), runtime["make-identifier"]("require"))
@@ -345,7 +333,7 @@
             module_syntax_error();
         }
 
-        const provunwrap = match_wrapper("#%round", sexp.get(1));
+        const provunwrap = sexp.get(1);
         if (!(List.isList(provunwrap)
               && provunwrap.size > 0
               && Immutable.is(provunwrap.get(0), runtime["make-identifier"]("provide"))

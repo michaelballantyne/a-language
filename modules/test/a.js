@@ -13,6 +13,7 @@
       1
       (* n (factorial (- n 1))))))
 
+; can I write comments now?
 (def factorial2
   (fn (n)
     (loop ([n n]

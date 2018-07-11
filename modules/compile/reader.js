@@ -138,27 +138,29 @@
         return grammar(input, 0);
     }
 
-    let wrap = (name, wrapper, body) =>
-        describe(name, action(body, (child) => Immutable.List([wrapper, child])));
+    //let wrap = (name, wrapper, body) =>
+        //describe(name, action(body, (child) => Immutable.List([wrapper, child])));
 
     let sexp = nonterm("sexp", () =>
         or(
             id,
             integer,
             string,
-            dsl_string,
-            wrap("parens", runtime["make-identifier"]("#%round"),
-                seq(c("("), sexp_list, c(")"))),
-            wrap("square brackets", runtime["make-identifier"]("#%square"),
-                seq(c("["), sexp_list, c("]"))),
-            wrap("curly brackets", runtime["make-identifier"]("#%curly"),
-                seq(c("{"), sexp_list, c("}"))),
-            wrap("tick", runtime["make-identifier"]("#%tick"),
-                seq(c("'"), sexp)),
-            wrap("backtick", runtime["make-identifier"]("#%backtick"),
-                seq(c("`"), sexp)),
-            wrap("comma", runtime["make-identifier"]("#%comma"),
-                seq(c(","), sexp))
+            seq(c("("), sexp_list, c(")")),
+            seq(c("["), sexp_list, c("]"))
+            //dsl_string,
+            //wrap("parens", runtime["make-identifier"]("#%round"),
+                //seq(c("("), sexp_list, c(")"))),
+            //wrap("square brackets", runtime["make-identifier"]("#%square"),
+                //seq(c("["), sexp_list, c("]"))),
+            //wrap("curly brackets", runtime["make-identifier"]("#%curly"),
+                //seq(c("{"), sexp_list, c("}"))),
+            //wrap("tick", runtime["make-identifier"]("#%tick"),
+                //seq(c("'"), sexp)),
+            //wrap("backtick", runtime["make-identifier"]("#%backtick"),
+                //seq(c("`"), sexp)),
+            //wrap("comma", runtime["make-identifier"]("#%comma"),
+                //seq(c(","), sexp))
         ));
 
     let empty_as_list = action(empty, (ignore) => Immutable.List([]));
@@ -166,6 +168,7 @@
     let sexp_list = nonterm("list of s-expressions", () =>
         or(
             seq(whitespace, sexp_list),
+            seq(comment, sexp_list),
             action(seq(sexp, or(seq(whitespace, sexp_list),
                                 empty_as_list)),
                    ([first, rest]) => Immutable.List([first]).concat(rest)),
@@ -174,6 +177,9 @@
 
     let whitespace = nonterm("whitespace", () =>
         one_or_more(or(c(" "), c("\n"))));
+
+    let comment = nonterm("comment", () =>
+        seq(c(";"), zero_or_more(c_not("\n")), c("\n")));
 
     let digit = c_range("0", "9")
 
@@ -200,17 +206,17 @@
     let string = nonterm("string", () =>
         seq(c("\""), capture_string(zero_or_more(c_not("\""))), c("\"")));
 
-    let dsl_string = nonterm("dsl string", () =>
-        seq(seq(c("‹"), c("‹")), capture_string(dsl_string_contents), c("›"), c("›")));
+    //let dsl_string = nonterm("dsl string", () =>
+        //seq(seq(c("‹"), c("‹")), capture_string(dsl_string_contents), c("›"), c("›")));
 
-    let dsl_string_contents = nonterm("dsl string contents", () =>
-        or(
-            seq(seq(c("‹"), c_not("‹", "›")), dsl_string_contents),
-            seq(seq(c("›"), c_not("‹", "›")), dsl_string_contents),
-            seq(c_not("‹", "›"), dsl_string_contents),
-            seq(dsl_string, dsl_string_contents),
-            empty
-        ));
+    //let dsl_string_contents = nonterm("dsl string contents", () =>
+        //or(
+            //seq(seq(c("‹"), c_not("‹", "›")), dsl_string_contents),
+            //seq(seq(c("›"), c_not("‹", "›")), dsl_string_contents),
+            //seq(c_not("‹", "›"), dsl_string_contents),
+            //seq(dsl_string, dsl_string_contents),
+            //empty
+        //));
 
     let top = seq(sexp_list, eof);
 
