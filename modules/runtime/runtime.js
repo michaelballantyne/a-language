@@ -1,7 +1,9 @@
 #lang js
-// require: vendor/immutable
-// provide: identifier?, number?, string?, js-object?, js-array?, make-identifier, identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, identifier/c, get
-(function (Immutable) {
+// require: vendor/immutable, runtime/minimal
+// provide: identifier?, number?, string?, js-object?, js-array?, make-identifier, identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, identifier/c, has, get
+(function (Immutable, runtime__minimal) {
+    let raise_arity_error = runtime__minimal["raise-arity-error"]
+
     function is_string(arg) {
         if (1 !== arguments.length) {
             raise_arity_error("string?", 1, arguments.length);
@@ -95,13 +97,6 @@
         }
     }
 
-    function raise_arity_error(name, expected, given) {
-        if (3 !== arguments.length) {
-            raise_arity_error("raise-arity-error", 3, arguments.length);
-        }
-
-        throw Error(name + ": arity mismatch\n  expected: " + expected + "\n  given: " + given);
-    }
 
     function checked_num_binop(name, f) {
         function wrapped(a, b) {
@@ -176,6 +171,7 @@
         "number/c": number_c,
         "string/c": string_c,
         "identifier/c": identifier_c,
+        "has": has,
         "get": get
     }
 })

@@ -22,7 +22,7 @@
         (recur (- n 1) (* n c))))))
 
 (def main
-  (fn ()
+  (fn (args)
    (displayln (factorial 5))
     ))
 

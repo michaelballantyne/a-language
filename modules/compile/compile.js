@@ -174,12 +174,59 @@
             }
         }
 
+        function build_arity_check(name, count) {
+            return {
+                type: "IfStatement",
+                test: {
+                    type: "BinaryExpression",
+                    operator: "!==",
+                    left: {
+                        type: "Literal",
+                        value: count
+                    },
+                    right: {
+                        type: "MemberExpression",
+                        object: compile_identifier("arguments"),
+                        property: compile_identifier("length")
+                    }
+                },
+                consequent: {
+                    type: "ExpressionStatement",
+                    expression: {
+                        type: "CallExpression",
+                        callee: {
+                            type: "MemberExpression",
+                            object: compile_identifier("$runtime"),
+                            property: { type: "Literal", value: "raise-arity-error" },
+                            computed: true
+                        },
+                        arguments: [
+                            { type: "Literal", value: name },
+                            { type: "Literal", value: count },
+                            {
+                                type: "MemberExpression",
+                                object: compile_identifier("arguments"),
+                                property: compile_identifier("length")
+                            }
+                        ]
+                    },
+                    alternate: null
+                }
+            }
+        }
+
         if (e.has("fn_args")) {
             const temps_as_refs = e.get("fn_temps").map((t) => Immutable.Map({reference: t}))
             return maybe_return({
                 type: "FunctionExpression",
                 params: e.get("fn_temps").map(compile_identifier).toArray(),
-                body: build_loop_body(e.get("fn_args"), temps_as_refs, e, ctx)
+                body: {
+                    type: "BlockStatement",
+                    body: [
+                        build_arity_check("anonymous procedure", e.get("fn_args").size),
+                        build_loop_body(e.get("fn_args"), temps_as_refs, e, ctx)
+                    ]
+                }
             })
         }
 
@@ -269,11 +316,13 @@
             }
         }
 
+        const require_internal_ids = stree.get("module_require_internal_ids").unshift("$runtime")
+
         const estree = {
             type: "ExpressionStatement",
             expression: {
                 type: "FunctionExpression",
-                params: stree.get("module_require_internal_ids").map(compile_identifier).toArray(),
+                params: require_internal_ids.map(compile_identifier).toArray(),
                 body: {
                     type: "BlockStatement",
                     body: compiled_definitions.push(compiled_return).toArray()
@@ -291,7 +340,9 @@
 
         const compiled_body = escodegen.generate(estree);
 
-        const res = module.CompiledModule(stree.get("module_requires").toArray(),
+        const module_requires = stree.get("module_requires").unshift("runtime/minimal")
+
+        const res = module.CompiledModule(module_requires.toArray(),
                                      stree.get("module_provides").toArray(),
                                      compiled_body);
         console.log(compiled_body)
