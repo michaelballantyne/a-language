@@ -1,7 +1,7 @@
 #lang js
-// require: vendor/immutable, compile/js
+// require: vendor/immutable, lang/js, lang/a
 // provide: compile_via_lang
-(function (Immutable, compilejs) {
+(function (Immutable, compilejs, compilea) {
     function lang_syntax_error(source) {
         throw "bad syntax while parsing module. Expected a #lang declaration followed by module body: \n" + source;
     }
@@ -35,7 +35,9 @@
         const [lang, body] = parse_lang_file(source)
 
         if (lang === "js") {
-            return compilejs.compile_js(body);
+            return compilejs.compile_language(body, runner);
+        } else if (lang === "a") {
+            return compilea.compile_language(body, runner);
         } else {
             const module_instance = runner.run(lang)
 
