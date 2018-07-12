@@ -1,6 +1,6 @@
 #lang js
 // require: vendor/immutable, runtime/minimal
-// provide: identifier?, number?, string?, js-object?, js-array?, make-identifier, identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, list, assoc, empty?, append
+// provide: identifier?, number?, string?, js-object?, js-array?, make-identifier, identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, list, assoc, empty?, append, null, number->string, first, rest, variadic, cons, size
 (function (Immutable, runtime__minimal) {
     let raise_arity_error = runtime__minimal["raise-arity-error"]
 
@@ -282,6 +282,11 @@
         if (!Immutable.List.isList(l)) {
             throw Error("first: contract violation\n  expected: list/c\n  given: " + l)
         }
+
+        if (l.isEmpty()) {
+            throw Error("first: cannot get first of empty list")
+        }
+
         return l.first();
     }
 
@@ -293,7 +298,24 @@
         if (!Immutable.List.isList(l)) {
             throw Error("rest: contract violation\n  expected: list/c\n  given: " + l)
         }
+
+        if (l.isEmpty()) {
+            throw Error("rest: cannot get rest of empty list")
+        }
+
         return l.rest();
+    }
+
+    function cons(e, l) {
+        if (2 !== arguments.length) {
+            raise_arity_error("cons", 2, arguments.length);
+        }
+
+        if (!Immutable.List.isList(l)) {
+            throw Error("cons: contract violation\n  expected: list/c\n  given: " + l)
+        }
+
+        return l.unshift(e);
     }
 
     function append(l1, l2) {
@@ -302,12 +324,39 @@
         }
 
         if (!Immutable.List.isList(l1)) {
-            throw Error("rest: contract violation\n  expected: list/c\n  given: " + l1)
+            throw Error("append: contract violation\n  expected: list/c\n  given: " + l1)
         }
         if (!Immutable.List.isList(l2)) {
-            throw Error("rest: contract violation\n  expected: list/c\n  given: " + l2)
+            throw Error("append: contract violation\n  expected: list/c\n  given: " + l2)
         }
         return l1.concat(l2);
+    }
+
+    function size(c) {
+        if (Immutable.isCollection(c)) {
+            return c.size;
+        } else if (is_js_array(c)) {
+            return c.length;
+        } else {
+            throw Error("size: contract violation\n  expected: (or/c collection/c array/c)\n  given: " + c);
+        }
+    }
+
+    function number_to_string(n) {
+        if (1 !== arguments.length) {
+            raise_arity_error("number->string", 1, arguments.length);
+        }
+
+        number_c("number->string", n)
+
+        return n.toString();
+    }
+
+    function variadic(f) {
+        function wrap() {
+            return f(Immutable.List(arguments));
+        }
+        return wrap;
     }
 
     return {
@@ -329,7 +378,7 @@
         ">": checked_num_binop(">", (a, b) => a > b),
         ">=": checked_num_binop(">=", (a, b) => a >= b),
         "<=": checked_num_binop("<=", (a, b) => a <= b),
-        "=": checked_num_binop("=", (a, b) => a = b),
+        "=": checked_num_binop("=", (a, b) => a === b),
         "displayln": displayln,
         "raise-arity-error": raise_arity_error,
         "number/c": number_c,
@@ -348,6 +397,13 @@
         "list": list,
         "assoc": assoc,
         "empty?": empty,
-        "append": append
+        "append": append,
+        "null": null,
+        "number->string": number_to_string,
+        "first": first,
+        "rest": rest,
+        "variadic": variadic,
+        "cons": cons,
+        "size": size
     }
 })
