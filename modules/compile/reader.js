@@ -1,380 +1,262 @@
-#lang js
-// require: vendor/immutable, runtime/runtime
-// provide: read, main, test, valid_module_name, valid_id_name
-(function (Immutable, runtime) {
-    'use strict';
-
-    function c_pred(pred, description) {
-        return (input, index) => {
-            if (input[index] != undefined && pred(input[index]) === true) {
-                return {position: index + 1, failure: []}
-            } else {
-                return {failure: [{expected: description, position: index}]}
-            }
-        }
-    }
-
-    let c = (to_match) => c_pred(ch => ch === to_match, `character ${to_match}`);
-    let c_not = (...to_match) => c_pred(ch => !(to_match.includes(ch)), `not ${to_match}`);
-    let c_range = (lower, upper) => c_pred((ch) => lower <= ch && ch <=upper, `range ${lower} to ${upper}`);
-
-    let empty = (input, index) => ({position: index, failure: []});
-
-    function merge_failures(l, r) {
-        if (l.length === 0) return r;
-        if (r.length === 0) return l;
-
-        if (r[0].position > l[0].position) return r;
-        if (l[0].position > r[0].position) return l;
-
-        return l.concat(r);
-    }
-
-    function seq(...args) {
-        return (input, index) => {
-            let curr_index = index,
-                results = [],
-                failures = [];
-
-            for (let parser of args) {
-                let res = parser(input, curr_index);
-
-                if (res.result !== undefined) {
-                    results.push(res.result);
-                }
-
-                failures = merge_failures(failures, res.failure);
-
-                curr_index = res.position;
-                if (curr_index === undefined) {
-                    break;
-                }
-            }
-
-            return {position: curr_index,
-                    result: results.length > 1 ? results : results[0],
-                    failure: failures};
-        }
-    }
-
-    function or(...args) {
-        return (input, index) => {
-            let failures = []
-
-            for (let parser of args) {
-                let res = parser(input, index);
-
-                if (res.failure !== undefined) {
-                    failures = merge_failures(failures, res.failure);
-                }
-
-                if (res.position !== undefined) {
-                    return Object.assign({}, res, {failure: failures});
-                }
-            }
-
-            return {failure: failures};
-        }
-    }
-
-    function nonterm(description, f) {
-        return describe(description, (...args) =>
-            f()(...args));
-    }
-
-    function one_or_more(p) {
-        let self = (input, index) => seq(p, or(self, empty))(input, index);
-        return self;
-    }
-
-    function zero_or_more(p) {
-        let self = (input, index) => or(seq(p, self), empty)(input, index);
-        return self;
-    }
-
-    function eof(input, index) {
-        if (index === input.length) {
-            return {position: index, failure: []};
-        } else {
-            return {failure: [{expected: "end of file", position: index}]};
-        }
-    }
-
-    function capture_string(p) {
-        return (input, index) => {
-            let res = p(input, index);
-            if (res.position !== undefined) {
-                return Object.assign({}, res, {result: input.substring(index, res.position)});
-            } else {
-                return res;
-            }
-        }
-    }
-
-    function action(p, f) {
-        return (input, index) => {
-            let res = p(input, index);
-            if (res.position !== undefined) {
-                return Object.assign({}, res, {result: f(res.result)});
-            } else {
-                return res;
-            }
-        }
-    }
-
-    function describe(name, p) {
-        return (input, index) => {
-            let res = p(input, index);
-
-            if (res.failure.length !== 0 && res.failure[0].position === index) {
-                return Object.assign({}, res, {failure: [{expected: name, position: index}]});
-            }
-
-            return res;
-        }
-    }
-
-    function parse(grammar, input) {
-        return grammar(input, 0);
-    }
-
-    //let wrap = (name, wrapper, body) =>
-        //describe(name, action(body, (child) => Immutable.List([wrapper, child])));
-
-    let sexp = nonterm("sexp", () =>
-        or(
-            id,
-            integer,
-            string,
-            keyword,
-            seq(c("("), sexp_list, c(")")),
-            seq(c("["), sexp_list, c("]"))
-            //dsl_string,
-            //wrap("parens", runtime["make-identifier"]("#%round"),
-                //seq(c("("), sexp_list, c(")"))),
-            //wrap("square brackets", runtime["make-identifier"]("#%square"),
-                //seq(c("["), sexp_list, c("]"))),
-            //wrap("curly brackets", runtime["make-identifier"]("#%curly"),
-                //seq(c("{"), sexp_list, c("}"))),
-            //wrap("tick", runtime["make-identifier"]("#%tick"),
-                //seq(c("'"), sexp)),
-            //wrap("backtick", runtime["make-identifier"]("#%backtick"),
-                //seq(c("`"), sexp)),
-            //wrap("comma", runtime["make-identifier"]("#%comma"),
-                //seq(c(","), sexp))
-        ));
-
-    let empty_as_list = action(empty, (ignore) => Immutable.List([]));
-
-    let sexp_list = nonterm("list of s-expressions", () =>
-        or(
-            seq(whitespace, sexp_list),
-            seq(comment, sexp_list),
-            action(seq(sexp, or(seq(whitespace, sexp_list),
-                                empty_as_list)),
-                   ([first, rest]) => Immutable.List([first]).concat(rest)),
-            empty_as_list
-        ));
-
-    let whitespace = nonterm("whitespace", () =>
-        one_or_more(or(c(" "), c("\n"))));
-
-    let comment = nonterm("comment", () =>
-        seq(c(";"), zero_or_more(c_not("\n")), c("\n")));
-
-    let digit = c_range("0", "9")
-
-    let alpha = or(c_range("a", "z"),
-                   c_range("A", "Z"))
-
-    let module_segment = seq(alpha, zero_or_more(or(alpha, digit)))
-    let module_name = seq(module_segment, zero_or_more(seq(c("/"), module_segment)))
-
-    let idchar = or(c_range("a", "z"), c_range("A","Z"),
-                    c("+"), c("-"), c("*"), c("%"), c("="), c("!"),
-                    c("<"), c(">"), c("-"), c("/"), c("?"), c("_"))
-
-    let id = nonterm("identifier", () =>
-        action(capture_string(seq(idchar,zero_or_more(or(digit, idchar)))),
-              (str) => runtime["make-identifier"](str)));
-
-    let keyword = nonterm("keyword", () =>
-        action(seq(c(":"), capture_string(one_or_more(or(digit, idchar)))),
-               (str) => runtime["make-keyword"](str)));
-
-    let integer = nonterm("integer", () =>
-        action(capture_string(or(c("0"),
-                                  seq(c_range("1", "9"),
-                                      zero_or_more(digit)))),
-               (str) => parseInt(str)));
-
-    let string = nonterm("string", () =>
-        seq(c("\""), capture_string(zero_or_more(c_not("\""))), c("\"")));
-
-    //let dsl_string = nonterm("dsl string", () =>
-        //seq(seq(c("‹"), c("‹")), capture_string(dsl_string_contents), c("›"), c("›")));
-
-    //let dsl_string_contents = nonterm("dsl string contents", () =>
-        //or(
-            //seq(seq(c("‹"), c_not("‹", "›")), dsl_string_contents),
-            //seq(seq(c("›"), c_not("‹", "›")), dsl_string_contents),
-            //seq(c_not("‹", "›"), dsl_string_contents),
-            //seq(dsl_string, dsl_string_contents),
-            //empty
-        //));
-
-    let top = seq(sexp_list, eof);
-
-    let valid_module_name = function (s) {
-        let res = parse(module_name, s);
-        return (res.position !== undefined);
-    }
-
-    let valid_id_name = function (s) {
-        let res = parse(id, s);
-        return (res.position !== undefined);
-    }
-
-    let read = function (string) {
-        const util = require("util");
-
-        function print(obj) {
-            return util.inspect(obj, false, null);
-        }
-
-        let res = parse(top, string)
-        if (res.position === undefined) {
-            throw "read error: " + print(res);
-        } else {
-            return res.result;
-        }
-    };
-
-    let test = function () {
-        let assert = require("assert")
-
-        {
-            let ex = parse(c("x"), "x")
-            assert(ex.position === 1)
-        }
-
-        {
-            let ex = parse(c("x"), "y")
-            assert(ex.position === undefined)
-
-            let f = ex.failure[0]
-            assert(f.position === 0)
-        }
-
-
-        assert(parse(c_not("x"), "y").position === 1)
-        assert(parse(c_not("x"), "x").position === undefined)
-        assert(parse(c_not("x", "y"), "z").position === 1)
-
-        {
-            let ex = parse(c_not("x", "y"), "y")
-            assert(ex.position === undefined)
-
-            let f = ex.failure[0]
-            assert(f.position === 0)
-        }
-
-        assert(parse(seq(c("x"), c("y")), "xy").position === 2)
-
-        {
-            let ex = parse(seq(c("x"), c("y")), "zy")
-            assert(ex.position === undefined)
-
-            let f = ex.failure[0]
-            assert(f.position === 0)
-        }
-
-        {
-            let ex = parse(seq(c("x"), c("y")), "xz")
-            assert(ex.position === undefined)
-
-            let f = ex.failure[0]
-            assert(f.position === 1)
-        }
-
-        {
-            let ex = parse(or(c("x"), c("y")), "x")
-            assert(ex.position === 1)
-
-            let f = ex.failure
-            assert(f.length === 0)
-        }
-
-        {
-            let ex = parse(or(c("x"), c("y")), "y")
-            assert(ex.position === 1)
-
-            assert(ex.failure.length === 1)
-            let f = ex.failure[0]
-            assert(f.position === 0)
-        }
-
-        {
-            let ex = parse(or(c("x"), empty), "y")
-            assert(ex.position === 0)
-
-            assert(ex.failure.length === 1)
-            let f = ex.failure[0]
-            assert(f.position === 0)
-        }
-
-        {
-            let ex = parse(or(seq(c("x"), c("y"), c("z")), seq(c("x"), c("x"))), "xyy")
-            assert(ex.position === undefined)
-
-            assert(ex.failure.length === 1)
-            let f = ex.failure[0]
-            assert(f.position === 2)
-        }
-
-        {
-            assert(Immutable.is(read("12"), Immutable.List([12])));
-            assert(Immutable.is(read("1 103"), Immutable.List([1, 103])));
-        }
-        console.log("tests passed")
-    };
-
-    let main = function () {
-        const util = require("util");
-
-        function print(obj) {
-            console.log(util.inspect(obj, false, null));
-        }
-
-        // for debugging
-        function trace(description, f) {
-            return describe(description, (...args) => {
-                console.log(`entering ${description}`);
-                let res = f(...args);
-                console.log(`returning from ${description}`);
-                print(res);
-                return res
-            });
-        }
-
-        let chunks = [];
-        process.stdin.resume()
-        process.stdin.on('data', function(chunk) { chunks.push(chunk); });
-        process.stdin.on('end', function() {
-            let string = chunks.join("");
-            try {
-                print(read(string));
-            } catch (e) {
-                print(e);
-            }
-        });
-    };
-
-    return {
-        test: test,
-        main: main,
-        read: read,
-        valid_module_name: valid_module_name,
-        valid_id_name: valid_id_name
-    }
-})
+#lang a
+
+(require runtime/runtime)
+(provide main read valid-module-name valid-id-name)
+
+(def succeed
+  (fn (index)
+    (hash :position index :failure (list))))
+
+(def fail
+  (fn (failures)
+    (hash :position false :failure failures)))
+
+(def c-pred
+  (fn (pred description)
+    (fn (input index)
+      (if (and (has input index) (pred (get input index)))
+        (succeed (+ index 1))
+        (fail (list (hash :expected description :position index)))))))
+
+(def c
+  (fn (to-match)
+    (c-pred (fn (ch) (=== ch to-match))
+            (string-append "character " to-match))))
+
+(def c-not
+  (variadic
+    (fn (to-match)
+      (c-pred (fn (ch) (not (contains to-match ch)))
+              (string-append "not " (to-string to-match))))))
+
+(def c-range
+  (fn (lower upper)
+    (c-pred (fn (ch) (and (>= (character-code ch) (character-code lower)) (<= (character-code ch) (character-code upper))))
+            (string-append "range " lower " to " upper))))
+
+(def empty (fn (input index) (succeed index)))
+
+(def eof
+  (fn (input index)
+    (if (=== index (size input))
+      (succeed index)
+      (fail (list (hash :expected "end of file" :position index))))))
+
+; TODO: clean up once I have cond
+(def merge-failures
+  (fn (l r)
+    (if (empty? l) r
+      (if (empty? r) l
+        (if (> (get (first r) :position) (get (first l) :position)) r
+          (if (> (get (first l) :position) (get (first r) :position)) l
+            (append l r)))))))
+
+(def seq
+  (variadic
+    (fn (parsers)
+      (fn (input index)
+        (loop ([parsers parsers]
+               [current-index index]
+               [results (list)]
+               [failures (list)])
+          (if (and current-index (not (empty? parsers)))
+            (block
+              (def res ((first parsers) input current-index))
+              (recur (rest parsers)
+                     (and (has res :position) (get res :position))
+                     (if (has res :result) (cons (get res :result) results) results)
+                     (merge-failures failures (get res :failure))))
+            ; TODO: this is ugly
+            (if (empty? results)
+              (hash :position current-index :failure failures)
+              (if (= (size results) 1)
+                (hash :position current-index :failure failures :result (first results))
+                (hash :position current-index :failure failures :result (reverse results))))
+            ;(hash :position current-index
+                  ;:result (if (= (size results) 1) (first results) results)
+                  ;:failure failures)
+          ))))))
+
+(def or/p
+  (variadic
+    (fn (parsers)
+      (fn (input index)
+        (loop ([parsers parsers]
+               [failures (list)])
+          (if (empty? parsers)
+            (fail failures)
+            (block
+              (def res ((first parsers) input index))
+              (def merged (merge-failures failures (get res :failure)))
+              (if (get res :position)
+                (assoc res :failure merged)
+                (recur (rest parsers) merged)))))))))
+
+(def one-or-more
+  (fn (parser)
+    (def self (fn (input index) ((seq parser (or/p self empty)) input index)))
+    self))
+
+(def zero-or-more
+  (fn (parser)
+    (def self (fn (input index) ((or/p (seq parser self) empty) input index)))
+    self))
+
+(def describe
+  (fn (name parser)
+    (fn (input index)
+      (def res (parser input index))
+      (def failures (get res :failure))
+      ; TODO: is only checking the first of the failures the right idea? What if one
+      ; of the alternatives within the description / nonterminal matched further?
+      (if (and (not (empty? failures)) (=== index (get (first failures) :position)))
+        (assoc res :failure (list (hash :expected name :position index)))
+        res))))
+
+; Helps tie the recursive knot.
+(def nonterm
+  (fn (description f)
+    (describe description
+              (variadic (fn (args) (apply (f) args))))))
+
+(def action
+  (fn (parser f)
+    (fn (input index)
+      (def res (parser input index))
+      (if (get res :position)
+        (assoc res :result (f (if (has res :result) (get res :result) null)))
+        res))))
+
+(def capture-string
+  (fn (parser)
+    (fn (input index)
+      (def res (parser input index))
+      (if (get res :position)
+        (assoc res :result (substring input index (get res :position)))
+        res))))
+
+(def parse
+  (fn (grammar input)
+    (grammar input 0)))
+
+
+(def sexp
+  (nonterm
+    "sexp"
+    (fn ()
+      (or/p
+        id
+        integer
+        string
+        keyword
+        (seq (c "(") sexp-list (c ")"))
+        (seq (c "[") sexp-list (c "]"))))))
+
+(def empty-as-list
+  (action empty (fn (ignore) (list))))
+
+(def sexp-list
+  (nonterm
+    "list of s-expressions"
+    (fn ()
+      (or/p
+        (seq whitespace sexp-list)
+        (seq comment sexp-list)
+        (action (seq sexp (or/p (seq whitespace sexp-list)
+                                empty-as-list))
+                (fn (pr) (cons (first pr) (first (rest pr)))))
+        empty-as-list))))
+
+(def whitespace
+  (nonterm
+    "whitespace"
+    (fn ()
+      (one-or-more (or/p (c " ") (c newline))))))
+
+(def comment
+  (nonterm
+    "comment"
+    (fn ()
+     (seq (c ";") (zero-or-more (c-not newline)) (c newline)))))
+
+(def digit
+ (nonterm
+  "digit"
+  (fn ()
+   (c-range "0" "9"))))
+
+(def alpha (or/p (c-range "a" "z")
+                 (c-range "A" "Z")))
+
+(def module-segment (seq alpha (zero-or-more (or/p alpha digit))))
+(def module-name (seq module-segment (zero-or-more (seq (c "/") module-segment))))
+
+(def idchar
+  (nonterm
+    "identifier character"
+    (fn ()
+        (or/p
+          alpha
+          (c "+")
+          (c "-")
+          (c "*")
+          (c "%")
+          (c "=")
+          (c "!")
+          (c "<")
+          (c ">")
+          (c "-")
+          (c "/")
+          (c "?")
+          (c "_")))))
+
+(def id
+  (nonterm
+    "identifier"
+    (fn ()
+      (action (capture-string (seq idchar (zero-or-more (or/p digit idchar))))
+              (fn (str) (make-identifier str))))))
+
+(def keyword
+  (nonterm
+    "keyword"
+    (fn ()
+      (action (seq (c ":") (capture-string (one-or-more (or/p digit idchar))))
+              (fn (str) (make-keyword str))))))
+
+(def integer
+  (nonterm
+    "integer"
+    (fn ()
+      (action (capture-string (or/p (c "0") (seq (c-range "1" "9") (zero-or-more digit))))
+              string->integer))))
+
+(def string
+  (nonterm
+    "string"
+    (fn ()
+      (seq (c double-quote) (capture-string (zero-or-more (c-not double-quote))) (c double-quote)))))
+
+(def top (seq sexp-list eof))
+
+(def valid-module-name
+  (fn (s)
+    (!== false (get (parse module-name s) :position))))
+
+(def valid-id-name
+  (fn (s)
+    (!== false (get (parse id s) :position))))
+
+(def read
+  (fn (s)
+    (def res (parse top s))
+    (if (=== (size s) (get res :position))
+      (get res :result)
+      (error :read res))))
+
+(def main
+  (fn (args)
+    (read-stdin
+      (fn (s)
+        (displayln (read s))))))
+

@@ -19,7 +19,7 @@
 
         const s2 = s1[1].split(",").map(i => i.trim());
 
-        if (!s2.every(valid_name)) {
+        if (!s2.every((v) => valid_name(v))) {
             malformed()
         }
 
@@ -29,8 +29,8 @@
     // source string -> CompiledModule
     function compile_js(source) {
         const lines = source.split('\n');
-        const imports = parseDecl("require", lines[0], reader.valid_module_name);
-        const exports = parseDecl("provide", lines[1], reader.valid_id_name);
+        const imports = parseDecl("require", lines[0], reader["valid-module-name"]);
+        const exports = parseDecl("provide", lines[1], reader["valid-id-name"]);
         const body = lines.slice(2).join("\n")
 
         const module_declaration = compiledmodule.CompiledModule(imports, exports, body);
