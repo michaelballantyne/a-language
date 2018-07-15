@@ -1,6 +1,6 @@
 #lang js
 // require: vendor/immutable, runtime/minimal
-// provide: identifier?, number?, string?, js-object?, js-array?, make-identifier, identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, list, assoc, empty?, append, null, number->string, first, rest, variadic, cons, size
+// provide: identifier?, number?, string?, js-object?, js-array?, make-identifier, identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, list, assoc, empty?, append, null, number->string, first, rest, variadic, cons, size, function?, apply, substring, list/c, function/c, newline, string->integer, read-stdin, double-quote, to-string, character-code, contains, reverse
 (function (Immutable, runtime__minimal) {
     let raise_arity_error = runtime__minimal["raise-arity-error"]
 
@@ -132,8 +132,10 @@
             return c[k] !== undefined;
         } else if (is_js_array(c)) {
             return c[k] !== undefined;
+        } else if (is_string(c)) {
+            return c[k] !== undefined;
         } else {
-            throw Error("has: contract violation\n  expected: (or/c collection/c array/c object/c) \n given: " + c)
+            throw Error("has: contract violation\n  expected: (or/c collection/c array/c object/c string/c) \n given: " + c)
         }
     }
 
@@ -143,8 +145,8 @@
             raise_arity_error("get", 2, arguments.length);
         }
 
-        if (!(Immutable.isCollection(c) || is_js_array(c) || is_js_object(c))) {
-            throw Error("get: contract violation\n  expected: (or/c collection/c array/c object/c) \n given: " + c)
+        if (!(Immutable.isCollection(c) || is_js_array(c) || is_js_object(c) || is_string(c))) {
+            throw Error("get: contract violation\n  expected: (or/c collection/c array/c object/c string/c) \n given: " + c)
         }
 
         function no_value() {
@@ -332,10 +334,23 @@
         return l1.concat(l2);
     }
 
+    function reverse(l) {
+        if (1 !== arguments.length) {
+            raise_arity_error("reverse", 1, arguments.length);
+        }
+
+        if (!Immutable.List.isList(l)) {
+            throw Error("reverse: contract violation\n  expected: list/c\n  given: " + l)
+        }
+        return l.reverse();
+    }
+
     function size(c) {
         if (Immutable.isCollection(c)) {
             return c.size;
         } else if (is_js_array(c)) {
+            return c.length;
+        } else if (is_string(c)) {
             return c.length;
         } else {
             throw Error("size: contract violation\n  expected: (or/c collection/c array/c)\n  given: " + c);
@@ -352,11 +367,117 @@
         return n.toString();
     }
 
+    function is_function(arg) {
+        if (1 !== arguments.length) {
+            raise_arity_error("function?", 1, arguments.length);
+        }
+
+        return typeof arg === "function";
+    }
+
+    function function_c(name, arg) {
+        if (!is_function(arg)) {
+            throw Error(name + ": contract violation\n  expected: function/c\n  given: " + arg);
+        }
+    }
+
     function variadic(f) {
+        if (1 !== arguments.length) {
+            raise_arity_error("variadic", 1, arguments.length);
+        }
+        function_c("variadic", f);
+
         function wrap() {
             return f(Immutable.List(arguments));
         }
+
         return wrap;
+    }
+
+    function list_c(name, arg) {
+        if (!Immutable.List.isList(arg)) {
+            throw Error(name + ": contract violation\n  expected: list/c\n  given: " + arg);
+        }
+    }
+
+    function apply(f, args) {
+        if (2 !== arguments.length) {
+            raise_arity_error("apply", 2, arguments.length);
+        }
+        function_c("apply", f);
+        list_c("apply", args);
+
+        return f.apply({}, args.toArray());
+    }
+
+    function substring(s, i1, i2) {
+        if (3 !== arguments.length) {
+            raise_arity_error("substring", 3, arguments.length);
+        }
+
+        string_c("substring", s);
+        number_c("substring", i1);
+        number_c("substring", i2);
+
+        return s.substring(i1, i2);
+    }
+
+    function string_to_integer(s) {
+        if (1 !== arguments.length) {
+            raise_arity_error("string->integer", 1, arguments.length);
+        }
+
+        string_c("string->integer", s)
+
+        if (/^(\-|\+)?([0-9]+|Infinity)$/.test(s)) {
+            return Number(s);
+        } else {
+            throw Error("string->integer: string cannot be parsed as an integer: " + s);
+        }
+    }
+
+    function read_stdin(callback) {
+        if (1 !== arguments.length) {
+            raise_arity_error("read-stdin", 1, arguments.length);
+        }
+        function_c("read-stdin", callback);
+
+        let chunks = [];
+        process.stdin.resume()
+        process.stdin.on('data', function(chunk) { chunks.push(chunk); });
+        process.stdin.on('end', function() {
+            let string = chunks.join("");
+            callback(string);
+        });
+    }
+
+    function to_string(v) {
+        if (1 !== arguments.length) {
+            raise_arity_error("to-string", 1, arguments.length);
+        }
+
+        return v.toString()
+    }
+
+
+    function character_code(s) {
+        if (1 !== arguments.length) {
+            raise_arity_error("character-code", 1, arguments.length);
+        }
+        if (!(is_string(s) && s.length === 1)) {
+            throw Error("character-code: contract violation\n  expected: a length 1 string\n  given: " + s);
+        }
+        return s.charCodeAt(0);
+    }
+
+    function contains(c, v) {
+        if (2 !== arguments.length) {
+            raise_arity_error("contains", 2, arguments.length);
+        }
+        if (!(Immutable.isCollection(c))) {
+            throw Error("contains: contract violation\n  expected: collection/c\n  given: " + c);
+        }
+        return c.contains(v);
     }
 
     return {
@@ -404,6 +525,19 @@
         "rest": rest,
         "variadic": variadic,
         "cons": cons,
-        "size": size
+        "size": size,
+        "function?": is_function,
+        "apply": apply,
+        "substring": substring,
+        "list/c": list_c,
+        "function/c": function_c,
+        "newline": "\n",
+        "double-quote": "\"",
+        "string->integer": string_to_integer,
+        "read-stdin": read_stdin,
+        "to-string": to_string,
+        "character-code": character_code,
+        "contains": contains,
+        "reverse": reverse
     }
 })
