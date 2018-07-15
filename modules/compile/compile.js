@@ -294,7 +294,7 @@
 
     // stree -> string_of_js
     function compile_module(stree) {
-        console.log(stree)
+        //console.log(stree)
         stree.get("module_require_internal_ids")
         stree.get("module_provide_internal_ids")
         stree.get("block_defs")
@@ -312,16 +312,13 @@
         const require_internal_ids = stree.get("module_require_internal_ids").unshift("$runtime")
 
         const estree = {
-            type: "ExpressionStatement",
-            expression: {
                 type: "FunctionExpression",
                 params: require_internal_ids.map(compile_identifier).toArray(),
                 body: {
                     type: "BlockStatement",
                     body: compiled_definitions.push(compiled_return).toArray()
                 }
-            }
-        };
+            };
 
         const util = require("util");
 
@@ -329,16 +326,19 @@
             console.log(util.inspect(obj, false, null));
         }
 
-        print(estree)
+        //print(estree)
 
         const compiled_body = escodegen.generate(estree);
+
+        // this makes the output legal in both expression and statement position
+        const paren_wrapped = "(" + compiled_body + ")";
 
         const module_requires = stree.get("module_requires").unshift("runtime/minimal")
 
         const res = module.CompiledModule(module_requires.toArray(),
                                      stree.get("module_provides").toArray(),
-                                     compiled_body);
-        console.log(compiled_body)
+                                     paren_wrapped);
+        //console.log(compiled_body)
         return res;
     }
 

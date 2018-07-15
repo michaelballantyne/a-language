@@ -1,7 +1,7 @@
-#lang lang/a
+#lang a
 
 (require runtime/runtime)
-(provide main)
+(provide main read valid-module-name valid-id-name)
 
 (def succeed
   (fn (index)
