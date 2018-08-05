@@ -6384,7 +6384,7 @@
             {
                 var index39 = index40;
                 while (true) {
-                    return runtime__runtime1['hash']('position', index39, 'failure', runtime__runtime1['list']());
+                    return runtime__runtime1['obj']('position', index39, 'failure', runtime__runtime1['list']());
                 }
             }
         };
@@ -6394,7 +6394,7 @@
             {
                 var failures41 = failures42;
                 while (true) {
-                    return runtime__runtime1['hash']('position', runtime__runtime1['false'], 'failure', failures41);
+                    return runtime__runtime1['obj']('position', runtime__runtime1['false'], 'failure', failures41);
                 }
             }
         };
@@ -6415,7 +6415,7 @@
                                 if (false !== (false !== runtime__runtime1['has'](input47, index48) ? pred43(runtime__runtime1['get'](input47, index48)) : false))
                                     return succeed2(runtime__runtime1['+'](index48, 1));
                                 else
-                                    return fail3(runtime__runtime1['list'](runtime__runtime1['hash']('expected', description44, 'position', index48)));
+                                    return fail3(runtime__runtime1['list'](runtime__runtime1['obj']('expected', description44, 'position', index48)));
                             }
                         }
                     };
@@ -6504,7 +6504,7 @@
                     if (false !== runtime__runtime1['==='](index70, runtime__runtime1['size'](input69)))
                         return succeed2(index70);
                     else
-                        return fail3(runtime__runtime1['list'](runtime__runtime1['hash']('expected', 'end of file', 'position', index70)));
+                        return fail3(runtime__runtime1['list'](runtime__runtime1['obj']('expected', 'end of file', 'position', index70)));
                 }
             }
         };
@@ -6560,11 +6560,11 @@
                                                 failures86 = tmp91;
                                             }
                                         } else if (false !== runtime__runtime1['empty?'](results85))
-                                            return runtime__runtime1['hash']('position', current_index84, 'failure', failures86);
+                                            return runtime__runtime1['obj']('position', current_index84, 'failure', failures86);
                                         else if (false !== runtime__runtime1['='](runtime__runtime1['size'](results85), 1))
-                                            return runtime__runtime1['hash']('position', current_index84, 'failure', failures86, 'result', runtime__runtime1['first'](results85));
+                                            return runtime__runtime1['obj']('position', current_index84, 'failure', failures86, 'result', runtime__runtime1['first'](results85));
                                         else
-                                            return runtime__runtime1['hash']('position', current_index84, 'failure', failures86, 'result', runtime__runtime1['reverse'](results85));
+                                            return runtime__runtime1['obj']('position', current_index84, 'failure', failures86, 'result', runtime__runtime1['reverse'](results85));
                                     }
                                 }
                             }
@@ -6671,7 +6671,7 @@
                                 const res126 = parser119(input122, index123);
                                 const failures127 = runtime__runtime1['get'](res126, 'failure');
                                 if (false !== (false !== runtime__runtime1['not'](runtime__runtime1['empty?'](failures127)) ? runtime__runtime1['==='](index123, runtime__runtime1['get'](runtime__runtime1['first'](failures127), 'position')) : false))
-                                    return runtime__runtime1['assoc'](res126, 'failure', runtime__runtime1['list'](runtime__runtime1['hash']('expected', name118, 'position', index123)));
+                                    return runtime__runtime1['assoc'](res126, 'failure', runtime__runtime1['list'](runtime__runtime1['obj']('expected', name118, 'position', index123)));
                                 else
                                     return res126;
                             }

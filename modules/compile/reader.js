@@ -5,18 +5,18 @@
 
 (def succeed
   (fn (index)
-    (hash :position index :failure (list))))
+    (obj :position index :failure (list))))
 
 (def fail
   (fn (failures)
-    (hash :position false :failure failures)))
+    (obj :position false :failure failures)))
 
 (def c-pred
   (fn (pred description)
     (fn (input index)
       (if (and (has input index) (pred (get input index)))
         (succeed (+ index 1))
-        (fail (list (hash :expected description :position index)))))))
+        (fail (list (obj :expected description :position index)))))))
 
 (def c
   (fn (to-match)
@@ -40,7 +40,7 @@
   (fn (input index)
     (if (=== index (size input))
       (succeed index)
-      (fail (list (hash :expected "end of file" :position index))))))
+      (fail (list (obj :expected "end of file" :position index))))))
 
 ; TODO: clean up once I have cond
 (def merge-failures
@@ -68,11 +68,11 @@
                      (merge-failures failures (get res :failure))))
             ; TODO: this is ugly
             (if (empty? results)
-              (hash :position current-index :failure failures)
+              (obj :position current-index :failure failures)
               (if (= (size results) 1)
-                (hash :position current-index :failure failures :result (first results))
-                (hash :position current-index :failure failures :result (reverse results))))
-            ;(hash :position current-index
+                (obj :position current-index :failure failures :result (first results))
+                (obj :position current-index :failure failures :result (reverse results))))
+            ;(obj :position current-index
                   ;:result (if (= (size results) 1) (first results) results)
                   ;:failure failures)
           ))))))
@@ -110,7 +110,7 @@
       ; TODO: is only checking the first of the failures the right idea? What if one
       ; of the alternatives within the description / nonterminal matched further?
       (if (and (not (empty? failures)) (=== index (get (first failures) :position)))
-        (assoc res :failure (list (hash :expected name :position index)))
+        (assoc res :failure (list (obj :expected name :position index)))
         res))))
 
 ; Helps tie the recursive knot.
