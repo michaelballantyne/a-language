@@ -118,7 +118,7 @@
         if (1 !== arguments.length) {
             raise_arity_error("displayln", 1, arguments.length);
         }
-        console.log(v);
+        console.log(String(v));
     }
 
     function has(c, k) {
@@ -205,12 +205,32 @@
         return a !== b;
     }
 
+    function quoteString(value) {
+        try {
+            return typeof value === 'string' ? JSON.stringify(value) : String(value);
+        } catch (_ignoreError) {
+            return JSON.stringify(value);
+        }
+    }
+
+    const ValueObject = { toString: function () {
+        var keys = Object.getOwnPropertyNames(this)
+
+        var str = "{ ";
+        var k;
+        for (var i = 0, l = keys.length; i !== l; i++) {
+            k = keys[i];
+            str += (i ? ', ' : '') + k + ': ' + quoteString(this[k]);
+        }
+        return str + ' }';
+    } }
+
     function obj() {
         if (arguments.length % 2 !== 0) {
             throw Error("obj: expected an even number of arguments")
         }
 
-        let res = {};
+        let res = Object.create(ValueObject);
 
         for (var i = 0; i < arguments.length; i = i + 2) {
             string_c("obj", arguments[i]);
@@ -254,7 +274,7 @@
             }
             return c.set(k, v);
         } else if (is_js_object(c)) {
-            var res = Object.assign({}, c)
+            var res = Object.assign(Object.create(Object.getPrototypeOf(c)), c)
             res[k] = v;
             return res;
         } else {
