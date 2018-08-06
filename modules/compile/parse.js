@@ -1,6 +1,6 @@
 #lang js
 // require: vendor/immutable, compile/reader, runtime/runtime
-// provide: test_parser, parse_module
+// provide: test_parser, parse_module, transform-reserved
 (function (Immutable, reader, runtime) {
     const Map = Immutable.Map;
     const List = Immutable.List;
@@ -458,7 +458,8 @@
 
     return {
         test_parser: test_parser,
-        parse_module: parse_module
+        parse_module: parse_module,
+        "transform-reserved": transform_reserved
     };
 })
 

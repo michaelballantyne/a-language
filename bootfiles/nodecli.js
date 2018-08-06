@@ -1,5 +1,5 @@
 (function () {
-    const vendor_immutable = ((function () {
+    const vendor__immutable = ((function () {
     'use strict';
     const exports = {}
     /**
@@ -5799,7 +5799,7 @@
     
     })
     )();
-    const compile_module = ((function () {
+    const compile__module = ((function () {
         const isString = i => typeof i === "string" || i instanceof String
     
         function CompiledModule(imports, exports, body_code) {
@@ -5819,7 +5819,7 @@
         return { CompiledModule: CompiledModule }
     })
     )();
-    const runtime_minimal = (//
+    const runtime__minimal = (//
     // References to this module and its exports are inserted by the compiler in every module.
     //
     (function () {
@@ -5836,7 +5836,7 @@
         };
     })
     )();
-    const runtime_runtime = ((function (Immutable, runtime__minimal) {
+    const runtime__runtime = ((function (Immutable, runtime__minimal) {
         let raise_arity_error = runtime__minimal["raise-arity-error"]
     
         function is_string(arg) {
@@ -5984,15 +5984,13 @@
                 throw Error("get: contract violation\n  expected: (or/c collection/c array/c object/c string/c) \n given: " + c)
             }
     
-            function no_value() {
-            }
-    
             var res;
             if (Immutable.isCollection(c)) {
                 res = c.get(k)
             } else {
                 res = c[k];
             }
+    
     
             if (res === undefined) {
                 throw Error("get: no value found for key\n  key: " + k);
@@ -6135,10 +6133,7 @@
             if (1 !== arguments.length) {
                 raise_arity_error("first", 1, arguments.length);
             }
-    
-            if (!Immutable.List.isList(l)) {
-                throw Error("first: contract violation\n  expected: list/c\n  given: " + l)
-            }
+            list_c("first", l);
     
             if (l.isEmpty()) {
                 throw Error("first: cannot get first of empty list")
@@ -6151,10 +6146,7 @@
             if (1 !== arguments.length) {
                 raise_arity_error("rest", 1, arguments.length);
             }
-    
-            if (!Immutable.List.isList(l)) {
-                throw Error("rest: contract violation\n  expected: list/c\n  given: " + l)
-            }
+            list_c("rest", l);
     
             if (l.isEmpty()) {
                 throw Error("rest: cannot get rest of empty list")
@@ -6167,10 +6159,7 @@
             if (2 !== arguments.length) {
                 raise_arity_error("cons", 2, arguments.length);
             }
-    
-            if (!Immutable.List.isList(l)) {
-                throw Error("cons: contract violation\n  expected: list/c\n  given: " + l)
-            }
+            list_c("cons", l);
     
             return l.unshift(e);
         }
@@ -6179,13 +6168,9 @@
             if (2 !== arguments.length) {
                 raise_arity_error("append", 2, arguments.length);
             }
+            list_c("append", l1);
+            list_c("append", l2);
     
-            if (!Immutable.List.isList(l1)) {
-                throw Error("append: contract violation\n  expected: list/c\n  given: " + l1)
-            }
-            if (!Immutable.List.isList(l2)) {
-                throw Error("append: contract violation\n  expected: list/c\n  given: " + l2)
-            }
             return l1.concat(l2);
         }
     
@@ -6193,12 +6178,32 @@
             if (1 !== arguments.length) {
                 raise_arity_error("reverse", 1, arguments.length);
             }
+            list_c("reverse", l);
     
-            if (!Immutable.List.isList(l)) {
-                throw Error("reverse: contract violation\n  expected: list/c\n  given: " + l)
-            }
             return l.reverse();
         }
+    
+        function list_to_array(l) {
+            if (1 !== arguments.length) {
+                raise_arity_error("list->array", 1, arguments.length);
+            }
+            list_c("list->array", l);
+    
+            return l.toArray();
+        }
+    
+        function array_to_list(a) {
+            if (1 !== arguments.length) {
+                raise_arity_error("array->list", 1, arguments.length);
+            }
+    
+            if (!is_js_array(a)) {
+                throw Error("array->list: contract violation\n  expected: array/c\n  given: " + a)
+            }
+    
+            return Immutable.List(a);
+        }
+    
     
         function size(c) {
             if (Immutable.isCollection(c)) {
@@ -6251,7 +6256,7 @@
     
         function list_c(name, arg) {
             if (!Immutable.List.isList(arg)) {
-                throw Error(name + ": contract violation\n  expected: list/c\n  given: " + arg);
+                throw Error(name + ": contract violation\n  expected: list/c\n  given: " + String(arg));
             }
         }
     
@@ -6335,6 +6340,30 @@
             return c.contains(v);
         }
     
+        function array() {
+            return Array.prototype.slice.call(arguments);
+        }
+    
+        function map(f, list) {
+            if (2 !== arguments.length) {
+                raise_arity_error("map", 2, arguments.length);
+            }
+            function_c("map", f);
+            list_c("map", list);
+    
+            return list.map(function (el) { return f(el); });
+        }
+    
+        function foldl(f, init, list) {
+            if (3 !== arguments.length) {
+                raise_arity_error("foldl", 3, arguments.length);
+            }
+            function_c("foldl", f);
+            list_c("foldl", list);
+    
+            return list.reduce(function (acc, el) { return f(acc, el); }, init);
+        }
+    
         return {
             "number?": is_number,
             "string?": is_string,
@@ -6393,11 +6422,16 @@
             "to-string": to_string,
             "character-code": character_code,
             "contains": contains,
-            "reverse": reverse
+            "reverse": reverse,
+            "array": array,
+            "list->array": list_to_array,
+            "map": map,
+            "foldl": foldl,
+            "array->list": array_to_list
         }
     })
-    )(vendor_immutable, runtime_minimal);
-    const compile_reader = ((function ($runtime, runtime__runtime1) {
+    )(vendor__immutable, runtime__minimal);
+    const compile__reader = ((function ($runtime, runtime__runtime1) {
         const succeed2 = function (index40) {
             if (1 !== arguments.length)
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments.length);
@@ -6970,8 +7004,8 @@
             'valid-module-name': valid_module_name35,
             'valid-id-name': valid_id_name36
         };
-    }))(runtime_minimal, runtime_runtime);
-    const compile_js = ((function (compiledmodule, reader) {
+    }))(runtime__minimal, runtime__runtime);
+    const compile__js = ((function (compiledmodule, reader) {
         function parseDecl(name, line, valid_name) {
             function malformed() {
                 throw "malformed " + name + ": " + line;
@@ -7010,12 +7044,12 @@
     
         return { compile_js: compile_js }
     })
-    )(compile_module, compile_reader);
-    const lang_js = ((function (compilejs) {
+    )(compile__module, compile__reader);
+    const lang__js = ((function (compilejs) {
         return { compile_language: compilejs.compile_js }
     })
-    )(compile_js);
-    const vendor_escodegen = ((function () {
+    )(compile__js);
+    const vendor__escodegen = ((function () {
       function require(file, parentModule) {
         if ({}.hasOwnProperty.call(require.cache, file))
           return require.cache[file];
@@ -12038,7 +12072,7 @@
       return require('/escodegen.js');
     })
     )();
-    const compile_compile = ((function (Immutable, escodegen, module) {
+    const compile__compile = ((function (Immutable, escodegen, module) {
         initial_exp_ctx = "exp"
         function in_exp(ctx) {
             return initial_exp_ctx;
@@ -12381,8 +12415,8 @@
     
         return {compile_module: compile_module}
     })
-    )(vendor_immutable, vendor_escodegen, compile_module);
-    const compile_parse = ((function (Immutable, reader, runtime) {
+    )(vendor__immutable, vendor__escodegen, compile__module);
+    const compile__parse = ((function (Immutable, reader, runtime) {
         const Map = Immutable.Map;
         const List = Immutable.List;
     
@@ -12839,12 +12873,13 @@
     
         return {
             test_parser: test_parser,
-            parse_module: parse_module
+            parse_module: parse_module,
+            "transform-reserved": transform_reserved
         };
     })
     
-    )(vendor_immutable, compile_reader, runtime_runtime);
-    const lang_a = ((function (reader, compile, parse, module) {
+    )(vendor__immutable, compile__reader, runtime__runtime);
+    const lang__a = ((function (reader, compile, parse, module) {
         function compile_language(source, load) {
             const sexp = reader.read(source)
             const ast = parse.parse_module(sexp, load)
@@ -12855,8 +12890,8 @@
     
         return { compile_language: compile_language }
     })
-    )(compile_reader, compile_compile, compile_parse, compile_module);
-    const compile_lang = ((function (Immutable, compilejs, compilea) {
+    )(compile__reader, compile__compile, compile__parse, compile__module);
+    const compile__lang = ((function (Immutable, compilejs, compilea) {
         function lang_syntax_error(source) {
             throw "bad syntax while parsing module. Expected a #lang declaration followed by module body: \n" + source;
         }
@@ -12907,8 +12942,8 @@
     
         return { compile_via_lang: compile_via_lang };
     })
-    )(vendor_immutable, lang_js, lang_a);
-    const compile_runner = ((function (Immutable, lang) {
+    )(vendor__immutable, lang__js, lang__a);
+    const compile__runner = ((function (Immutable, lang) {
         function make_runner(platform) {
             var declaration_cache = Immutable.Map()
     
@@ -12960,8 +12995,8 @@
     
         return { make_runner: make_runner}
     })
-    )(vendor_immutable, compile_lang);
-    const node_platform = ((function () {
+    )(vendor__immutable, compile__lang);
+    const node__platform = ((function () {
         const fs = require("fs")
         const vm = require("vm");
     
@@ -12979,7 +13014,7 @@
                  eval_module: eval_module }
     })
     )();
-    const node_cli = ((function (runner, nodeplatform) {
+    const node__cli = ((function (runner, nodeplatform) {
         const fs = require("fs");
         const vm = require("vm");
     
@@ -12999,6 +13034,6 @@
     
         return { main: main };
     })
-    )(compile_runner, node_platform);
-    return node_cli;
+    )(compile__runner, node__platform);
+    return node__cli;
 });

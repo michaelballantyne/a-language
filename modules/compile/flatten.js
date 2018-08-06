@@ -1,86 +1,58 @@
-#lang js
-// require: vendor/immutable, compile/lang, vendor/escodegen, compile/js
-// provide: flatten
-(function (Immutable, lang, escodegen, compilejs) {
-    function escapeModuleName(name) {
-        return name.replace("/", "_");
-    }
+#lang a
 
-    function moduleInstance(name, source, deps) {
-        return {
-            type: 'VariableDeclaration',
-            declarations: [{
-                type: "VariableDeclarator",
-                id: {
-                    type: "Identifier",
-                    name: escapeModuleName(name)
-                },
-                init: {
-                    type: "CallExpression",
-                    callee: {
-                        type: "Literal",
-                        verbatim: source
-                    },
-                    arguments: deps.map(name => ({ type: "Identifier", name: escapeModuleName(name) }))
-                }
-            }],
-            kind: "const"
-        };
-    }
+(require runtime/runtime compile/lang vendor/escodegen compile/js compile/parse)
+(provide flatten)
 
-    function wrap(declarations, final_module_name) {
-        return {
-            type: "ExpressionStatement",
-            expression: {
-                type: "FunctionExpression",
-                id: null,
-                params: [],
-                body: {
-                    type: "BlockStatement",
-                    body: [
-                        ...declarations,
-                        {
-                            type: "ReturnStatement",
-                            argument: {
-                                type: "Identifier",
-                                name: escapeModuleName(final_module_name)
-                            }
-                        }
-                    ]
-                }
-            }
-        };
-    }
+(def gen-module-id
+  (fn (str)
+    (obj :type "Identifier"
+         :name (transform-reserved str))))
 
-    function flatten(runner, main_module_name) {
-        if (!(typeof main_module_name === "string" || main_module_name instanceof String)) {
-            throw "malformed module name; should be a string: " + asString(module_name);
-        }
+(def gen-module-instance-declaration
+  (fn (name source deps)
+    (obj :type "VariableDeclaration"
+         :declarations
+         (array (obj :type "VariableDeclarator"
+                     :id (gen-module-id name)
+                     :init (obj :type "CallExpression"
+                                :callee (obj :type "Literal"
+                                             :verbatim source)
+                                :arguments (list->array (map gen-module-id deps)))))
+         :kind "const")))
 
-        function flatten_internal([declarations, visited], module_name) {
-            if (visited.has(module_name)) {
-                return [declarations, visited];
-            }
+(def gen-iife-block-expression-statement
+  (fn (body)
+    (obj :type "ExpressionStatement"
+         :expression (obj :type "FunctionExpression"
+                          :id null
+                          :params (array)
+                          :body (obj :type "BlockStatement"
+                                     :body (list->array body))))))
 
-            const compiled = runner.load(module_name);
-
-            const [declarationsAfterImports, visitedAfterImports] =
-                compiled.imports.reduce(flatten_internal, [declarations, visited])
-
-            const declarationCode = moduleInstance(module_name, compiled.body_code, compiled.imports);
-            return [
-                declarationsAfterImports.push(declarationCode),
-                visitedAfterImports.add(module_name)
-            ];
-        }
-
-        const [declarations,] = flatten_internal([Immutable.List(), Immutable.Set()], main_module_name);
-        const tree = wrap(declarations.toArray(), main_module_name);
-
-        return escodegen.generate(tree, { verbatim: "verbatim"} )
-    }
-
-    return {
-        flatten: flatten
-    }
-})
+(def flatten
+  (fn (runner main-module-name)
+    ; TODO: clean up with support for expressions in defn sequence
+    (def _ (string/c "flatten" main-module-name))
+    (def flatten-internal
+      (fn (acc module-name)
+        (if (has (get acc :visited) module-name)
+          acc
+          (block
+            (def compiled ((get runner :load) module-name))
+            (def acc2 (foldl flatten-internal acc (array->list (get compiled :imports))))
+            (def instance-declaration
+              (gen-module-instance-declaration
+                module-name
+                (get compiled "body_code")
+                (array->list (get compiled :imports))))
+            (obj :declarations (cons instance-declaration (get acc2 :declarations))
+                 :visited (assoc (get acc2 :visited) module-name true))))))
+    (def module-declarations
+      (reverse (get (flatten-internal (obj :declarations (list) :visited (hash)) main-module-name) :declarations)))
+    (generate ; escodegen
+      (gen-iife-block-expression-statement
+       (append
+        module-declarations
+         (list (obj :type "ReturnStatement"
+                    :argument (gen-module-id main-module-name)))))
+      (obj :verbatim :verbatim))))

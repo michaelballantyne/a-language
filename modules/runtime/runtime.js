@@ -1,6 +1,6 @@
 #lang js
 // require: vendor/immutable, runtime/minimal
-// provide: identifier?, number?, string?, js-object?, js-array?, make-identifier, identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, list, assoc, empty?, append, null, number->string, first, rest, variadic, cons, size, function?, apply, substring, list/c, function/c, newline, string->integer, read-stdin, double-quote, to-string, character-code, contains, reverse
+// provide: identifier?, number?, string?, js-object?, js-array?, make-identifier, identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, list, assoc, empty?, append, null, number->string, first, rest, variadic, cons, size, function?, apply, substring, list/c, function/c, newline, string->integer, read-stdin, double-quote, to-string, character-code, contains, reverse, array, list->array, array->list, map, foldl
 (function (Immutable, runtime__minimal) {
     let raise_arity_error = runtime__minimal["raise-arity-error"]
 
@@ -149,15 +149,13 @@
             throw Error("get: contract violation\n  expected: (or/c collection/c array/c object/c string/c) \n given: " + c)
         }
 
-        function no_value() {
-        }
-
         var res;
         if (Immutable.isCollection(c)) {
             res = c.get(k)
         } else {
             res = c[k];
         }
+
 
         if (res === undefined) {
             throw Error("get: no value found for key\n  key: " + k);
@@ -300,10 +298,7 @@
         if (1 !== arguments.length) {
             raise_arity_error("first", 1, arguments.length);
         }
-
-        if (!Immutable.List.isList(l)) {
-            throw Error("first: contract violation\n  expected: list/c\n  given: " + l)
-        }
+        list_c("first", l);
 
         if (l.isEmpty()) {
             throw Error("first: cannot get first of empty list")
@@ -316,10 +311,7 @@
         if (1 !== arguments.length) {
             raise_arity_error("rest", 1, arguments.length);
         }
-
-        if (!Immutable.List.isList(l)) {
-            throw Error("rest: contract violation\n  expected: list/c\n  given: " + l)
-        }
+        list_c("rest", l);
 
         if (l.isEmpty()) {
             throw Error("rest: cannot get rest of empty list")
@@ -332,10 +324,7 @@
         if (2 !== arguments.length) {
             raise_arity_error("cons", 2, arguments.length);
         }
-
-        if (!Immutable.List.isList(l)) {
-            throw Error("cons: contract violation\n  expected: list/c\n  given: " + l)
-        }
+        list_c("cons", l);
 
         return l.unshift(e);
     }
@@ -344,13 +333,9 @@
         if (2 !== arguments.length) {
             raise_arity_error("append", 2, arguments.length);
         }
+        list_c("append", l1);
+        list_c("append", l2);
 
-        if (!Immutable.List.isList(l1)) {
-            throw Error("append: contract violation\n  expected: list/c\n  given: " + l1)
-        }
-        if (!Immutable.List.isList(l2)) {
-            throw Error("append: contract violation\n  expected: list/c\n  given: " + l2)
-        }
         return l1.concat(l2);
     }
 
@@ -358,12 +343,32 @@
         if (1 !== arguments.length) {
             raise_arity_error("reverse", 1, arguments.length);
         }
+        list_c("reverse", l);
 
-        if (!Immutable.List.isList(l)) {
-            throw Error("reverse: contract violation\n  expected: list/c\n  given: " + l)
-        }
         return l.reverse();
     }
+
+    function list_to_array(l) {
+        if (1 !== arguments.length) {
+            raise_arity_error("list->array", 1, arguments.length);
+        }
+        list_c("list->array", l);
+
+        return l.toArray();
+    }
+
+    function array_to_list(a) {
+        if (1 !== arguments.length) {
+            raise_arity_error("array->list", 1, arguments.length);
+        }
+
+        if (!is_js_array(a)) {
+            throw Error("array->list: contract violation\n  expected: array/c\n  given: " + a)
+        }
+
+        return Immutable.List(a);
+    }
+
 
     function size(c) {
         if (Immutable.isCollection(c)) {
@@ -416,7 +421,7 @@
 
     function list_c(name, arg) {
         if (!Immutable.List.isList(arg)) {
-            throw Error(name + ": contract violation\n  expected: list/c\n  given: " + arg);
+            throw Error(name + ": contract violation\n  expected: list/c\n  given: " + String(arg));
         }
     }
 
@@ -500,6 +505,30 @@
         return c.contains(v);
     }
 
+    function array() {
+        return Array.prototype.slice.call(arguments);
+    }
+
+    function map(f, list) {
+        if (2 !== arguments.length) {
+            raise_arity_error("map", 2, arguments.length);
+        }
+        function_c("map", f);
+        list_c("map", list);
+
+        return list.map(function (el) { return f(el); });
+    }
+
+    function foldl(f, init, list) {
+        if (3 !== arguments.length) {
+            raise_arity_error("foldl", 3, arguments.length);
+        }
+        function_c("foldl", f);
+        list_c("foldl", list);
+
+        return list.reduce(function (acc, el) { return f(acc, el); }, init);
+    }
+
     return {
         "number?": is_number,
         "string?": is_string,
@@ -558,6 +587,11 @@
         "to-string": to_string,
         "character-code": character_code,
         "contains": contains,
-        "reverse": reverse
+        "reverse": reverse,
+        "array": array,
+        "list->array": list_to_array,
+        "map": map,
+        "foldl": foldl,
+        "array->list": array_to_list
     }
 })
