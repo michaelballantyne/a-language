@@ -1,6 +1,6 @@
 #lang js
 // require: vendor/immutable, runtime/minimal
-// provide: identifier?, number?, string?, js-object?, js-array?, make-identifier, identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, list, assoc, empty?, append, null, number->string, first, rest, variadic, cons, size, function?, apply, substring, list/c, function/c, newline, string->integer, read-stdin, double-quote, to-string, character-code, contains, reverse, array, list->array, array->list, map, foldl
+// provide: identifier?, number?, string?, js-object?, js-array?, make-identifier, identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, list, assoc, empty?, append, null, number->string, first, rest, variadic, cons, size, function?, apply, substring, list/c, function/c, newline, string->integer, read-stdin, double-quote, to-string, character-code, contains, reverse, array, list->array, array->list, map, foldl, box, box?, unbox, set-box!
 (function (Immutable, runtime__minimal) {
     let raise_arity_error = runtime__minimal["raise-arity-error"]
 
@@ -529,6 +529,47 @@
         return list.reduce(function (acc, el) { return f(acc, el); }, init);
     }
 
+    function Box(init) {
+        this.val = init;
+    }
+
+    function box(init) {
+        if (1 !== arguments.length) {
+            raise_arity_error("box", 1, arguments.length);
+        }
+        return new Box(init);
+    }
+
+    function is_box(v) {
+        if (1 !== arguments.length) {
+            raise_arity_error("box?", 1, arguments.length);
+        }
+        return v instanceof Box;
+    }
+
+    function unbox(b) {
+        if (1 !== arguments.length) {
+            raise_arity_error("unbox", 1, arguments.length);
+        }
+        if (!is_box(b)) {
+            throw Error("unbox: contract violation\n  expected: box/c\n  given: " + b)
+        }
+        return b.val;
+    }
+
+
+    function set_box_bang(b, v) {
+        if (2 !== arguments.length) {
+            raise_arity_error("set-box!", 2, arguments.length);
+        }
+
+        if (!is_box(b)) {
+            throw Error("set-box!: contract violation\n  expected: box/c\n  given: " + b)
+        }
+
+        b.val = v;
+    }
+
     return {
         "number?": is_number,
         "string?": is_string,
@@ -592,6 +633,10 @@
         "list->array": list_to_array,
         "map": map,
         "foldl": foldl,
-        "array->list": array_to_list
+        "array->list": array_to_list,
+        "box": box,
+        "box?": is_box,
+        "unbox": unbox,
+        "set-box!": set_box_bang
     }
 })
