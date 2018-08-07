@@ -1,6 +1,6 @@
 #lang js
 // require: vendor/immutable, lang/js, lang/a
-// provide: compile_via_lang
+// provide: compile-via-lang
 (function (Immutable, compilejs, compilea) {
     function lang_syntax_error(source) {
         throw "bad syntax while parsing module. Expected a #lang declaration followed by module body: \n" + source;
@@ -50,5 +50,5 @@
         }
     }
 
-    return { compile_via_lang: compile_via_lang };
+    return { "compile-via-lang": compile_via_lang };
 })

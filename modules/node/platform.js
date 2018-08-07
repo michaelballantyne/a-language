@@ -1,6 +1,6 @@
 #lang js
 // require:
-// provide: resolve, eval_module
+// provide: resolve, eval-module
 (function () {
     const fs = require("fs")
     const vm = require("vm");
@@ -16,5 +16,5 @@
     }
 
     return { resolve: resolve,
-             eval_module: eval_module }
+             "eval-module": eval_module }
 })

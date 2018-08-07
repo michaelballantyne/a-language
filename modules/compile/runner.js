@@ -1,55 +1,60 @@
-#lang js
-// require: vendor/immutable, compile/lang
-// provide: make_runner
-(function (Immutable, lang) {
-    function make_runner(platform) {
-        var declaration_cache = Immutable.Map()
+#lang a
 
-        function load(module_name) {
-            if (declaration_cache.has(module_name)) {
-                return declaration_cache.get(module_name);
-            } else {
-                const module_source = platform.resolve(module_name);
-                const module_declaration = lang.compile_via_lang(module_source, {load: load, run: run});
+(require runtime/runtime compile/lang)
+(provide make-runner)
 
-                module_declaration.body_function = platform.eval_module(module_declaration.body_code);
+(def make-runner
+  (fn (platform)
+    (def declaration-cache (box (hash)))
 
-                declaration_cache = declaration_cache.set(module_name, module_declaration);
-                return module_declaration;
-            }
-        }
+    (def load
+      (fn (module-name)
+        (if (has (unbox declaration-cache) module-name)
+          (get (unbox declaration-cache) module-name)
+          (block
+            (def source ((get platform :resolve) module-name))
+            (def module-declaration (compile-via-lang source (obj :load load :run run)))
+            (def module-declaration2
+              (assoc module-declaration
+                     :body-function
+                     ((get platform :eval-module)
+                      (get module-declaration :body-code))))
+            ; TODO: clean up with expression in def ctx
+            (def _ (set-box! declaration-cache
+                             (assoc (unbox declaration-cache)
+                                    module-name module-declaration2)))
+            module-declaration2))))
 
-        function run(module_name) {
-            if (!(typeof module_name === "string" || module_name instanceof String)) {
-                throw "malformed module name; should be a string: " + module_name;
-            }
+    ; TODO: should be in a standard library somewhere
+    (def andmap
+      (fn (f l)
+        (foldl (fn (a b) (and a b)) true
+               (map f l))))
 
-            const run_module_internal = function (instance_map, module_name) {
-                if (instance_map.has(module_name)) {
-                    return instance_map;
-                }
+    (def run
+      (fn (module-name)
+        (def _ (string/c "run" module-name))
+        (def run-module-internal
+          (fn (instance-map module-name)
+            (if (has instance-map module-name)
+              instance-map
+              (block
+                (def module-declaration (load module-name))
+                (def instance-map2
+                  (foldl run-module-internal instance-map
+                         (array->list (get module-declaration :imports))))
+                (def instance (apply (get module-declaration :body-function)
+                                     (map (fn (i) (get instance-map2 i))
+                                          (array->list (get module-declaration :imports)))))
+                ; TODO: clean up with expression in def ctx and when
+                (def _ (if (not (andmap (fn (export) (has instance export))
+                                        (array->list (get module-declaration :exports))))
+                         (error "run"
+                                (string-append
+                                  "Module instance does not include all keys listed in exports: "
+                                  module-name))
+                         null))
+                (assoc instance-map2 module-name instance)))))
+        (get (run-module-internal (hash) module-name) module-name)))
 
-                const module_declaration = load(module_name)
-
-                const imports_instantiated =
-                    module_declaration.imports.reduce(run_module_internal, instance_map);
-
-                const instance =
-                    module_declaration.body_function.apply(undefined, module_declaration.imports.map(i => imports_instantiated.get(i)));
-
-                if (!(Immutable.Collection(module_declaration.exports).isSubset(Immutable.Collection(Object.keys(instance))))) {
-                    throw "Module instance does not include all keys listed in exports: " + module_name;
-                }
-
-                return imports_instantiated.set(module_name, instance);
-            }
-
-            const instance_map = run_module_internal(Immutable.Map(), module_name)
-            return instance_map.get(module_name);
-        }
-
-        return {load: load, run: run};
-    }
-
-    return { make_runner: make_runner}
-})
+    (obj :load load :run run)))

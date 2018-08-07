@@ -43,7 +43,7 @@
             (def instance-declaration
               (gen-module-instance-declaration
                 module-name
-                (get compiled "body_code")
+                (get compiled :body-code)
                 (array->list (get compiled :imports))))
             (obj :declarations (cons instance-declaration (get acc2 :declarations))
                  :visited (assoc (get acc2 :visited) module-name true))))))

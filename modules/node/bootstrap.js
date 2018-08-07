@@ -5,7 +5,7 @@
     const fs = require("fs");
 
     function main(args) {
-        const text = flatten.flatten(runner.make_runner(nodeplatform), "node/cli")
+        const text = flatten.flatten(runner["make-runner"](nodeplatform), "node/cli")
         fs.writeFileSync("bootfiles/nodecli.js", text)
     }
 

@@ -14,7 +14,7 @@
         return {
             imports: imports,
             exports: exports,
-            body_code: body_code
+            "body-code": body_code
         };
     }
 
