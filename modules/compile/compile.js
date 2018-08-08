@@ -1,7 +1,7 @@
 #lang js
-// require: vendor/immutable, vendor/escodegen, compile/module
+// require: vendor/immutable, vendor/escodegen, compile/module, runtime/runtime
 // provide: compile_module
-(function (Immutable, escodegen, module) {
+(function (Immutable, escodegen, module, runtime) {
     initial_exp_ctx = "exp"
     function in_exp(ctx) {
         return initial_exp_ctx;
@@ -26,6 +26,7 @@
     }
 
     function compile_identifier(str) {
+        runtime["string/c"]("compile_identifier", str);
         return {
             type: "Identifier",
             name: str
@@ -76,20 +77,20 @@
             return maybe_return(compile_identifier(e.get("reference")));
         }
 
-        if (e.has("module_ref_sym")) {
+        if (e.has("module-ref-sym")) {
             return maybe_return({
                 type: "MemberExpression",
-                object: compile_identifier(e.get("module_ref_sym")),
+                object: compile_identifier(e.get("module-ref-sym")),
                 property: {
                     type: "Literal",
-                    value: e.get("module_ref_field"),
+                    value: e.get("module-ref-field"),
                 },
                 computed: true
             });
         }
 
-        if (e.has("app_exps")) {
-            const compiled_exps = e.get("app_exps").map((e) => compile_expression(e, in_exp(ctx)));
+        if (e.has("app-exps")) {
+            const compiled_exps = e.get("app-exps").map((e) => compile_expression(e, in_exp(ctx)));
 
             return maybe_return({
                 type: "CallExpression",
@@ -110,10 +111,10 @@
             };
         }
 
-        if (e.has("if_c") && is_exp(ctx)) {
-            const if_c = compile_expression(e.get("if_c"), ctx)
-            const if_t = compile_expression(e.get("if_t"), ctx)
-            const if_e = compile_expression(e.get("if_e"), ctx)
+        if (e.has("if-c") && is_exp(ctx)) {
+            const if_c = compile_expression(e.get("if-c"), ctx)
+            const if_t = compile_expression(e.get("if-t"), ctx)
+            const if_e = compile_expression(e.get("if-e"), ctx)
 
             return maybe_return({
                 type: "ConditionalExpression",
@@ -123,10 +124,10 @@
             });
         }
 
-        if (e.has("if_c") && is_stmt(ctx)) {
-            const if_c = compile_expression(e.get("if_c"), in_exp(ctx));
-            const if_t = compile_expression(e.get("if_t"), ctx);
-            const if_e = compile_expression(e.get("if_e"), ctx);
+        if (e.has("if-c") && is_stmt(ctx)) {
+            const if_c = compile_expression(e.get("if-c"), in_exp(ctx));
+            const if_t = compile_expression(e.get("if-t"), ctx);
+            const if_e = compile_expression(e.get("if-e"), ctx);
 
             return {
                 type: "IfStatement",
@@ -137,10 +138,10 @@
         }
 
         function compile_block(block, ctx) {
-            const decls = block.get("block_defs").map(compile_def);
+            const decls = block.get("block-defs").map(compile_def);
             return {
                 type: "BlockStatement",
-                body: decls.push(compile_expression(block.get("block_ret"), ctx)).toArray()
+                body: decls.push(compile_expression(block.get("block-ret"), ctx)).toArray()
             };
         }
 
@@ -208,42 +209,42 @@
             }
         }
 
-        if (e.has("fn_args")) {
-            const temps_as_refs = e.get("fn_temps").map((t) => Immutable.Map({reference: t}))
+        if (e.has("fn-args")) {
+            const temps_as_refs = e.get("fn-temps").map((t) => Immutable.Map({reference: t}))
             return maybe_return({
                 type: "FunctionExpression",
-                params: e.get("fn_temps").map(compile_identifier).toArray(),
+                params: e.get("fn-temps").map(compile_identifier).toArray(),
                 body: {
                     type: "BlockStatement",
                     body: [
-                        build_arity_check("anonymous procedure", e.get("fn_args").size),
-                        build_loop_body(e.get("fn_args"), temps_as_refs, e, ctx)
+                        build_arity_check("anonymous procedure", e.get("fn-args").size),
+                        build_loop_body(e.get("fn-args"), temps_as_refs, e, ctx)
                     ]
                 }
             })
         }
 
-        if (e.has("loop_vars") && is_stmt(ctx)) {
-            return build_loop_body(e.get("loop_vars"), e.get("loop_inits"), e);
+        if (e.has("loop-vars") && is_stmt(ctx)) {
+            return build_loop_body(e.get("loop-vars"), e.get("loop-inits"), e);
         }
 
-        if (e.has("loop_vars") && is_exp(ctx)) {
+        if (e.has("loop-vars") && is_exp(ctx)) {
             return maybe_return({
                 type: "CallExpression",
                 callee: {
                     type: "FunctionExpression",
                     params: [],
-                    body: build_loop_body(e.get("loop_vars"), e.get("loop_inits"), e)
+                    body: build_loop_body(e.get("loop-vars"), e.get("loop-inits"), e)
                 },
                 arguments: []
             });
         }
 
-        if (e.has("block_exp") && is_stmt(ctx)) {
+        if (e.has("block-exp") && is_stmt(ctx)) {
             return compile_block(e, ctx);
         }
 
-        if (e.has("block_exp") && is_exp(ctx)) {
+        if (e.has("block-exp") && is_exp(ctx)) {
             return maybe_return({
                 type: "CallExpression",
                 callee: {
@@ -255,15 +256,15 @@
             });
         }
 
-        if (e.has("recur_exps")) {
+        if (e.has("recur-exps")) {
             if (!is_recur_context(ctx)) {
                 throw "recur not in tail position";
             }
-            if (get_recur_vars(ctx).size !== e.get("recur_exps").size) {
+            if (get_recur_vars(ctx).size !== e.get("recur-exps").size) {
                 throw "wrong number of arguments to recur"
             }
 
-            const temp_assigns = e.get("recur_temps").zip(e.get("recur_exps")).map((binding) => ({
+            const temp_assigns = e.get("recur-temps").zip(e.get("recur-exps")).map((binding) => ({
                 type: "ExpressionStatement",
                 expression: {
                     type: "AssignmentExpression",
@@ -273,7 +274,7 @@
                 }
             }));
 
-            const loop_var_assigns = get_recur_vars(ctx).zip(e.get("recur_temps")).map((binding) => ({
+            const loop_var_assigns = get_recur_vars(ctx).zip(e.get("recur-temps")).map((binding) => ({
                 type: "ExpressionStatement",
                 expression: {
                     type: "AssignmentExpression",
@@ -294,22 +295,17 @@
 
     // stree -> string_of_js
     function compile_module(stree) {
-        //console.log(stree)
-        stree.get("module_require_internal_ids")
-        stree.get("module_provide_internal_ids")
-        stree.get("block_defs")
-
-        const compiled_definitions = stree.get("block_defs").map(compile_def)
+        const compiled_definitions = stree.get("block-defs").map(compile_def)
 
         const compiled_return = {
             type: "ReturnStatement",
             argument: {
                 type: "ObjectExpression",
-                properties: stree.get("module_provide_internal_ids").zip(stree.get("module_provides")).map(compile_provide).toArray()
+                properties: stree.get("module-provide-internal-ids").zip(stree.get("module-provides")).map(compile_provide).toArray()
             }
         }
 
-        const require_internal_ids = stree.get("module_require_internal_ids").unshift("$runtime")
+        const require_internal_ids = stree.get("module-require-internal-ids").unshift("$runtime")
 
         const estree = {
                 type: "FunctionExpression",
@@ -333,10 +329,10 @@
         // this makes the output legal in both expression and statement position
         const paren_wrapped = "(" + compiled_body + ")";
 
-        const module_requires = stree.get("module_requires").unshift("runtime/minimal")
+        const module_requires = stree.get("module-requires").unshift("runtime/minimal")
 
         const res = module.CompiledModule(module_requires.toArray(),
-                                     stree.get("module_provides").toArray(),
+                                     stree.get("module-provides").toArray(),
                                      paren_wrapped);
         //console.log(compiled_body)
         return res;

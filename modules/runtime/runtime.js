@@ -1,6 +1,6 @@
 #lang js
 // require: vendor/immutable, runtime/minimal
-// provide: identifier?, number?, string?, js-object?, js-array?, make-identifier, identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, list, assoc, empty?, append, null, number->string, first, rest, variadic, cons, size, function?, apply, substring, list/c, function/c, newline, string->integer, read-stdin, double-quote, to-string, character-code, contains, reverse, array, list->array, array->list, map, foldl, box, box?, unbox, set-box!
+// provide: identifier?, number?, string?, js-object?, js-array?, make-identifier, identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, list, assoc, empty?, append, null, number->string, first, rest, variadic, cons, size, function?, apply, substring, list/c, function/c, newline, string->integer, read-stdin, double-quote, to-string, character-code, contains, reverse, array, list->array, array->list, map, foldl, box, box?, unbox, set-box!, string-split, string-join, equal?, zip, subset, list?
 (function (Immutable, runtime__minimal) {
     let raise_arity_error = runtime__minimal["raise-arity-error"]
 
@@ -29,7 +29,7 @@
             raise_arity_error("identifier?", 1, arguments.length);
         }
 
-        return Immutable.Map.isMap(arg) && arg.has("identifier");
+        return is_js_object(arg) && arg.identifier !== undefined;
     }
 
     // Arrays are objects in JS, but I'm going to treat them as disjoint.
@@ -59,7 +59,7 @@
         }
         string_c("make-identifier", str);
 
-        return Immutable.Map({identifier: str});
+        return Object.assign(Object.create(ValueObject), { identifier: str });
     }
 
     function get_identifier_string(id) {
@@ -69,7 +69,7 @@
 
         identifier_c("identifier-string", id);
 
-        return id.get("identifier");
+        return id["identifier"];
     }
 
     function number_c(name, v) {
@@ -158,7 +158,7 @@
 
 
         if (res === undefined) {
-            throw Error("get: no value found for key\n  key: " + k);
+            throw Error("get: no value found for key\n  key: " + k + "\n  in: " + String(c));
         }
         return res;
     }
@@ -211,17 +211,34 @@
         }
     }
 
-    const ValueObject = { toString: function () {
-        var keys = Object.getOwnPropertyNames(this)
+    const ValueObject = {
+        toString: function () {
+            var keys = Object.getOwnPropertyNames(this)
 
-        var str = "{ ";
-        var k;
-        for (var i = 0, l = keys.length; i !== l; i++) {
-            k = keys[i];
-            str += (i ? ', ' : '') + k + ': ' + quoteString(this[k]);
+            var str = "{ ";
+            var k;
+            for (var i = 0, l = keys.length; i !== l; i++) {
+                k = keys[i];
+                str += (i ? ', ' : '') + k + ': ' + quoteString(this[k]);
+            }
+            return str + ' }';
+        },
+        // Super inefficient equals and hashcode implementations...
+        toAlist: function () {
+            var that = this;
+            const keys = Object.getOwnPropertyNames(that).sort()
+            return Immutable.List(keys.map(function(k) { return Immutable.List([k, that[k]]); }));
+        },
+        equals: function(other) {
+            if (Object.getPrototypeOf(other) !== ValueObject) {
+                return false;
+            }
+            return Immutable.is(this.toAlist(), other.toAlist());
+        },
+        hashCode: function() {
+            return this.toAlist().hashCode();
         }
-        return str + ' }';
-    } }
+    }
 
     function obj() {
         if (arguments.length % 2 !== 0) {
@@ -570,6 +587,60 @@
         b.val = v;
     }
 
+    function string_split(s, sep) {
+        if (2 !== arguments.length) {
+            raise_arity_error("string-split", 2, arguments.length);
+        }
+        string_c("string-split", s);
+        string_c("string-split", sep);
+
+        return array_to_list(s.split(sep));
+    }
+
+    function string_join(l, sep) {
+        if (2 !== arguments.length) {
+            raise_arity_error("string-join", 2, arguments.length);
+        }
+        list_c("string-join", l);
+        string_c("string-join", sep);
+
+        return list_to_array(l).join(sep);
+    }
+
+    function equal(v1, v2) {
+        if (2 !== arguments.length) {
+            raise_arity_error("equal?", 2, arguments.length);
+        }
+        return Immutable.is(v1, v2);
+    }
+
+    function zip(f, l1, l2) {
+        if (3 !== arguments.length) {
+            raise_arity_error("zip", 3, arguments.length)
+        }
+        function_c("zip", f);
+        list_c("zip", l1);
+        list_c("zip", l2);
+        return l1.zipWith((a, b) => f(a, b), l2)
+    }
+
+    function subset(l1, l2) {
+        if (2 !== arguments.length) {
+            raise_arity_error("subset", 2, arguments.length)
+        }
+        list_c("subset", l1);
+        list_c("subset", l2);
+
+        return l1.isSubset(l2);
+    }
+
+    function is_list(v) {
+        if (1 !== arguments.length) {
+            raise_arity_error("list?", 1, arguments.length)
+        }
+        return Immutable.List.isList(v);
+    }
+
     return {
         "number?": is_number,
         "string?": is_string,
@@ -637,6 +708,12 @@
         "box": box,
         "box?": is_box,
         "unbox": unbox,
-        "set-box!": set_box_bang
+        "set-box!": set_box_bang,
+        "string-split": string_split,
+        "string-join": string_join,
+        "equal?": equal,
+        "zip": zip,
+        "subset": subset,
+        "list?": is_list
     }
 })

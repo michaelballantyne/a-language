@@ -1,6 +1,6 @@
 #lang a
 
-(require runtime/runtime compile/lang vendor/escodegen compile/js compile/parse)
+(require runtime/runtime compile/lang vendor/escodegen compile/js compile/parsea)
 (provide flatten)
 
 (def gen-module-id

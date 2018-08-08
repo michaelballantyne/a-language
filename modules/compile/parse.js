@@ -229,7 +229,7 @@
         // The toList is important---otherwise this is a lazy sequence that gets repeatedly evaluated
         // and the gensym gives different answers on each reference!
         const recur_temps = Immutable.Range(0, recur_exps.size)
-                             .map((n) => gensym(Immutable.Map({identifier:"tmp"})))
+                             .map((n) => gensym(runtime["make-identifier"]("tmp")))
                              .toList();
 
         return Map({recur_exps: recur_exps, recur_temps: recur_temps})
