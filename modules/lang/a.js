@@ -1,5 +1,5 @@
 #lang js
-// require: compile/reader, compile/compile, compile/parsea, compile/module
+// require: compile/reader, compile/compile, compile/parse, compile/module
 // provide: compile_language
 (function (reader, compile, parse, module) {
     function compile_language(source, load) {

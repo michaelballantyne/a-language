@@ -73,8 +73,8 @@
             });
         }
 
-        if (e.has("reference")) {
-            return maybe_return(compile_identifier(e.get("reference")));
+        if (e.has("local-ref")) {
+            return maybe_return(compile_identifier(e.get("local-ref")));
         }
 
         if (e.has("module-ref-sym")) {
@@ -210,7 +210,7 @@
         }
 
         if (e.has("fn-args")) {
-            const temps_as_refs = e.get("fn-temps").map((t) => Immutable.Map({reference: t}))
+            const temps_as_refs = e.get("fn-temps").map((t) => Immutable.Map({"local-ref": t}))
             return maybe_return({
                 type: "FunctionExpression",
                 params: e.get("fn-temps").map(compile_identifier).toArray(),
@@ -280,7 +280,7 @@
                     type: "AssignmentExpression",
                     operator: "=",
                     left: compile_identifier(binding[0]),
-                    right: compile_expression(Immutable.Map({reference: binding[1]}), in_exp(ctx))
+                    right: compile_expression(Immutable.Map({"local-ref": binding[1]}), in_exp(ctx))
                 }
             }));
 
