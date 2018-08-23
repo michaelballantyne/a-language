@@ -1,342 +1,258 @@
-#lang js
-// require: vendor/immutable, vendor/escodegen, compile/module, runtime/runtime
-// provide: compile_module
-(function (Immutable, escodegen, module, runtime) {
-    initial_exp_ctx = "exp"
-    function in_exp(ctx) {
-        return initial_exp_ctx;
-    }
-    function in_stmt(recur_vars, ctx) {
-        return recur_vars;
-    }
-    function is_stmt(ctx) {
-        return Immutable.List.isList(ctx) || ctx === false;
-    }
-    function in_non_recur_stmt(ctx) {
-        return false;
-    }
-    function is_exp(ctx) {
-        return ctx === initial_exp_ctx;
-    }
-    function is_recur_context(ctx) {
-        return Immutable.List.isList(ctx);
-    }
-    function get_recur_vars(ctx) {
-        return ctx;
-    }
+#lang a
 
-    function compile_identifier(str) {
-        runtime["string/c"]("compile_identifier", str);
-        return {
-            type: "Identifier",
-            name: str
-        };
-    }
+(require runtime/runtime vendor/escodegen compile/module)
+(provide compile-module)
 
-    function compile_provide(p) {
-        [internal, external] = p;
-        return {
-            type: "Property",
-            key: {type: "Literal", value: external},
-            value: compile_identifier(internal)
-        };
-    }
 
-    function compile_def(d) {
-        return {
-            type: "VariableDeclaration",
-            kind: "const",
-            declarations: [{
-                type: "VariableDeclarator",
-                id: compile_identifier(d.get("id")),
-                init: compile_expression(d.get("rhs"), initial_exp_ctx)
-            }]
-        }
-    }
+(def exp-ctx (obj :ctx-type :exp))
+(def stmt-ctx (fn (recur-vars) (obj :ctx-type :stmt :recur-vars recur-vars)))
+(def non-recur-stmt-ctx (obj :ctx-type :stmt))
 
-    function compile_expression(e, ctx) {
-        function maybe_return(e) {
-            if (is_stmt(ctx)) {
-                return {
-                    type: "ReturnStatement",
-                    argument: e
-                }
-            } else {
-                return e;
-            }
-        }
+(def exp-ctx? (fn (ctx) (equal? :exp (get ctx :ctx-type))))
+(def stmt-ctx? (fn (ctx) (equal? :stmt (get ctx :ctx-type))))
+(def recur-ctx? (fn (ctx) (has ctx :recur-vars)))
+(def recur-ctx-vars (fn (ctx) (get ctx :recur-vars)))
 
-        if (e.has("literal")) {
-            return maybe_return({
-                type: "Literal",
-                value: e.get("literal")
-            });
-        }
+(def gen-literal
+  (fn (value)
+    (obj :type "Literal"
+         :value value)))
 
-        if (e.has("local-ref")) {
-            return maybe_return(compile_identifier(e.get("local-ref")));
-        }
+(def gen-identifier
+  (fn (str)
+    (def _ (string/c "gen-identifier" str))
+    (obj :type "Identifier"
+         :name str)))
 
-        if (e.has("module-ref-sym")) {
-            return maybe_return({
-                type: "MemberExpression",
-                object: compile_identifier(e.get("module-ref-sym")),
-                property: {
-                    type: "Literal",
-                    value: e.get("module-ref-field"),
-                },
-                computed: true
-            });
-        }
+(def gen-binding
+  (fn (lhs rhs kind)
+    (obj :type "VariableDeclaration"
+         :kind kind
+         :declarations
+         (array
+           (obj :type "VariableDeclarator"
+                :id (gen-identifier lhs)
+                :init rhs)))))
 
-        if (e.has("app-exps")) {
-            const compiled_exps = e.get("app-exps").map((e) => compile_expression(e, in_exp(ctx)));
+(def gen-const-field-access
+  (fn (o name)
+    (obj :type "MemberExpression"
+         :object o
+         :property (gen-literal name)
+         :computed true)))
 
-            return maybe_return({
-                type: "CallExpression",
-                callee: compiled_exps.first(),
-                arguments: compiled_exps.rest().toArray()
-            });
-        }
+(def gen-iife
+  (fn (body)
+    (obj :type "CallExpression"
+         :arguments (array)
+         :callee (obj :type "FunctionExpression"
+                      :params (array)
+                      :body body))))
 
-        function build_condition(if_c) {
-            return {
-                type: "BinaryExpression",
-                operator: "!==",
-                left: {
-                    type: "Literal",
-                    value: false
-                },
-                right: if_c
-            };
-        }
+(def gen-assignment-stmt
+  (fn (lhs rhs)
+    (obj :type "ExpressionStatement"
+         :expression
+         (obj :type "AssignmentExpression"
+              :operator "="
+              :left (gen-identifier lhs)
+              :right rhs))))
 
-        if (e.has("if-c") && is_exp(ctx)) {
-            const if_c = compile_expression(e.get("if-c"), ctx)
-            const if_t = compile_expression(e.get("if-t"), ctx)
-            const if_e = compile_expression(e.get("if-e"), ctx)
+(def compile-def
+  (fn (d)
+    (gen-binding (get d :id)
+                 (compile-expression (get d :rhs) exp-ctx)
+                 :const)))
 
-            return maybe_return({
-                type: "ConditionalExpression",
-                test: build_condition(if_c),
-                consequent: if_t,
-                alternate: if_e
-            });
-        }
+(def compile-expression
+  (fn (e ctx)
+    (def maybe-return
+      (fn (e)
+        (if (stmt-ctx? ctx)
+          (obj :type "ReturnStatement"
+               :argument e)
+          e)))
 
-        if (e.has("if-c") && is_stmt(ctx)) {
-            const if_c = compile_expression(e.get("if-c"), in_exp(ctx));
-            const if_t = compile_expression(e.get("if-t"), ctx);
-            const if_e = compile_expression(e.get("if-e"), ctx);
+    (def compile-literal
+      (fn ()
+        (maybe-return (gen-literal (get e :literal)))))
 
-            return {
-                type: "IfStatement",
-                test: build_condition(if_c),
-                consequent: if_t,
-                alternate: if_e
-            };
-        }
+    (def compile-local-ref
+      (fn ()
+        (maybe-return (gen-identifier (get e :local-ref)))))
 
-        function compile_block(block, ctx) {
-            const decls = block.get("block-defs").map(compile_def);
-            return {
-                type: "BlockStatement",
-                body: decls.push(compile_expression(block.get("block-ret"), ctx)).toArray()
-            };
-        }
+    (def compile-module-ref
+      (fn ()
+        (maybe-return
+          (gen-const-field-access (gen-identifier (get e :module-ref-sym))
+                                  (get e :module-ref-field)))))
 
-        function build_loop_body(vars, inits, body, ctx) {
-            const decls = vars.zip(inits).map((binding) => ({
-                type: "VariableDeclaration",
-                kind: "var",
-                declarations: [{
-                    type: "VariableDeclarator",
-                    id: compile_identifier(binding[0]),
-                    init: compile_expression(binding[1], in_exp(ctx))
-                }]
-            }));
-            return {
-                type: "BlockStatement",
-                body: decls.push({
-                    type: "WhileStatement",
-                    test: {
-                        type: "Literal",
-                        value: true
-                    },
-                    body: compile_block(body, in_stmt(vars, ctx))
-                }).toArray()
-            }
-        }
+    (def compile-app
+      (fn ()
+        (def compiled-exps (map (fn (e) (compile-expression e exp-ctx)) (get e :app-exps)))
+        (maybe-return
+          (obj :type "CallExpression"
+               :callee (first compiled-exps)
+               :arguments (list->array (rest compiled-exps))))))
 
-        function build_arity_check(name, count) {
-            return {
-                type: "IfStatement",
-                test: {
-                    type: "BinaryExpression",
-                    operator: "!==",
-                    left: {
-                        type: "Literal",
-                        value: count
-                    },
-                    right: {
-                        type: "MemberExpression",
-                        object: compile_identifier("arguments"),
-                        property: compile_identifier("length")
-                    }
-                },
-                consequent: {
-                    type: "ExpressionStatement",
-                    expression: {
-                        type: "CallExpression",
-                        callee: {
-                            type: "MemberExpression",
-                            object: compile_identifier("$runtime"),
-                            property: { type: "Literal", value: "raise-arity-error" },
-                            computed: true
-                        },
-                        arguments: [
-                            { type: "Literal", value: name },
-                            { type: "Literal", value: count },
-                            {
-                                type: "MemberExpression",
-                                object: compile_identifier("arguments"),
-                                property: compile_identifier("length")
-                            }
-                        ]
-                    },
-                    alternate: null
-                }
-            }
-        }
+    (def build-condition
+      (fn (if-c)
+        (obj :type "BinaryExpression"
+             :operator "!=="
+             :left (gen-literal false)
+             :right if-c)))
 
-        if (e.has("fn-args")) {
-            const temps_as_refs = e.get("fn-temps").map((t) => Immutable.Map({"local-ref": t}))
-            return maybe_return({
-                type: "FunctionExpression",
-                params: e.get("fn-temps").map(compile_identifier).toArray(),
-                body: {
-                    type: "BlockStatement",
-                    body: [
-                        build_arity_check("anonymous procedure", e.get("fn-args").size),
-                        build_loop_body(e.get("fn-args"), temps_as_refs, e, ctx)
-                    ]
-                }
-            })
-        }
+    (def compile-if-exp
+      (fn ()
+        (maybe-return
+          (obj :type "ConditionalExpression"
+               :test (build-condition (compile-expression (get e :if-c) ctx))
+               :consequent (compile-expression (get e :if-t) ctx)
+               :alternate (compile-expression (get e :if-e) ctx)))))
 
-        if (e.has("loop-vars") && is_stmt(ctx)) {
-            return build_loop_body(e.get("loop-vars"), e.get("loop-inits"), e);
-        }
+    (def compile-if-stmt
+      (fn ()
+        (obj :type "IfStatement"
+             :test (build-condition (compile-expression (get e :if-c) exp-ctx))
+             :consequent (compile-expression (get e :if-t) ctx)
+             :alternate (compile-expression (get e :if-e) ctx))))
 
-        if (e.has("loop-vars") && is_exp(ctx)) {
-            return maybe_return({
-                type: "CallExpression",
-                callee: {
-                    type: "FunctionExpression",
-                    params: [],
-                    body: build_loop_body(e.get("loop-vars"), e.get("loop-inits"), e)
-                },
-                arguments: []
-            });
-        }
+    (def compile-block
+      (fn (block ctx)
+        (def decls (map compile-def (get block :block-defs)))
+        (def ret (compile-expression (get block :block-ret) ctx))
+        (obj :type "BlockStatement"
+             :body (list->array (append decls (list ret))))))
 
-        if (e.has("block-exp") && is_stmt(ctx)) {
-            return compile_block(e, ctx);
-        }
 
-        if (e.has("block-exp") && is_exp(ctx)) {
-            return maybe_return({
-                type: "CallExpression",
-                callee: {
-                    type: "FunctionExpression",
-                    params: [],
-                    body: compile_block(e, in_non_recur_stmt(ctx))
-                },
-                arguments: []
-            });
-        }
+    (def build-loop-body
+      (fn (vars inits body ctx)
+        (def decls (zip (fn (var init)
+                          (gen-binding var
+                                       (compile-expression init exp-ctx)
+                                       :var))
+                        vars inits))
+        (def body-loop
+          (obj :type "WhileStatement"
+               :test (gen-literal true)
+               :body (compile-block body (stmt-ctx vars))))
+        (obj :type "BlockStatement"
+             :body (list->array (append decls (list body-loop))))))
 
-        if (e.has("recur-exps")) {
-            if (!is_recur_context(ctx)) {
-                throw "recur not in tail position";
-            }
-            if (get_recur_vars(ctx).size !== e.get("recur-exps").size) {
-                throw "wrong number of arguments to recur"
-            }
+    (def build-arity-check
+      (fn (name count)
+        (obj :type "IfStatement"
+             :test (obj :type "BinaryExpression"
+                        :operator "!=="
+                        :left (gen-literal count)
+                        :right (gen-const-field-access (gen-identifier "arguments") "length"))
+             :consequent
+             (obj :type "ExpressionStatement"
+                  :expression
+                  (obj :type "CallExpression"
+                       :callee (gen-const-field-access (gen-identifier "$runtime") "raise-arity-error")
+                       :arguments
+                       (array
+                         (gen-literal name)
+                         (gen-literal count)
+                         (gen-const-field-access (gen-identifier "arguments") "length"))))
+             :alternate null)))
 
-            const temp_assigns = e.get("recur-temps").zip(e.get("recur-exps")).map((binding) => ({
-                type: "ExpressionStatement",
-                expression: {
-                    type: "AssignmentExpression",
-                    operator: "=",
-                    left: compile_identifier(binding[0]),
-                    right: compile_expression(binding[1], in_exp(ctx))
-                }
-            }));
+    (def compile-fn
+      (fn ()
+        (def temps-as-refs (map (fn (t) (obj :local-ref t)) (get e :fn-temps)))
+        (maybe-return
+          (obj :type "FunctionExpression"
+               :params (list->array (map gen-identifier (get e :fn-temps)))
+               :body (obj :type "BlockStatement"
+                          :body (array (build-arity-check "anonymous procedure" (size (get e :fn-args)))
+                                       (build-loop-body (get e :fn-args) temps-as-refs e ctx)))))))
 
-            const loop_var_assigns = get_recur_vars(ctx).zip(e.get("recur-temps")).map((binding) => ({
-                type: "ExpressionStatement",
-                expression: {
-                    type: "AssignmentExpression",
-                    operator: "=",
-                    left: compile_identifier(binding[0]),
-                    right: compile_expression(Immutable.Map({"local-ref": binding[1]}), in_exp(ctx))
-                }
-            }));
+    (def compile-loop-exp
+      (fn ()
+        (maybe-return
+          (gen-iife (build-loop-body (get e :loop-vars) (get e :loop-inits) e ctx)))))
 
-            return {
-                type: "BlockStatement",
-                body: temp_assigns.concat(loop_var_assigns).toArray()
-            }
-        }
+    (def compile-loop-stmt
+      (fn ()
+        (build-loop-body (get e :loop-vars) (get e :loop-inits) e ctx)))
 
-        throw "unhandled: " + e + ctx
-    }
+    (def compile-block-exp
+      (fn ()
+        (maybe-return
+          (gen-iife (compile-block e non-recur-stmt-ctx)))))
 
-    // stree -> string_of_js
-    function compile_module(stree) {
-        const compiled_definitions = stree.get("block-defs").map(compile_def)
+    (def compile-block-stmt
+      (fn ()
+        (compile-block e ctx)))
 
-        const compiled_return = {
-            type: "ReturnStatement",
-            argument: {
-                type: "ObjectExpression",
-                properties: stree.get("module-provide-internal-ids").zip(stree.get("module-provides")).map(compile_provide).toArray()
-            }
-        }
+    (def compile-recur
+      (fn ()
+        (def _1 (if (not (recur-ctx? ctx))
+                  (error "compile" "recur not in tail position")
+                  null))
+        (def _2 (if (not (= (size (recur-ctx-vars ctx)) (size (get e :recur-exps))))
+                  (error "wrong number of arguments to recur")
+                  null))
+        (def compiled-expressions
+          (map (fn (e) (compile-expression e exp-ctx))
+               (get e :recur-exps)))
+        (def tmp-assigns
+          (zip gen-assignment-stmt
+               (get e :recur-temps) compiled-expressions))
+        (def loop-var-assigns
+          (zip (fn (loop-var tmp-var)
+                 (gen-assignment-stmt
+                   loop-var
+                   (compile-expression (obj :local-ref tmp-var) exp-ctx)))
+               (recur-ctx-vars ctx) (get e :recur-temps)))
+        (obj :type "BlockStatement"
+             :body (list->array (append tmp-assigns loop-var-assigns)))))
 
-        const require_internal_ids = stree.get("module-require-internal-ids").unshift("$runtime")
+    (if (has e :literal) (compile-literal)
+      (if (has e :local-ref) (compile-local-ref)
+        (if (has e :module-ref-sym) (compile-module-ref)
+          (if (has e :app-exps) (compile-app)
+            (if (and (has e :if-c) (exp-ctx? ctx)) (compile-if-exp)
+              (if (and (has e :if-c) (stmt-ctx? ctx)) (compile-if-stmt)
+                (if (has e :fn-args) (compile-fn)
+                  (if (and (has e :loop-vars) (exp-ctx? ctx)) (compile-loop-exp)
+                    (if (and (has e :loop-vars) (stmt-ctx? ctx)) (compile-loop-stmt)
+                      (if (and (has e :block-exp) (exp-ctx? ctx)) (compile-block-exp)
+                        (if (and (has e :block-exp) (stmt-ctx? ctx)) (compile-block-stmt)
+                          (if (has e :recur-exps) (compile-recur)
+                            (error "compile" (string-append "unhandled expression " (to-string e)))))))))))))))))
 
-        const estree = {
-                type: "FunctionExpression",
-                params: require_internal_ids.map(compile_identifier).toArray(),
-                body: {
-                    type: "BlockStatement",
-                    body: compiled_definitions.push(compiled_return).toArray()
-                }
-            };
 
-        const util = require("util");
+(def compile-module
+  (fn (stree)
+    (def compiled-defs (map compile-def (get stree :block-defs)))
+    (def compiled-return
+      (obj :type "ReturnStatement"
+           :argument
+           (obj :type "ObjectExpression"
+                :properties
+                (list->array
+                  (zip (fn (internal external)
+                         (obj :type "Property"
+                              :key (gen-literal external)
+                              :value (gen-identifier internal)))
+                       (get stree :module-provide-internal-ids)
+                       (get stree :module-provides))))))
 
-        function print(obj) {
-            console.log(util.inspect(obj, false, null));
-        }
+    (def require-internal-ids (cons "$runtime" (get stree :module-require-internal-ids)))
+    (def estree
+      (obj :type "FunctionExpression"
+           :params (list->array (map gen-identifier require-internal-ids))
+           :body (obj :type "BlockStatement"
+                      :body (list->array (append compiled-defs (list compiled-return))))))
 
-        //print(estree)
+    (def compiled-body (generate estree))
+    (def paren-wrapped (string-append "(" compiled-body ")"))
 
-        const compiled_body = escodegen.generate(estree);
+    (def module-requires (cons "runtime/minimal" (get stree :module-requires)))
 
-        // this makes the output legal in both expression and statement position
-        const paren_wrapped = "(" + compiled_body + ")";
-
-        const module_requires = stree.get("module-requires").unshift("runtime/minimal")
-
-        const res = module.CompiledModule(module_requires.toArray(),
-                                     stree.get("module-provides").toArray(),
-                                     paren_wrapped);
-        //console.log(compiled_body)
-        return res;
-    }
-
-    return {compile_module: compile_module}
-})
+    (CompiledModule
+      (list->array module-requires)
+      (list->array (get stree :module-provides))
+      paren-wrapped)))
