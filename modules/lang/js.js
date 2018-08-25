@@ -18,14 +18,10 @@
 
 (def compile-language
   (fn (source runner)
-    (def res (parse (seq (header "require" module-name)
-                         (c newline)
-                         (header "provide" id-string)
-                         (c newline))
+    (def res (parse (seq (header "require" module-name) (c newline)
+                         (header "provide" id-string) (c newline))
                     source))
-    ; TODO: make position property unifmrm, make <= blow up on false.`
-    (if (and (and (has res :position) (get res :position))
-             (<= (get res :position) (size source)))
+    (if (and (get res :position) (<= (get res :position) (size source)))
       (compiled-module
         (get (get res :result) 0)
         (get (get res :result) 1)

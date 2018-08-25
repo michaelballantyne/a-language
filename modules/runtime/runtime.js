@@ -21,7 +21,7 @@
             raise_arity_error("number?", 1, arguments.length);
         }
 
-        return !isNaN(arg);
+        return Number(parseFloat(arg)) === arg;
     }
 
     function is_identifier(arg) {
