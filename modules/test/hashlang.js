@@ -1,10 +1,10 @@
 #lang lang/js
-// require:
-// provide: main
+// require: vendor/immutable, vendor/escodegen
+// provide: main, foo
 (function () {
     function main() {
         console.log("hello world");
     }
 
-    return {main: main};
+    return {main: main, foo: 5};
 })

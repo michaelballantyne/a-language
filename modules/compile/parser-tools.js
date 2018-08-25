@@ -1,7 +1,7 @@
 #lang a
 
 (require runtime/runtime)
-(provide c c-not c-range empty seq or/p eof one-or-more zero-or-more describe nonterm action capture-string parse whitespace alpha digit)
+(provide c c-not c-range string/p empty seq or/p eof one-or-more zero-or-more describe nonterm action capture-string parse whitespace alpha digit empty-as-list)
 
 (def succeed
   (fn (index)
@@ -10,6 +10,14 @@
 (def fail
   (fn (failures)
     (obj :position false :failure failures)))
+
+(def string/p
+  (fn (to-match)
+    (fn (input index)
+      (if (and (has input (+ index (- (size to-match) 1)))
+               (equal? to-match (substring input index (+ index (size to-match)))))
+        (succeed (+ index (size to-match)))
+        (fail (list (obj :expected (string-append "string " to-match) :position index)))))))
 
 (def c-pred
   (fn (pred description)
@@ -154,4 +162,7 @@
 
 (def alpha (or/p (c-range "a" "z")
                  (c-range "A" "Z")))
+
+(def empty-as-list
+  (action empty (fn (ignore) (list))))
 
