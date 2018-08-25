@@ -1,12 +1,8 @@
-#lang js
-// require: compile/reader, compile/compile, compile/parse, compile/module
-// provide: compile_language
-(function (reader, compile, parse, module) {
-    function compile_language(source, load) {
-        const sexp = reader.read(source)
-        const ast = parse["parse-module"](sexp, load)
-        return compile["compile-module"](ast);
-    }
+#lang a
 
-    return { compile_language: compile_language }
-})
+(require compile/reader compile/compile compile/parse)
+(provide compile-language)
+
+(def compile-language
+  (fn (body runner)
+    (compile-module (parse-module (read body) runner))))

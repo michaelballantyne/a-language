@@ -35,15 +35,15 @@
         const [lang, body] = parse_lang_file(source)
 
         if (lang === "js") {
-            return compilejs.compile_language(body, runner);
+            return compilejs["compile-language"](body, runner);
         } else if (lang === "a") {
-            return compilea.compile_language(body, runner);
+            return compilea["compile-language"](body, runner);
         } else {
             const module_instance = runner.run(lang)
 
-            const compile_f = module_instance["compile_language"];
+            const compile_f = module_instance["compile-language"];
             if (compile_f === undefined) {
-                throw "#lang module does not implement compile_language"
+                throw "#lang module does not implement compile-language"
             }
 
             return compile_f(body, runner);
