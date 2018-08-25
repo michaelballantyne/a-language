@@ -2,5 +2,5 @@
 // require: compile/js
 // provide: compile_language
 (function (compilejs) {
-    return { compile_language: compilejs.compile_js }
+    return { compile_language: compilejs["compile-js"] }
 })

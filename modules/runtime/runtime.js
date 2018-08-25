@@ -1,6 +1,6 @@
 #lang js
 // require: vendor/immutable, runtime/minimal
-// provide: identifier?, number?, string?, js-object?, js-array?, make-identifier, identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, list, assoc, empty?, append, null, number->string, first, rest, variadic, cons, size, function?, apply, substring, list/c, function/c, newline, string->integer, read-stdin, double-quote, to-string, character-code, contains, reverse, array, list->array, array->list, map, foldl, box, box?, unbox, set-box!, string-split, string-join, equal?, zip, subset, list?
+// provide: identifier?, number?, string?, js-object?, js-array?, make-identifier, identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, list, assoc, empty?, append, null, number->string, first, rest, variadic, cons, size, function?, apply, substring, list/c, function/c, newline, string->integer, read-stdin, double-quote, to-string, character-code, contains, reverse, array, list->array, array->list, map, foldl, box, box?, unbox, set-box!, string-split, string-join, equal?, zip, subset, list?, string-trim
 (function (Immutable, runtime__minimal) {
     let raise_arity_error = runtime__minimal["raise-arity-error"]
 
@@ -607,6 +607,14 @@
         return list_to_array(l).join(sep);
     }
 
+    function string_trim(s) {
+        if (1 !== arguments.length) {
+            raise_arity_error("string-trim", 1, arguments.length);
+        }
+        string_c("string-trim", s);
+        return s.trim();
+    }
+
     function equal(v1, v2) {
         if (2 !== arguments.length) {
             raise_arity_error("equal?", 2, arguments.length);
@@ -714,6 +722,7 @@
         "equal?": equal,
         "zip": zip,
         "subset": subset,
-        "list?": is_list
+        "list?": is_list,
+        "string-trim": string_trim
     }
 })

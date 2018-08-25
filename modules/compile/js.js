@@ -1,42 +1,34 @@
-#lang js
-// require: compile/module, compile/reader
-// provide: compile_js
-(function (compiledmodule, reader) {
-    function parseDecl(name, line, valid_name) {
-        function malformed() {
-            throw "malformed " + name + ": " + line;
-        }
+#lang a
 
-        const s1 = line.split(":");
+(require runtime/runtime compile/module compile/reader)
+(provide compile-js)
 
-        if (s1[0] !== "// " + name) {
-            malformed()
-        }
+(def andmap
+  (fn (f l)
+    (foldl (fn (a b) (and a b)) true
+           (map f l))))
 
-        if (s1[1].trim() == "") {
-            return [];
-        }
+(def parse-decl
+  (fn (name line valid-name)
+    (def malformed (fn () (error (string-append "malformed " name) line)))
+    (def split (string-split line ":"))
+    (def _ (if (not (equal? (string-append "// " name) (get split 0)))
+             (malformed)
+             null))
+    (if (equal? "" (string-trim (get split 1)))
+      (list)
+      (block
+        (def names (map string-trim (string-split (get split 1) ",")))
+        (def _ (if (not (andmap valid-name names))
+                 (malformed)
+                 null))
+        names))))
 
-        const s2 = s1[1].split(",").map(i => i.trim());
+(def compile-js
+  (fn (source runner)
+    (def lines (string-split source newline))
+    (def imports (parse-decl "require" (get lines 0) valid-module-name))
+    (def exports (parse-decl "provide" (get lines 1) valid-id-name))
+    (def body (string-join (rest (rest lines)) newline))
+    (CompiledModule (list->array imports) (list->array exports) body)))
 
-        if (!s2.every((v) => valid_name(v))) {
-            malformed()
-        }
-
-        return s2;
-    }
-
-    // source string -> CompiledModule
-    function compile_js(source) {
-        const lines = source.split('\n');
-        const imports = parseDecl("require", lines[0], reader["valid-module-name"]);
-        const exports = parseDecl("provide", lines[1], reader["valid-id-name"]);
-        const body = lines.slice(2).join("\n")
-
-        const module_declaration = compiledmodule.CompiledModule(imports, exports, body);
-
-        return module_declaration;
-    }
-
-    return { compile_js: compile_js }
-})
