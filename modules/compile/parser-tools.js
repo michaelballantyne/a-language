@@ -1,7 +1,7 @@
 #lang a
 
 (require runtime/runtime)
-(provide c c-not c-range string/p empty seq or/p eof one-or-more zero-or-more describe nonterm action capture-string parse whitespace alpha digit empty-as-list)
+(provide c c-not c-range string/p empty seq or/p eof one-or-more zero-or-more describe nonterm action apply-action capture-string parse whitespace alpha digit empty-as-list)
 
 (def succeed
   (fn (index)
@@ -134,6 +134,8 @@
       (if (get res :position)
         (assoc res :result (f (if (has res :result) (get res :result) null)))
         res))))
+
+(def apply-action (fn (parser f) (action parser (fn (l) (apply f l)))))
 
 (def capture-string
   (fn (parser)

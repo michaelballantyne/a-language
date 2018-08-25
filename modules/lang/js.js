@@ -6,11 +6,8 @@
 (def header
   (fn (name el)
     (def comma-list
-      (nonterm
-        "comma separated list"
-        (fn ()
-          (action (seq el tail)
-                  (fn (p) (cons (get p 0) (get p 1)))))))
+      (nonterm (string-append name " list")
+               (fn () (apply-action (seq el tail) cons))))
     (def tail (or/p (seq (string/p ", ") comma-list) empty-as-list))
 
     (seq (string/p "// ") (string/p name) (c ":") (or/p (seq (c " ") comma-list)

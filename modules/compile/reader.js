@@ -22,9 +22,9 @@
       (or/p
         (seq whitespace sexp-list)
         (seq comment sexp-list)
-        (action (seq sexp (or/p (seq whitespace sexp-list)
+        (apply-action (seq sexp (or/p (seq whitespace sexp-list)
                                 empty-as-list))
-                (fn (pr) (cons (first pr) (first (rest pr)))))
+                      cons)
         empty-as-list))))
 
 (def comment
@@ -59,14 +59,14 @@
 (def id
   (nonterm
     "identifier"
-    (fn () (action id-string (fn (str) (make-identifier str))))))
+    (fn () (action id-string make-identifier))))
 
 (def keyword
   (nonterm
     "keyword"
     (fn ()
       (action (seq (c ":") (capture-string (one-or-more (or/p digit idchar))))
-              (fn (str) (make-keyword str))))))
+              make-keyword))))
 
 (def integer
   (nonterm
