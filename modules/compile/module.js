@@ -1,22 +1,21 @@
-#lang js
-// require:
-// provide: CompiledModule
-(function () {
-    const isString = i => typeof i === "string" || i instanceof String
+#lang a
 
-    function CompiledModule(imports, exports, body_code) {
-        if (imports === undefined || !Array.isArray(imports) || !imports.every(isString) ||
-            exports === undefined || !Array.isArray(exports) || !exports.every(isString) ||
-                body_code === undefined || !isString(body_code)) {
-            throw "Malformed module declaration"
-        }
+(require runtime/runtime)
+(provide compiled-module)
 
-        return {
-            imports: imports,
-            exports: exports,
-            "body-code": body_code
-        };
-    }
+(def andmap
+  (fn (f l)
+    (foldl (fn (a b) (and a b)) true
+           (map f l))))
 
-    return { CompiledModule: CompiledModule }
-})
+(def compiled-module
+  (fn (imports exports body-code)
+    (if (not (and
+                (and
+                  (and (list? imports) (andmap string? imports))
+                  (and (list? exports) (andmap string? exports)))
+                (string? body-code)))
+      (error "compiled-module" "malformed module declaration")
+      (obj :imports imports
+           :exports exports
+           :body-code body-code))))

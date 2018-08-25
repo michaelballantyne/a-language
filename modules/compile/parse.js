@@ -298,7 +298,7 @@
                    (assoc env (make-identifier name)
                           (hash :module-ref-sym (get module-bindings req)
                                :module-ref-field name)))
-                 env (array->list (get decl :exports))))
+                 env (get decl :exports)))
              initial-env requires))
 
     (def parsed-defs (parse-defs body module-env))

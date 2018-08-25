@@ -252,7 +252,7 @@
 
     (def module-requires (cons "runtime/minimal" (get stree :module-requires)))
 
-    (CompiledModule
-      (list->array module-requires)
-      (list->array (get stree :module-provides))
+    (compiled-module
+      module-requires
+      (get stree :module-provides)
       paren-wrapped)))

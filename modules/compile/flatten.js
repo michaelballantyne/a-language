@@ -39,12 +39,12 @@
           acc
           (block
             (def compiled ((get runner :load) module-name))
-            (def acc2 (foldl flatten-internal acc (array->list (get compiled :imports))))
+            (def acc2 (foldl flatten-internal acc (get compiled :imports)))
             (def instance-declaration
               (gen-module-instance-declaration
                 module-name
                 (get compiled :body-code)
-                (array->list (get compiled :imports))))
+                (get compiled :imports)))
             (obj :declarations (cons instance-declaration (get acc2 :declarations))
                  :visited (assoc (get acc2 :visited) module-name true))))))
     (def module-declarations

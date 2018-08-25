@@ -30,4 +30,4 @@
     (def imports (parse-decl "require" (get lines 0) valid-module-name))
     (def exports (parse-decl "provide" (get lines 1) valid-id-name))
     (def body (string-join (rest (rest lines)) newline))
-    (CompiledModule (list->array imports) (list->array exports) body)))
+    (compiled-module imports exports body)))

@@ -42,13 +42,13 @@
                 (def module-declaration (load module-name))
                 (def instance-map2
                   (foldl run-module-internal instance-map
-                         (array->list (get module-declaration :imports))))
+                         (get module-declaration :imports)))
                 (def instance (apply (get module-declaration :body-function)
                                      (map (fn (i) (get instance-map2 i))
-                                          (array->list (get module-declaration :imports)))))
+                                          (get module-declaration :imports))))
                 ; TODO: clean up with expression in def ctx and when
                 (def _ (if (not (andmap (fn (export) (has instance export))
-                                        (array->list (get module-declaration :exports))))
+                                        (get module-declaration :exports)))
                          (error "run"
                                 (string-append
                                   "Module instance does not include all keys listed in exports: "
