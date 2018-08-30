@@ -5,20 +5,19 @@
 
 (def compile-via-lang
   (fn (source runner)
-    (def res (parse (seq (string/p "#lang ") module-name (c newline)) source))
+    (def res (parse (seq (string/p "#lang") (c " ") module-name (c newline)) source 0))
     (if (and (get res :position) (<= (get res :position) (size source)))
       (block
         (def lang (get res :result))
-        (def body (substring source (get res :position) (size source)))
         (if (equal? "js" lang)
-          (compile-js body runner)
+          (compile-js source (get res :position) runner)
           (if (equal? "a" lang)
-            (compile-a body runner)
+            (compile-a source (get res :position) runner)
             (block
               (def lang-mod-inst ((get runner :run) lang))
               (def _ (if (not (has lang-mod-inst :compile-language))
                        (error "compile-via-lang" "#lang module does not implement compile-language")
                        null))
-              ((get lang-mod-inst :compile-language) body runner)))))
+              ((get lang-mod-inst :compile-language) source (get res :position) runner)))))
       (error "compile-via-lang" res))))
 

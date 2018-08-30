@@ -1,7 +1,7 @@
 #lang a
 
 (require runtime/runtime)
-(provide c c-not c-range string/p empty seq or/p eof one-or-more zero-or-more describe nonterm action apply-action capture-string parse whitespace alpha digit empty-as-list module-name id-string idchar)
+(provide c c-not c-range string/p empty seq or/p eof one-or-more zero-or-more describe nonterm action apply-action capture-string parse whitespace alpha digit empty-as-list module-name id-string idchar newline/p)
 
 (def succeed
   (fn (index)
@@ -29,7 +29,7 @@
 (def c
   (fn (to-match)
     (c-pred (fn (ch) (=== ch to-match))
-            (string-append "character " to-match))))
+            (string-append "character '" to-match "'"))))
 
 (def c-not
   (variadic
@@ -40,7 +40,7 @@
 (def c-range
   (fn (lower upper)
     (c-pred (fn (ch) (and (>= (character-code ch) (character-code lower)) (<= (character-code ch) (character-code upper))))
-            (string-append "range " lower " to " upper))))
+            (string-append "range '" lower "' to '" upper "'"))))
 
 (def empty (fn (input index) (succeed index)))
 
@@ -113,7 +113,7 @@
       (def failures (get res :failure))
       ; TODO: is only checking the first of the failures the right idea? What if one
       ; of the alternatives within the description / nonterminal matched further?
-      (if (and (not (empty? failures)) (=== index (get (first failures) :position)))
+      (if (and (not (empty? failures)) (= index (get (first failures) :position)))
         (assoc res :failure (list (obj :expected name :position index)))
         res))))
 
@@ -141,25 +141,41 @@
         (assoc res :result (substring input index (get res :position)))
         res))))
 
-(def parse
-  (fn (grammar input)
-    (grammar input 0)))
 
+(def parse-failure
+  (fn (failures)
+    (def min
+      (variadic
+        (fn (l)
+          (if (= 0 (size l))
+            l
+            (foldl (fn (a b) (if (<= a b) a b)) (first l) (rest l))))))
+    (def pos (apply min (map (fn (f) (get f :position)) failures)))
+    (def msgs (map (fn (f) (get f :expected)) failures))
+    (error (string-append "Parse error at position " (number->string pos) ". Expected one of")
+           (string-append (string-join msgs ", ")))))
+
+(def parse
+  (fn (grammar input index)
+    (def res (grammar input index))
+    (if (not (get res :position))
+      (parse-failure (get res :failure))
+      res)))
 
 (def whitespace
-  (nonterm
+  (describe
     "whitespace"
-    (fn ()
-      (one-or-more (or/p (c " ") (c newline))))))
+    (one-or-more (describe "whitespace" (or/p (c " ") (c newline))))))
 
 (def digit
- (nonterm
+ (describe
   "digit"
-  (fn ()
-   (c-range "0" "9"))))
+  (c-range "0" "9")))
 
-(def alpha (or/p (c-range "a" "z")
-                 (c-range "A" "Z")))
+(def alpha
+  (describe "letter"
+            (or/p (c-range "a" "z")
+                  (c-range "A" "Z"))))
 
 (def empty-as-list
   (action empty (fn (ignore) (list))))
@@ -167,7 +183,7 @@
 ; These non-terminals are included here because they're used in several readers
 
 (def module-segment (seq alpha (zero-or-more (or/p alpha digit))))
-(def module-name (capture-string (seq module-segment (zero-or-more (seq (c "/") module-segment)))))
+(def module-name (describe "module name" (capture-string (seq module-segment (zero-or-more (seq (c "/") module-segment))))))
 
 (def idchar
   (nonterm
@@ -189,3 +205,5 @@
           (c "_")))))
 
 (def id-string (capture-string (seq idchar (zero-or-more (or/p digit idchar)))))
+
+(def newline/p (c-pred (fn (ch) (=== ch newline)) "newline"))

@@ -6585,218 +6585,218 @@
         return { 'compiled-module': compiled_module11 };
     }))(runtime__minimal, runtime__runtime);
     const compile__parser_tools = ((function ($runtime, runtime__runtime26) {
-        const succeed27 = function (index56) {
+        const succeed27 = function (index58) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var index55 = index56;
+                var index57 = index58;
                 while (true) {
-                    return runtime__runtime26['obj']('position', index55, 'failure', runtime__runtime26['list']());
+                    return runtime__runtime26['obj']('position', index57, 'failure', runtime__runtime26['list']());
                 }
             }
         };
-        const fail28 = function (failures58) {
+        const fail28 = function (failures60) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var failures57 = failures58;
+                var failures59 = failures60;
                 while (true) {
-                    return runtime__runtime26['obj']('position', runtime__runtime26['false'], 'failure', failures57);
+                    return runtime__runtime26['obj']('position', runtime__runtime26['false'], 'failure', failures59);
                 }
             }
         };
-        const string__p29 = function (to_match64) {
+        const string__p29 = function (to_match66) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var to_match59 = to_match64;
+                var to_match61 = to_match66;
                 while (true) {
-                    return function (input62, index63) {
+                    return function (input64, index65) {
                         if (2 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                         {
-                            var input60 = input62;
-                            var index61 = index63;
+                            var input62 = input64;
+                            var index63 = index65;
                             while (true) {
-                                if (false !== (false !== runtime__runtime26['has'](input60, runtime__runtime26['+'](index61, runtime__runtime26['-'](runtime__runtime26['size'](to_match59), 1))) ? runtime__runtime26['equal?'](to_match59, runtime__runtime26['substring'](input60, index61, runtime__runtime26['+'](index61, runtime__runtime26['size'](to_match59)))) : false))
-                                    return succeed27(runtime__runtime26['+'](index61, runtime__runtime26['size'](to_match59)));
+                                if (false !== (false !== runtime__runtime26['has'](input62, runtime__runtime26['+'](index63, runtime__runtime26['-'](runtime__runtime26['size'](to_match61), 1))) ? runtime__runtime26['equal?'](to_match61, runtime__runtime26['substring'](input62, index63, runtime__runtime26['+'](index63, runtime__runtime26['size'](to_match61)))) : false))
+                                    return succeed27(runtime__runtime26['+'](index63, runtime__runtime26['size'](to_match61)));
                                 else
-                                    return fail28(runtime__runtime26['list'](runtime__runtime26['obj']('expected', runtime__runtime26['string-append']('string ', to_match59), 'position', index61)));
+                                    return fail28(runtime__runtime26['list'](runtime__runtime26['obj']('expected', runtime__runtime26['string-append']('string ', to_match61), 'position', index63)));
                             }
                         }
                     };
                 }
             }
         };
-        const c_pred30 = function (pred71, description72) {
+        const c_pred30 = function (pred73, description74) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var pred65 = pred71;
-                var description66 = description72;
+                var pred67 = pred73;
+                var description68 = description74;
                 while (true) {
-                    return function (input69, index70) {
+                    return function (input71, index72) {
                         if (2 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                         {
-                            var input67 = input69;
-                            var index68 = index70;
+                            var input69 = input71;
+                            var index70 = index72;
                             while (true) {
-                                if (false !== (false !== runtime__runtime26['has'](input67, index68) ? pred65(runtime__runtime26['get'](input67, index68)) : false))
-                                    return succeed27(runtime__runtime26['+'](index68, 1));
+                                if (false !== (false !== runtime__runtime26['has'](input69, index70) ? pred67(runtime__runtime26['get'](input69, index70)) : false))
+                                    return succeed27(runtime__runtime26['+'](index70, 1));
                                 else
-                                    return fail28(runtime__runtime26['list'](runtime__runtime26['obj']('expected', description66, 'position', index68)));
+                                    return fail28(runtime__runtime26['list'](runtime__runtime26['obj']('expected', description68, 'position', index70)));
                             }
                         }
                     };
                 }
             }
         };
-        const c31 = function (to_match76) {
+        const c31 = function (to_match78) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var to_match73 = to_match76;
+                var to_match75 = to_match78;
                 while (true) {
-                    return c_pred30(function (ch75) {
+                    return c_pred30(function (ch77) {
                         if (1 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                         {
-                            var ch74 = ch75;
+                            var ch76 = ch77;
                             while (true) {
-                                return runtime__runtime26['==='](ch74, to_match73);
+                                return runtime__runtime26['==='](ch76, to_match75);
                             }
                         }
-                    }, runtime__runtime26['string-append']('character ', to_match73));
+                    }, runtime__runtime26['string-append']('character \'', to_match75, '\''));
                 }
             }
         };
-        const c_not32 = runtime__runtime26['variadic'](function (to_match80) {
+        const c_not32 = runtime__runtime26['variadic'](function (to_match82) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var to_match77 = to_match80;
+                var to_match79 = to_match82;
                 while (true) {
-                    return c_pred30(function (ch79) {
+                    return c_pred30(function (ch81) {
                         if (1 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                         {
-                            var ch78 = ch79;
+                            var ch80 = ch81;
                             while (true) {
-                                return runtime__runtime26['not'](runtime__runtime26['contains'](to_match77, ch78));
+                                return runtime__runtime26['not'](runtime__runtime26['contains'](to_match79, ch80));
                             }
                         }
-                    }, runtime__runtime26['string-append']('not ', runtime__runtime26['to-string'](to_match77)));
+                    }, runtime__runtime26['string-append']('not ', runtime__runtime26['to-string'](to_match79)));
                 }
             }
         });
-        const c_range33 = function (lower85, upper86) {
+        const c_range33 = function (lower87, upper88) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var lower81 = lower85;
-                var upper82 = upper86;
+                var lower83 = lower87;
+                var upper84 = upper88;
                 while (true) {
-                    return c_pred30(function (ch84) {
+                    return c_pred30(function (ch86) {
                         if (1 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                         {
-                            var ch83 = ch84;
+                            var ch85 = ch86;
                             while (true) {
-                                if (false !== runtime__runtime26['>='](runtime__runtime26['character-code'](ch83), runtime__runtime26['character-code'](lower81)))
-                                    return runtime__runtime26['<='](runtime__runtime26['character-code'](ch83), runtime__runtime26['character-code'](upper82));
+                                if (false !== runtime__runtime26['>='](runtime__runtime26['character-code'](ch85), runtime__runtime26['character-code'](lower83)))
+                                    return runtime__runtime26['<='](runtime__runtime26['character-code'](ch85), runtime__runtime26['character-code'](upper84));
                                 else
                                     return false;
                             }
                         }
-                    }, runtime__runtime26['string-append']('range ', lower81, ' to ', upper82));
+                    }, runtime__runtime26['string-append']('range \'', lower83, '\' to \'', upper84, '\''));
                 }
             }
         };
-        const empty34 = function (input89, index90) {
+        const empty34 = function (input91, index92) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var input87 = input89;
-                var index88 = index90;
+                var input89 = input91;
+                var index90 = index92;
                 while (true) {
-                    return succeed27(index88);
+                    return succeed27(index90);
                 }
             }
         };
-        const eof35 = function (input93, index94) {
+        const eof35 = function (input95, index96) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var input91 = input93;
-                var index92 = index94;
+                var input93 = input95;
+                var index94 = index96;
                 while (true) {
-                    if (false !== runtime__runtime26['==='](index92, runtime__runtime26['size'](input91)))
-                        return succeed27(index92);
+                    if (false !== runtime__runtime26['==='](index94, runtime__runtime26['size'](input93)))
+                        return succeed27(index94);
                     else
-                        return fail28(runtime__runtime26['list'](runtime__runtime26['obj']('expected', 'end of file', 'position', index92)));
+                        return fail28(runtime__runtime26['list'](runtime__runtime26['obj']('expected', 'end of file', 'position', index94)));
                 }
             }
         };
-        const merge_failures36 = function (l97, r98) {
+        const merge_failures36 = function (l99, r100) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var l95 = l97;
-                var r96 = r98;
+                var l97 = l99;
+                var r98 = r100;
                 while (true) {
-                    if (false !== runtime__runtime26['empty?'](l95))
-                        return r96;
-                    else if (false !== runtime__runtime26['empty?'](r96))
-                        return l95;
-                    else if (false !== runtime__runtime26['>'](runtime__runtime26['get'](runtime__runtime26['first'](r96), 'position'), runtime__runtime26['get'](runtime__runtime26['first'](l95), 'position')))
-                        return r96;
-                    else if (false !== runtime__runtime26['>'](runtime__runtime26['get'](runtime__runtime26['first'](l95), 'position'), runtime__runtime26['get'](runtime__runtime26['first'](r96), 'position')))
-                        return l95;
+                    if (false !== runtime__runtime26['empty?'](l97))
+                        return r98;
+                    else if (false !== runtime__runtime26['empty?'](r98))
+                        return l97;
+                    else if (false !== runtime__runtime26['>'](runtime__runtime26['get'](runtime__runtime26['first'](r98), 'position'), runtime__runtime26['get'](runtime__runtime26['first'](l97), 'position')))
+                        return r98;
+                    else if (false !== runtime__runtime26['>'](runtime__runtime26['get'](runtime__runtime26['first'](l97), 'position'), runtime__runtime26['get'](runtime__runtime26['first'](r98), 'position')))
+                        return l97;
                     else
-                        return runtime__runtime26['append'](l95, r96);
+                        return runtime__runtime26['append'](l97, r98);
                 }
             }
         };
-        const seq37 = runtime__runtime26['variadic'](function (parsers114) {
+        const seq37 = runtime__runtime26['variadic'](function (parsers116) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var parsers99 = parsers114;
+                var parsers101 = parsers116;
                 while (true) {
-                    return function (input112, index113) {
+                    return function (input114, index115) {
                         if (2 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                         {
-                            var input100 = input112;
-                            var index101 = index113;
+                            var input102 = input114;
+                            var index103 = index115;
                             while (true) {
                                 {
-                                    var parsers102 = parsers99;
-                                    var current_index103 = index101;
-                                    var results104 = runtime__runtime26['list']();
-                                    var failures105 = runtime__runtime26['list']();
+                                    var parsers104 = parsers101;
+                                    var current_index105 = index103;
+                                    var results106 = runtime__runtime26['list']();
+                                    var failures107 = runtime__runtime26['list']();
                                     while (true) {
-                                        if (false !== (false !== current_index103 ? runtime__runtime26['not'](runtime__runtime26['empty?'](parsers102)) : false)) {
-                                            const res106 = runtime__runtime26['first'](parsers102)(input100, current_index103);
+                                        if (false !== (false !== current_index105 ? runtime__runtime26['not'](runtime__runtime26['empty?'](parsers104)) : false)) {
+                                            const res108 = runtime__runtime26['first'](parsers104)(input102, current_index105);
                                             {
-                                                tmp107 = runtime__runtime26['rest'](parsers102);
-                                                tmp108 = false !== runtime__runtime26['has'](res106, 'position') ? runtime__runtime26['get'](res106, 'position') : false;
-                                                tmp109 = false !== runtime__runtime26['has'](res106, 'result') ? runtime__runtime26['cons'](runtime__runtime26['get'](res106, 'result'), results104) : results104;
-                                                tmp110 = merge_failures36(failures105, runtime__runtime26['get'](res106, 'failure'));
-                                                parsers102 = tmp107;
-                                                current_index103 = tmp108;
-                                                results104 = tmp109;
-                                                failures105 = tmp110;
+                                                tmp109 = runtime__runtime26['rest'](parsers104);
+                                                tmp110 = false !== runtime__runtime26['has'](res108, 'position') ? runtime__runtime26['get'](res108, 'position') : false;
+                                                tmp111 = false !== runtime__runtime26['has'](res108, 'result') ? runtime__runtime26['cons'](runtime__runtime26['get'](res108, 'result'), results106) : results106;
+                                                tmp112 = merge_failures36(failures107, runtime__runtime26['get'](res108, 'failure'));
+                                                parsers104 = tmp109;
+                                                current_index105 = tmp110;
+                                                results106 = tmp111;
+                                                failures107 = tmp112;
                                             }
                                         } else {
-                                            const res111 = runtime__runtime26['obj']('position', current_index103, 'failure', failures105);
-                                            if (false !== runtime__runtime26['empty?'](results104))
-                                                return res111;
-                                            else if (false !== runtime__runtime26['='](runtime__runtime26['size'](results104), 1))
-                                                return runtime__runtime26['assoc'](res111, 'result', runtime__runtime26['first'](results104));
+                                            const res113 = runtime__runtime26['obj']('position', current_index105, 'failure', failures107);
+                                            if (false !== runtime__runtime26['empty?'](results106))
+                                                return res113;
+                                            else if (false !== runtime__runtime26['='](runtime__runtime26['size'](results106), 1))
+                                                return runtime__runtime26['assoc'](res113, 'result', runtime__runtime26['first'](results106));
                                             else
-                                                return runtime__runtime26['assoc'](res111, 'result', runtime__runtime26['reverse'](results104));
+                                                return runtime__runtime26['assoc'](res113, 'result', runtime__runtime26['reverse'](results106));
                                         }
                                     }
                                 }
@@ -6806,35 +6806,35 @@
                 }
             }
         });
-        const or__p38 = runtime__runtime26['variadic'](function (parsers126) {
+        const or__p38 = runtime__runtime26['variadic'](function (parsers128) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var parsers115 = parsers126;
+                var parsers117 = parsers128;
                 while (true) {
-                    return function (input124, index125) {
+                    return function (input126, index127) {
                         if (2 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                         {
-                            var input116 = input124;
-                            var index117 = index125;
+                            var input118 = input126;
+                            var index119 = index127;
                             while (true) {
                                 {
-                                    var parsers118 = parsers115;
-                                    var failures119 = runtime__runtime26['list']();
+                                    var parsers120 = parsers117;
+                                    var failures121 = runtime__runtime26['list']();
                                     while (true) {
-                                        if (false !== runtime__runtime26['empty?'](parsers118))
-                                            return fail28(failures119);
+                                        if (false !== runtime__runtime26['empty?'](parsers120))
+                                            return fail28(failures121);
                                         else {
-                                            const res120 = runtime__runtime26['first'](parsers118)(input116, index117);
-                                            const merged121 = merge_failures36(failures119, runtime__runtime26['get'](res120, 'failure'));
-                                            if (false !== runtime__runtime26['get'](res120, 'position'))
-                                                return runtime__runtime26['assoc'](res120, 'failure', merged121);
+                                            const res122 = runtime__runtime26['first'](parsers120)(input118, index119);
+                                            const merged123 = merge_failures36(failures121, runtime__runtime26['get'](res122, 'failure'));
+                                            if (false !== runtime__runtime26['get'](res122, 'position'))
+                                                return runtime__runtime26['assoc'](res122, 'failure', merged123);
                                             else {
-                                                tmp122 = runtime__runtime26['rest'](parsers118);
-                                                tmp123 = merged121;
-                                                parsers118 = tmp122;
-                                                failures119 = tmp123;
+                                                tmp124 = runtime__runtime26['rest'](parsers120);
+                                                tmp125 = merged123;
+                                                parsers120 = tmp124;
+                                                failures121 = tmp125;
                                             }
                                         }
                                     }
@@ -6845,215 +6845,270 @@
                 }
             }
         });
-        const one_or_more39 = function (parser133) {
+        const one_or_more39 = function (parser135) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var parser127 = parser133;
+                var parser129 = parser135;
                 while (true) {
-                    const self128 = function (input131, index132) {
+                    const self130 = function (input133, index134) {
                         if (2 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                         {
-                            var input129 = input131;
-                            var index130 = index132;
+                            var input131 = input133;
+                            var index132 = index134;
                             while (true) {
-                                return seq37(parser127, or__p38(self128, empty34))(input129, index130);
+                                return seq37(parser129, or__p38(self130, empty34))(input131, index132);
                             }
                         }
                     };
-                    return self128;
+                    return self130;
                 }
             }
         };
-        const zero_or_more40 = function (parser140) {
+        const zero_or_more40 = function (parser142) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var parser134 = parser140;
+                var parser136 = parser142;
                 while (true) {
-                    const self135 = function (input138, index139) {
+                    const self137 = function (input140, index141) {
                         if (2 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                         {
-                            var input136 = input138;
-                            var index137 = index139;
+                            var input138 = input140;
+                            var index139 = index141;
                             while (true) {
-                                return or__p38(seq37(parser134, self135), empty34)(input136, index137);
+                                return or__p38(seq37(parser136, self137), empty34)(input138, index139);
                             }
                         }
                     };
-                    return self135;
+                    return self137;
                 }
             }
         };
-        const describe41 = function (name149, parser150) {
+        const describe41 = function (name151, parser152) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var name141 = name149;
-                var parser142 = parser150;
+                var name143 = name151;
+                var parser144 = parser152;
                 while (true) {
-                    return function (input147, index148) {
+                    return function (input149, index150) {
                         if (2 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                         {
-                            var input143 = input147;
-                            var index144 = index148;
+                            var input145 = input149;
+                            var index146 = index150;
                             while (true) {
-                                const res145 = parser142(input143, index144);
-                                const failures146 = runtime__runtime26['get'](res145, 'failure');
-                                if (false !== (false !== runtime__runtime26['not'](runtime__runtime26['empty?'](failures146)) ? runtime__runtime26['==='](index144, runtime__runtime26['get'](runtime__runtime26['first'](failures146), 'position')) : false))
-                                    return runtime__runtime26['assoc'](res145, 'failure', runtime__runtime26['list'](runtime__runtime26['obj']('expected', name141, 'position', index144)));
+                                const res147 = parser144(input145, index146);
+                                const failures148 = runtime__runtime26['get'](res147, 'failure');
+                                if (false !== (false !== runtime__runtime26['not'](runtime__runtime26['empty?'](failures148)) ? runtime__runtime26['='](index146, runtime__runtime26['get'](runtime__runtime26['first'](failures148), 'position')) : false))
+                                    return runtime__runtime26['assoc'](res147, 'failure', runtime__runtime26['list'](runtime__runtime26['obj']('expected', name143, 'position', index146)));
                                 else
-                                    return res145;
+                                    return res147;
                             }
                         }
                     };
                 }
             }
         };
-        const nonterm42 = function (description155, f156) {
+        const nonterm42 = function (description157, f158) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var description151 = description155;
-                var f152 = f156;
+                var description153 = description157;
+                var f154 = f158;
                 while (true) {
-                    return describe41(description151, runtime__runtime26['variadic'](function (args154) {
+                    return describe41(description153, runtime__runtime26['variadic'](function (args156) {
                         if (1 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                         {
-                            var args153 = args154;
+                            var args155 = args156;
                             while (true) {
-                                return runtime__runtime26['apply'](f152(), args153);
+                                return runtime__runtime26['apply'](f154(), args155);
                             }
                         }
                     }));
                 }
             }
         };
-        const action43 = function (parser164, f165) {
+        const action43 = function (parser166, f167) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var parser157 = parser164;
-                var f158 = f165;
+                var parser159 = parser166;
+                var f160 = f167;
                 while (true) {
-                    return function (input162, index163) {
+                    return function (input164, index165) {
                         if (2 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                         {
-                            var input159 = input162;
-                            var index160 = index163;
+                            var input161 = input164;
+                            var index162 = index165;
                             while (true) {
-                                const res161 = parser157(input159, index160);
-                                if (false !== runtime__runtime26['get'](res161, 'position'))
-                                    return runtime__runtime26['assoc'](res161, 'result', f158(false !== runtime__runtime26['has'](res161, 'result') ? runtime__runtime26['get'](res161, 'result') : runtime__runtime26['null']));
+                                const res163 = parser159(input161, index162);
+                                if (false !== runtime__runtime26['get'](res163, 'position'))
+                                    return runtime__runtime26['assoc'](res163, 'result', f160(false !== runtime__runtime26['has'](res163, 'result') ? runtime__runtime26['get'](res163, 'result') : runtime__runtime26['null']));
                                 else
-                                    return res161;
+                                    return res163;
                             }
                         }
                     };
                 }
             }
         };
-        const apply_action44 = function (parser170, f171) {
+        const apply_action44 = function (parser172, f173) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var parser166 = parser170;
-                var f167 = f171;
+                var parser168 = parser172;
+                var f169 = f173;
                 while (true) {
-                    return action43(parser166, function (l169) {
+                    return action43(parser168, function (l171) {
                         if (1 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                         {
-                            var l168 = l169;
+                            var l170 = l171;
                             while (true) {
-                                return runtime__runtime26['apply'](f167, l168);
+                                return runtime__runtime26['apply'](f169, l170);
                             }
                         }
                     });
                 }
             }
         };
-        const capture_string45 = function (parser178) {
+        const capture_string45 = function (parser180) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var parser172 = parser178;
+                var parser174 = parser180;
                 while (true) {
-                    return function (input176, index177) {
+                    return function (input178, index179) {
                         if (2 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                         {
-                            var input173 = input176;
-                            var index174 = index177;
+                            var input175 = input178;
+                            var index176 = index179;
                             while (true) {
-                                const res175 = parser172(input173, index174);
-                                if (false !== runtime__runtime26['get'](res175, 'position'))
-                                    return runtime__runtime26['assoc'](res175, 'result', runtime__runtime26['substring'](input173, index174, runtime__runtime26['get'](res175, 'position')));
+                                const res177 = parser174(input175, index176);
+                                if (false !== runtime__runtime26['get'](res177, 'position'))
+                                    return runtime__runtime26['assoc'](res177, 'result', runtime__runtime26['substring'](input175, index176, runtime__runtime26['get'](res177, 'position')));
                                 else
-                                    return res175;
+                                    return res177;
                             }
                         }
                     };
                 }
             }
         };
-        const parse46 = function (grammar181, input182) {
-            if (2 !== arguments['length'])
-                $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
-            {
-                var grammar179 = grammar181;
-                var input180 = input182;
-                while (true) {
-                    return grammar179(input180, 0);
-                }
-            }
-        };
-        const whitespace47 = nonterm42('whitespace', function () {
-            if (0 !== arguments['length'])
-                $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
-            {
-                while (true) {
-                    return one_or_more39(or__p38(c31(' '), c31(runtime__runtime26['newline'])));
-                }
-            }
-        });
-        const digit48 = nonterm42('digit', function () {
-            if (0 !== arguments['length'])
-                $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
-            {
-                while (true) {
-                    return c_range33('0', '9');
-                }
-            }
-        });
-        const alpha49 = or__p38(c_range33('a', 'z'), c_range33('A', 'Z'));
-        const empty_as_list50 = action43(empty34, function (ignore184) {
+        const parse_failure46 = function (failures195) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var ignore183 = ignore184;
+                var failures181 = failures195;
+                while (true) {
+                    const min182 = runtime__runtime26['variadic'](function (l190) {
+                        if (1 !== arguments['length'])
+                            $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
+                        {
+                            var l185 = l190;
+                            while (true) {
+                                if (false !== runtime__runtime26['='](0, runtime__runtime26['size'](l185)))
+                                    return l185;
+                                else
+                                    return runtime__runtime26['foldl'](function (a188, b189) {
+                                        if (2 !== arguments['length'])
+                                            $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
+                                        {
+                                            var a186 = a188;
+                                            var b187 = b189;
+                                            while (true) {
+                                                if (false !== runtime__runtime26['<='](a186, b187))
+                                                    return a186;
+                                                else
+                                                    return b187;
+                                            }
+                                        }
+                                    }, runtime__runtime26['first'](l185), runtime__runtime26['rest'](l185));
+                            }
+                        }
+                    });
+                    const pos183 = runtime__runtime26['apply'](min182, runtime__runtime26['map'](function (f192) {
+                        if (1 !== arguments['length'])
+                            $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
+                        {
+                            var f191 = f192;
+                            while (true) {
+                                return runtime__runtime26['get'](f191, 'position');
+                            }
+                        }
+                    }, failures181));
+                    const msgs184 = runtime__runtime26['map'](function (f194) {
+                        if (1 !== arguments['length'])
+                            $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
+                        {
+                            var f193 = f194;
+                            while (true) {
+                                return runtime__runtime26['get'](f193, 'expected');
+                            }
+                        }
+                    }, failures181);
+                    return runtime__runtime26['error'](runtime__runtime26['string-append']('Parse error at position ', runtime__runtime26['number->string'](pos183), '. Expected one of'), runtime__runtime26['string-append'](runtime__runtime26['string-join'](msgs184, ', ')));
+                }
+            }
+        };
+        const parse47 = function (grammar200, input201, index202) {
+            if (3 !== arguments['length'])
+                $runtime['raise-arity-error']('anonymous procedure', 3, arguments['length']);
+            {
+                var grammar196 = grammar200;
+                var input197 = input201;
+                var index198 = index202;
+                while (true) {
+                    const res199 = grammar196(input197, index198);
+                    if (false !== runtime__runtime26['not'](runtime__runtime26['get'](res199, 'position')))
+                        return parse_failure46(runtime__runtime26['get'](res199, 'failure'));
+                    else
+                        return res199;
+                }
+            }
+        };
+        const whitespace48 = describe41('whitespace', one_or_more39(describe41('whitespace', or__p38(c31(' '), c31(runtime__runtime26['newline'])))));
+        const digit49 = describe41('digit', c_range33('0', '9'));
+        const alpha50 = describe41('letter', or__p38(c_range33('a', 'z'), c_range33('A', 'Z')));
+        const empty_as_list51 = action43(empty34, function (ignore204) {
+            if (1 !== arguments['length'])
+                $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
+            {
+                var ignore203 = ignore204;
                 while (true) {
                     return runtime__runtime26['list']();
                 }
             }
         });
-        const module_segment51 = seq37(alpha49, zero_or_more40(or__p38(alpha49, digit48)));
-        const module_name52 = capture_string45(seq37(module_segment51, zero_or_more40(seq37(c31('/'), module_segment51))));
-        const idchar53 = nonterm42('identifier character', function () {
+        const module_segment52 = seq37(alpha50, zero_or_more40(or__p38(alpha50, digit49)));
+        const module_name53 = describe41('module name', capture_string45(seq37(module_segment52, zero_or_more40(seq37(c31('/'), module_segment52)))));
+        const idchar54 = nonterm42('identifier character', function () {
             if (0 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
             {
                 while (true) {
-                    return or__p38(alpha49, c31('+'), c31('-'), c31('*'), c31('%'), c31('='), c31('!'), c31('<'), c31('>'), c31('-'), c31('/'), c31('?'), c31('_'));
+                    return or__p38(alpha50, c31('+'), c31('-'), c31('*'), c31('%'), c31('='), c31('!'), c31('<'), c31('>'), c31('-'), c31('/'), c31('?'), c31('_'));
                 }
             }
         });
-        const id_string54 = capture_string45(seq37(idchar53, zero_or_more40(or__p38(digit48, idchar53))));
+        const id_string55 = capture_string45(seq37(idchar54, zero_or_more40(or__p38(digit49, idchar54))));
+        const newline__p56 = c_pred30(function (ch206) {
+            if (1 !== arguments['length'])
+                $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
+            {
+                var ch205 = ch206;
+                while (true) {
+                    return runtime__runtime26['==='](ch205, runtime__runtime26['newline']);
+                }
+            }
+        }, 'newline');
         return {
             'c': c31,
             'c-not': c_not32,
@@ -7070,151 +7125,154 @@
             'action': action43,
             'apply-action': apply_action44,
             'capture-string': capture_string45,
-            'parse': parse46,
-            'whitespace': whitespace47,
-            'alpha': alpha49,
-            'digit': digit48,
-            'empty-as-list': empty_as_list50,
-            'module-name': module_name52,
-            'id-string': id_string54,
-            'idchar': idchar53
+            'parse': parse47,
+            'whitespace': whitespace48,
+            'alpha': alpha50,
+            'digit': digit49,
+            'empty-as-list': empty_as_list51,
+            'module-name': module_name53,
+            'id-string': id_string55,
+            'idchar': idchar54,
+            'newline/p': newline__p56
         };
     }))(runtime__minimal, runtime__runtime);
     const lang__js = ((function ($runtime, runtime__runtime6, compile__module7, compile__parser_tools8) {
-        const header185 = function (name192, el193) {
+        const header207 = function (name214, el215) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var name188 = name192;
-                var el189 = el193;
+                var name210 = name214;
+                var el211 = el215;
                 while (true) {
-                    const comma_list190 = compile__parser_tools8['nonterm'](runtime__runtime6['string-append'](name188, ' list'), function () {
+                    const comma_list212 = compile__parser_tools8['nonterm'](runtime__runtime6['string-append'](name210, ' list'), function () {
                         if (0 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
                         {
                             while (true) {
-                                return compile__parser_tools8['apply-action'](compile__parser_tools8['seq'](el189, tail191), runtime__runtime6['cons']);
+                                return compile__parser_tools8['apply-action'](compile__parser_tools8['seq'](el211, tail213), runtime__runtime6['cons']);
                             }
                         }
                     });
-                    const tail191 = compile__parser_tools8['or/p'](compile__parser_tools8['seq'](compile__parser_tools8['string/p'](', '), comma_list190), compile__parser_tools8['empty-as-list']);
-                    return compile__parser_tools8['seq'](compile__parser_tools8['string/p']('// '), compile__parser_tools8['string/p'](name188), compile__parser_tools8['c'](':'), compile__parser_tools8['or/p'](compile__parser_tools8['seq'](compile__parser_tools8['c'](' '), comma_list190), compile__parser_tools8['empty-as-list']));
+                    const tail213 = compile__parser_tools8['or/p'](compile__parser_tools8['seq'](compile__parser_tools8['string/p'](', '), comma_list212), compile__parser_tools8['empty-as-list']);
+                    return compile__parser_tools8['seq'](compile__parser_tools8['string/p']('// '), compile__parser_tools8['string/p'](name210), compile__parser_tools8['c'](':'), compile__parser_tools8['or/p'](compile__parser_tools8['seq'](compile__parser_tools8['c'](' '), comma_list212), compile__parser_tools8['empty-as-list']));
                 }
             }
         };
-        const compile_js186 = function (source197, runner198) {
+        const compile_js208 = function (source220, index221, runner222) {
+            if (3 !== arguments['length'])
+                $runtime['raise-arity-error']('anonymous procedure', 3, arguments['length']);
+            {
+                var source216 = source220;
+                var index217 = index221;
+                var runner218 = runner222;
+                while (true) {
+                    const res219 = compile__parser_tools8['parse'](compile__parser_tools8['seq'](header207('require', compile__parser_tools8['module-name']), compile__parser_tools8['c'](runtime__runtime6['newline']), header207('provide', compile__parser_tools8['id-string']), compile__parser_tools8['c'](runtime__runtime6['newline'])), source216, index217);
+                    if (false !== (false !== runtime__runtime6['get'](res219, 'position') ? runtime__runtime6['<='](runtime__runtime6['get'](res219, 'position'), runtime__runtime6['size'](source216)) : false))
+                        return compile__module7['compiled-module'](runtime__runtime6['get'](runtime__runtime6['get'](res219, 'result'), 0), runtime__runtime6['get'](runtime__runtime6['get'](res219, 'result'), 1), runtime__runtime6['substring'](source216, runtime__runtime6['get'](res219, 'position'), runtime__runtime6['size'](source216)));
+                    else
+                        return runtime__runtime6['error']('compile-language', res219);
+                }
+            }
+        };
+        const compile_language209 = compile_js208;
+        return {
+            'compile-js': compile_js208,
+            'compile-language': compile_language209
+        };
+    }))(runtime__minimal, runtime__runtime, compile__module, compile__parser_tools);
+    const compile__reader = ((function ($runtime, runtime__runtime226, compile__parser_tools227) {
+        const sexp228 = compile__parser_tools227['nonterm']('s-expression', function () {
+            if (0 !== arguments['length'])
+                $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
+            {
+                while (true) {
+                    return compile__parser_tools227['or/p'](id231, integer233, string234, keyword232, compile__parser_tools227['seq'](compile__parser_tools227['c']('('), sexp_list229, compile__parser_tools227['c'](')')), compile__parser_tools227['seq'](compile__parser_tools227['c']('['), sexp_list229, compile__parser_tools227['c'](']')));
+                }
+            }
+        });
+        const sexp_list229 = compile__parser_tools227['nonterm']('list of s-expressions', function () {
+            if (0 !== arguments['length'])
+                $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
+            {
+                while (true) {
+                    return compile__parser_tools227['or/p'](compile__parser_tools227['seq'](compile__parser_tools227['whitespace'], sexp_list229), compile__parser_tools227['seq'](comment230, sexp_list229), compile__parser_tools227['apply-action'](compile__parser_tools227['seq'](sexp228, compile__parser_tools227['or/p'](compile__parser_tools227['seq'](compile__parser_tools227['whitespace'], sexp_list229), compile__parser_tools227['empty-as-list'])), runtime__runtime226['cons']), compile__parser_tools227['empty-as-list']);
+                }
+            }
+        });
+        const comment230 = compile__parser_tools227['nonterm']('comment', function () {
+            if (0 !== arguments['length'])
+                $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
+            {
+                while (true) {
+                    return compile__parser_tools227['seq'](compile__parser_tools227['c'](';'), compile__parser_tools227['zero-or-more'](compile__parser_tools227['describe']('comment body', compile__parser_tools227['c-not'](runtime__runtime226['newline']))), compile__parser_tools227['newline/p']);
+                }
+            }
+        });
+        const id231 = compile__parser_tools227['nonterm']('identifier', function () {
+            if (0 !== arguments['length'])
+                $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
+            {
+                while (true) {
+                    return compile__parser_tools227['action'](compile__parser_tools227['id-string'], runtime__runtime226['make-identifier']);
+                }
+            }
+        });
+        const keyword232 = compile__parser_tools227['nonterm']('keyword', function () {
+            if (0 !== arguments['length'])
+                $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
+            {
+                while (true) {
+                    return compile__parser_tools227['action'](compile__parser_tools227['seq'](compile__parser_tools227['c'](':'), compile__parser_tools227['capture-string'](compile__parser_tools227['one-or-more'](compile__parser_tools227['or/p'](compile__parser_tools227['digit'], compile__parser_tools227['idchar'])))), runtime__runtime226['make-keyword']);
+                }
+            }
+        });
+        const integer233 = compile__parser_tools227['nonterm']('integer', function () {
+            if (0 !== arguments['length'])
+                $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
+            {
+                while (true) {
+                    return compile__parser_tools227['action'](compile__parser_tools227['capture-string'](compile__parser_tools227['or/p'](compile__parser_tools227['c']('0'), compile__parser_tools227['seq'](compile__parser_tools227['c-range']('1', '9'), compile__parser_tools227['zero-or-more'](compile__parser_tools227['digit'])))), runtime__runtime226['string->integer']);
+                }
+            }
+        });
+        const string234 = compile__parser_tools227['nonterm']('string', function () {
+            if (0 !== arguments['length'])
+                $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
+            {
+                while (true) {
+                    return compile__parser_tools227['seq'](compile__parser_tools227['c'](runtime__runtime226['double-quote']), compile__parser_tools227['capture-string'](compile__parser_tools227['zero-or-more'](compile__parser_tools227['describe']('string body', compile__parser_tools227['c-not'](runtime__runtime226['double-quote'])))), compile__parser_tools227['c'](runtime__runtime226['double-quote']));
+                }
+            }
+        });
+        const top235 = compile__parser_tools227['seq'](sexp_list229, compile__parser_tools227['eof']);
+        const read236 = function (s241, index242) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var source194 = source197;
-                var runner195 = runner198;
+                var s238 = s241;
+                var index239 = index242;
                 while (true) {
-                    const res196 = compile__parser_tools8['parse'](compile__parser_tools8['seq'](header185('require', compile__parser_tools8['module-name']), compile__parser_tools8['c'](runtime__runtime6['newline']), header185('provide', compile__parser_tools8['id-string']), compile__parser_tools8['c'](runtime__runtime6['newline'])), source194);
-                    if (false !== (false !== runtime__runtime6['get'](res196, 'position') ? runtime__runtime6['<='](runtime__runtime6['get'](res196, 'position'), runtime__runtime6['size'](source194)) : false))
-                        return compile__module7['compiled-module'](runtime__runtime6['get'](runtime__runtime6['get'](res196, 'result'), 0), runtime__runtime6['get'](runtime__runtime6['get'](res196, 'result'), 1), runtime__runtime6['substring'](source194, runtime__runtime6['get'](res196, 'position'), runtime__runtime6['size'](source194)));
+                    const res240 = compile__parser_tools227['parse'](top235, s238, index239);
+                    if (false !== runtime__runtime226['==='](runtime__runtime226['size'](s238), runtime__runtime226['get'](res240, 'position')))
+                        return runtime__runtime226['get'](res240, 'result');
                     else
-                        return runtime__runtime6['error']('compile-language', res196);
+                        return runtime__runtime226['error']('read', res240);
                 }
             }
         };
-        const compile_language187 = compile_js186;
-        return {
-            'compile-js': compile_js186,
-            'compile-language': compile_language187
-        };
-    }))(runtime__minimal, runtime__runtime, compile__module, compile__parser_tools);
-    const compile__reader = ((function ($runtime, runtime__runtime202, compile__parser_tools203) {
-        const sexp204 = compile__parser_tools203['nonterm']('sexp', function () {
-            if (0 !== arguments['length'])
-                $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
-            {
-                while (true) {
-                    return compile__parser_tools203['or/p'](id207, integer209, string210, keyword208, compile__parser_tools203['seq'](compile__parser_tools203['c']('('), sexp_list205, compile__parser_tools203['c'](')')), compile__parser_tools203['seq'](compile__parser_tools203['c']('['), sexp_list205, compile__parser_tools203['c'](']')));
-                }
-            }
-        });
-        const sexp_list205 = compile__parser_tools203['nonterm']('list of s-expressions', function () {
-            if (0 !== arguments['length'])
-                $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
-            {
-                while (true) {
-                    return compile__parser_tools203['or/p'](compile__parser_tools203['seq'](compile__parser_tools203['whitespace'], sexp_list205), compile__parser_tools203['seq'](comment206, sexp_list205), compile__parser_tools203['apply-action'](compile__parser_tools203['seq'](sexp204, compile__parser_tools203['or/p'](compile__parser_tools203['seq'](compile__parser_tools203['whitespace'], sexp_list205), compile__parser_tools203['empty-as-list'])), runtime__runtime202['cons']), compile__parser_tools203['empty-as-list']);
-                }
-            }
-        });
-        const comment206 = compile__parser_tools203['nonterm']('comment', function () {
-            if (0 !== arguments['length'])
-                $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
-            {
-                while (true) {
-                    return compile__parser_tools203['seq'](compile__parser_tools203['c'](';'), compile__parser_tools203['zero-or-more'](compile__parser_tools203['c-not'](runtime__runtime202['newline'])), compile__parser_tools203['c'](runtime__runtime202['newline']));
-                }
-            }
-        });
-        const id207 = compile__parser_tools203['nonterm']('identifier', function () {
-            if (0 !== arguments['length'])
-                $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
-            {
-                while (true) {
-                    return compile__parser_tools203['action'](compile__parser_tools203['id-string'], runtime__runtime202['make-identifier']);
-                }
-            }
-        });
-        const keyword208 = compile__parser_tools203['nonterm']('keyword', function () {
-            if (0 !== arguments['length'])
-                $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
-            {
-                while (true) {
-                    return compile__parser_tools203['action'](compile__parser_tools203['seq'](compile__parser_tools203['c'](':'), compile__parser_tools203['capture-string'](compile__parser_tools203['one-or-more'](compile__parser_tools203['or/p'](compile__parser_tools203['digit'], compile__parser_tools203['idchar'])))), runtime__runtime202['make-keyword']);
-                }
-            }
-        });
-        const integer209 = compile__parser_tools203['nonterm']('integer', function () {
-            if (0 !== arguments['length'])
-                $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
-            {
-                while (true) {
-                    return compile__parser_tools203['action'](compile__parser_tools203['capture-string'](compile__parser_tools203['or/p'](compile__parser_tools203['c']('0'), compile__parser_tools203['seq'](compile__parser_tools203['c-range']('1', '9'), compile__parser_tools203['zero-or-more'](compile__parser_tools203['digit'])))), runtime__runtime202['string->integer']);
-                }
-            }
-        });
-        const string210 = compile__parser_tools203['nonterm']('string', function () {
-            if (0 !== arguments['length'])
-                $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
-            {
-                while (true) {
-                    return compile__parser_tools203['seq'](compile__parser_tools203['c'](runtime__runtime202['double-quote']), compile__parser_tools203['capture-string'](compile__parser_tools203['zero-or-more'](compile__parser_tools203['c-not'](runtime__runtime202['double-quote']))), compile__parser_tools203['c'](runtime__runtime202['double-quote']));
-                }
-            }
-        });
-        const top211 = compile__parser_tools203['seq'](sexp_list205, compile__parser_tools203['eof']);
-        const read212 = function (s216) {
+        const main237 = function (args246) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var s214 = s216;
+                var args243 = args246;
                 while (true) {
-                    const res215 = compile__parser_tools203['parse'](top211, s214);
-                    if (false !== runtime__runtime202['==='](runtime__runtime202['size'](s214), runtime__runtime202['get'](res215, 'position')))
-                        return runtime__runtime202['get'](res215, 'result');
-                    else
-                        return runtime__runtime202['error']('read', res215);
-                }
-            }
-        };
-        const main213 = function (args220) {
-            if (1 !== arguments['length'])
-                $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
-            {
-                var args217 = args220;
-                while (true) {
-                    return runtime__runtime202['read-stdin'](function (s219) {
+                    return runtime__runtime226['read-stdin'](function (s245) {
                         if (1 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                         {
-                            var s218 = s219;
+                            var s244 = s245;
                             while (true) {
-                                return runtime__runtime202['displayln'](read212(s218));
+                                return runtime__runtime226['displayln'](read236(s244, 0));
                             }
                         }
                     });
@@ -7222,8 +7280,8 @@
             }
         };
         return {
-            'main': main213,
-            'read': read212
+            'main': main237,
+            'read': read236
         };
     }))(runtime__minimal, runtime__runtime, compile__parser_tools);
     const vendor__escodegen = ((function () {
@@ -12249,887 +12307,887 @@
       return require('/escodegen.js');
     })
     )();
-    const compile__compile = ((function ($runtime, runtime__runtime221, vendor__escodegen222, compile__module223) {
-        const exp_ctx224 = runtime__runtime221['obj']('ctx-type', 'exp');
-        const stmt_ctx225 = function (recur_vars241) {
+    const compile__compile = ((function ($runtime, runtime__runtime247, vendor__escodegen248, compile__module249) {
+        const exp_ctx250 = runtime__runtime247['obj']('ctx-type', 'exp');
+        const stmt_ctx251 = function (recur_vars267) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var recur_vars240 = recur_vars241;
+                var recur_vars266 = recur_vars267;
                 while (true) {
-                    return runtime__runtime221['obj']('ctx-type', 'stmt', 'recur-vars', recur_vars240);
+                    return runtime__runtime247['obj']('ctx-type', 'stmt', 'recur-vars', recur_vars266);
                 }
             }
         };
-        const non_recur_stmt_ctx226 = runtime__runtime221['obj']('ctx-type', 'stmt');
-        const exp_ctx_huh_227 = function (ctx243) {
+        const non_recur_stmt_ctx252 = runtime__runtime247['obj']('ctx-type', 'stmt');
+        const exp_ctx_huh_253 = function (ctx269) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var ctx242 = ctx243;
+                var ctx268 = ctx269;
                 while (true) {
-                    return runtime__runtime221['equal?']('exp', runtime__runtime221['get'](ctx242, 'ctx-type'));
+                    return runtime__runtime247['equal?']('exp', runtime__runtime247['get'](ctx268, 'ctx-type'));
                 }
             }
         };
-        const stmt_ctx_huh_228 = function (ctx245) {
+        const stmt_ctx_huh_254 = function (ctx271) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var ctx244 = ctx245;
+                var ctx270 = ctx271;
                 while (true) {
-                    return runtime__runtime221['equal?']('stmt', runtime__runtime221['get'](ctx244, 'ctx-type'));
+                    return runtime__runtime247['equal?']('stmt', runtime__runtime247['get'](ctx270, 'ctx-type'));
                 }
             }
         };
-        const recur_ctx_huh_229 = function (ctx247) {
+        const recur_ctx_huh_255 = function (ctx273) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var ctx246 = ctx247;
+                var ctx272 = ctx273;
                 while (true) {
-                    return runtime__runtime221['has'](ctx246, 'recur-vars');
+                    return runtime__runtime247['has'](ctx272, 'recur-vars');
                 }
             }
         };
-        const recur_ctx_vars230 = function (ctx249) {
+        const recur_ctx_vars256 = function (ctx275) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var ctx248 = ctx249;
+                var ctx274 = ctx275;
                 while (true) {
-                    return runtime__runtime221['get'](ctx248, 'recur-vars');
+                    return runtime__runtime247['get'](ctx274, 'recur-vars');
                 }
             }
         };
-        const gen_literal231 = function (value251) {
+        const gen_literal257 = function (value277) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var value250 = value251;
+                var value276 = value277;
                 while (true) {
-                    return runtime__runtime221['obj']('type', 'Literal', 'value', value250);
+                    return runtime__runtime247['obj']('type', 'Literal', 'value', value276);
                 }
             }
         };
-        const gen_identifier232 = function (str254) {
+        const gen_identifier258 = function (str280) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var str252 = str254;
+                var str278 = str280;
                 while (true) {
-                    const _253 = runtime__runtime221['string/c']('gen-identifier', str252);
-                    return runtime__runtime221['obj']('type', 'Identifier', 'name', str252);
+                    const _279 = runtime__runtime247['string/c']('gen-identifier', str278);
+                    return runtime__runtime247['obj']('type', 'Identifier', 'name', str278);
                 }
             }
         };
-        const gen_binding233 = function (lhs258, rhs259, kind260) {
+        const gen_binding259 = function (lhs284, rhs285, kind286) {
             if (3 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 3, arguments['length']);
             {
-                var lhs255 = lhs258;
-                var rhs256 = rhs259;
-                var kind257 = kind260;
+                var lhs281 = lhs284;
+                var rhs282 = rhs285;
+                var kind283 = kind286;
                 while (true) {
-                    return runtime__runtime221['obj']('type', 'VariableDeclaration', 'kind', kind257, 'declarations', runtime__runtime221['array'](runtime__runtime221['obj']('type', 'VariableDeclarator', 'id', gen_identifier232(lhs255), 'init', rhs256)));
+                    return runtime__runtime247['obj']('type', 'VariableDeclaration', 'kind', kind283, 'declarations', runtime__runtime247['array'](runtime__runtime247['obj']('type', 'VariableDeclarator', 'id', gen_identifier258(lhs281), 'init', rhs282)));
                 }
             }
         };
-        const gen_const_field_access234 = function (o263, name264) {
+        const gen_const_field_access260 = function (o289, name290) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var o261 = o263;
-                var name262 = name264;
+                var o287 = o289;
+                var name288 = name290;
                 while (true) {
-                    return runtime__runtime221['obj']('type', 'MemberExpression', 'object', o261, 'property', gen_literal231(name262), 'computed', runtime__runtime221['true']);
+                    return runtime__runtime247['obj']('type', 'MemberExpression', 'object', o287, 'property', gen_literal257(name288), 'computed', runtime__runtime247['true']);
                 }
             }
         };
-        const gen_iife235 = function (body266) {
+        const gen_iife261 = function (body292) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var body265 = body266;
+                var body291 = body292;
                 while (true) {
-                    return runtime__runtime221['obj']('type', 'CallExpression', 'arguments', runtime__runtime221['array'](), 'callee', runtime__runtime221['obj']('type', 'FunctionExpression', 'params', runtime__runtime221['array'](), 'body', body265));
+                    return runtime__runtime247['obj']('type', 'CallExpression', 'arguments', runtime__runtime247['array'](), 'callee', runtime__runtime247['obj']('type', 'FunctionExpression', 'params', runtime__runtime247['array'](), 'body', body291));
                 }
             }
         };
-        const gen_assignment_stmt236 = function (lhs269, rhs270) {
+        const gen_assignment_stmt262 = function (lhs295, rhs296) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var lhs267 = lhs269;
-                var rhs268 = rhs270;
+                var lhs293 = lhs295;
+                var rhs294 = rhs296;
                 while (true) {
-                    return runtime__runtime221['obj']('type', 'ExpressionStatement', 'expression', runtime__runtime221['obj']('type', 'AssignmentExpression', 'operator', '=', 'left', gen_identifier232(lhs267), 'right', rhs268));
+                    return runtime__runtime247['obj']('type', 'ExpressionStatement', 'expression', runtime__runtime247['obj']('type', 'AssignmentExpression', 'operator', '=', 'left', gen_identifier258(lhs293), 'right', rhs294));
                 }
             }
         };
-        const compile_def237 = function (d272) {
+        const compile_def263 = function (d298) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var d271 = d272;
+                var d297 = d298;
                 while (true) {
-                    return gen_binding233(runtime__runtime221['get'](d271, 'id'), compile_expression238(runtime__runtime221['get'](d271, 'rhs'), exp_ctx224), 'const');
+                    return gen_binding259(runtime__runtime247['get'](d297, 'id'), compile_expression264(runtime__runtime247['get'](d297, 'rhs'), exp_ctx250), 'const');
                 }
             }
         };
-        const compile_expression238 = function (e337, ctx338) {
+        const compile_expression264 = function (e363, ctx364) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var e273 = e337;
-                var ctx274 = ctx338;
+                var e299 = e363;
+                var ctx300 = ctx364;
                 while (true) {
-                    const maybe_return275 = function (e293) {
+                    const maybe_return301 = function (e319) {
                         if (1 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                         {
-                            var e292 = e293;
+                            var e318 = e319;
                             while (true) {
-                                if (false !== stmt_ctx_huh_228(ctx274))
-                                    return runtime__runtime221['obj']('type', 'ReturnStatement', 'argument', e292);
+                                if (false !== stmt_ctx_huh_254(ctx300))
+                                    return runtime__runtime247['obj']('type', 'ReturnStatement', 'argument', e318);
                                 else
-                                    return e292;
+                                    return e318;
                             }
                         }
                     };
-                    const compile_literal276 = function () {
+                    const compile_literal302 = function () {
                         if (0 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
                         {
                             while (true) {
-                                return maybe_return275(gen_literal231(runtime__runtime221['get'](e273, 'literal')));
+                                return maybe_return301(gen_literal257(runtime__runtime247['get'](e299, 'literal')));
                             }
                         }
                     };
-                    const compile_local_ref277 = function () {
+                    const compile_local_ref303 = function () {
                         if (0 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
                         {
                             while (true) {
-                                return maybe_return275(gen_identifier232(runtime__runtime221['get'](e273, 'local-ref')));
+                                return maybe_return301(gen_identifier258(runtime__runtime247['get'](e299, 'local-ref')));
                             }
                         }
                     };
-                    const compile_module_ref278 = function () {
+                    const compile_module_ref304 = function () {
                         if (0 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
                         {
                             while (true) {
-                                return maybe_return275(gen_const_field_access234(gen_identifier232(runtime__runtime221['get'](e273, 'module-ref-sym')), runtime__runtime221['get'](e273, 'module-ref-field')));
+                                return maybe_return301(gen_const_field_access260(gen_identifier258(runtime__runtime247['get'](e299, 'module-ref-sym')), runtime__runtime247['get'](e299, 'module-ref-field')));
                             }
                         }
                     };
-                    const compile_app279 = function () {
+                    const compile_app305 = function () {
                         if (0 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
                         {
                             while (true) {
-                                const compiled_exps294 = runtime__runtime221['map'](function (e296) {
+                                const compiled_exps320 = runtime__runtime247['map'](function (e322) {
                                     if (1 !== arguments['length'])
                                         $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                                     {
-                                        var e295 = e296;
+                                        var e321 = e322;
                                         while (true) {
-                                            return compile_expression238(e295, exp_ctx224);
+                                            return compile_expression264(e321, exp_ctx250);
                                         }
                                     }
-                                }, runtime__runtime221['get'](e273, 'app-exps'));
-                                return maybe_return275(runtime__runtime221['obj']('type', 'CallExpression', 'callee', runtime__runtime221['first'](compiled_exps294), 'arguments', runtime__runtime221['list->array'](runtime__runtime221['rest'](compiled_exps294))));
+                                }, runtime__runtime247['get'](e299, 'app-exps'));
+                                return maybe_return301(runtime__runtime247['obj']('type', 'CallExpression', 'callee', runtime__runtime247['first'](compiled_exps320), 'arguments', runtime__runtime247['list->array'](runtime__runtime247['rest'](compiled_exps320))));
                             }
                         }
                     };
-                    const build_condition280 = function (if_c298) {
+                    const build_condition306 = function (if_c324) {
                         if (1 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                         {
-                            var if_c297 = if_c298;
+                            var if_c323 = if_c324;
                             while (true) {
-                                return runtime__runtime221['obj']('type', 'BinaryExpression', 'operator', '!==', 'left', gen_literal231(runtime__runtime221['false']), 'right', if_c297);
+                                return runtime__runtime247['obj']('type', 'BinaryExpression', 'operator', '!==', 'left', gen_literal257(runtime__runtime247['false']), 'right', if_c323);
                             }
                         }
                     };
-                    const compile_if_exp281 = function () {
+                    const compile_if_exp307 = function () {
                         if (0 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
                         {
                             while (true) {
-                                return maybe_return275(runtime__runtime221['obj']('type', 'ConditionalExpression', 'test', build_condition280(compile_expression238(runtime__runtime221['get'](e273, 'if-c'), ctx274)), 'consequent', compile_expression238(runtime__runtime221['get'](e273, 'if-t'), ctx274), 'alternate', compile_expression238(runtime__runtime221['get'](e273, 'if-e'), ctx274)));
+                                return maybe_return301(runtime__runtime247['obj']('type', 'ConditionalExpression', 'test', build_condition306(compile_expression264(runtime__runtime247['get'](e299, 'if-c'), ctx300)), 'consequent', compile_expression264(runtime__runtime247['get'](e299, 'if-t'), ctx300), 'alternate', compile_expression264(runtime__runtime247['get'](e299, 'if-e'), ctx300)));
                             }
                         }
                     };
-                    const compile_if_stmt282 = function () {
+                    const compile_if_stmt308 = function () {
                         if (0 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
                         {
                             while (true) {
-                                return runtime__runtime221['obj']('type', 'IfStatement', 'test', build_condition280(compile_expression238(runtime__runtime221['get'](e273, 'if-c'), exp_ctx224)), 'consequent', compile_expression238(runtime__runtime221['get'](e273, 'if-t'), ctx274), 'alternate', compile_expression238(runtime__runtime221['get'](e273, 'if-e'), ctx274));
+                                return runtime__runtime247['obj']('type', 'IfStatement', 'test', build_condition306(compile_expression264(runtime__runtime247['get'](e299, 'if-c'), exp_ctx250)), 'consequent', compile_expression264(runtime__runtime247['get'](e299, 'if-t'), ctx300), 'alternate', compile_expression264(runtime__runtime247['get'](e299, 'if-e'), ctx300));
                             }
                         }
                     };
-                    const compile_block283 = function (block303, ctx304) {
+                    const compile_block309 = function (block329, ctx330) {
                         if (2 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                         {
-                            var block299 = block303;
-                            var ctx300 = ctx304;
+                            var block325 = block329;
+                            var ctx326 = ctx330;
                             while (true) {
-                                const decls301 = runtime__runtime221['map'](compile_def237, runtime__runtime221['get'](block299, 'block-defs'));
-                                const ret302 = compile_expression238(runtime__runtime221['get'](block299, 'block-ret'), ctx300);
-                                return runtime__runtime221['obj']('type', 'BlockStatement', 'body', runtime__runtime221['list->array'](runtime__runtime221['append'](decls301, runtime__runtime221['list'](ret302))));
+                                const decls327 = runtime__runtime247['map'](compile_def263, runtime__runtime247['get'](block325, 'block-defs'));
+                                const ret328 = compile_expression264(runtime__runtime247['get'](block325, 'block-ret'), ctx326);
+                                return runtime__runtime247['obj']('type', 'BlockStatement', 'body', runtime__runtime247['list->array'](runtime__runtime247['append'](decls327, runtime__runtime247['list'](ret328))));
                             }
                         }
                     };
-                    const build_loop_body284 = function (vars315, inits316, body317, ctx318) {
+                    const build_loop_body310 = function (vars341, inits342, body343, ctx344) {
                         if (4 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 4, arguments['length']);
                         {
-                            var vars305 = vars315;
-                            var inits306 = inits316;
-                            var body307 = body317;
-                            var ctx308 = ctx318;
+                            var vars331 = vars341;
+                            var inits332 = inits342;
+                            var body333 = body343;
+                            var ctx334 = ctx344;
                             while (true) {
-                                const decls309 = runtime__runtime221['zip'](function (var313, init314) {
+                                const decls335 = runtime__runtime247['zip'](function (var339, init340) {
                                     if (2 !== arguments['length'])
                                         $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                                     {
-                                        var var311 = var313;
-                                        var init312 = init314;
+                                        var var337 = var339;
+                                        var init338 = init340;
                                         while (true) {
-                                            return gen_binding233(var311, compile_expression238(init312, exp_ctx224), 'var');
+                                            return gen_binding259(var337, compile_expression264(init338, exp_ctx250), 'var');
                                         }
                                     }
-                                }, vars305, inits306);
-                                const body_loop310 = runtime__runtime221['obj']('type', 'WhileStatement', 'test', gen_literal231(runtime__runtime221['true']), 'body', compile_block283(body307, stmt_ctx225(vars305)));
-                                return runtime__runtime221['obj']('type', 'BlockStatement', 'body', runtime__runtime221['list->array'](runtime__runtime221['append'](decls309, runtime__runtime221['list'](body_loop310))));
+                                }, vars331, inits332);
+                                const body_loop336 = runtime__runtime247['obj']('type', 'WhileStatement', 'test', gen_literal257(runtime__runtime247['true']), 'body', compile_block309(body333, stmt_ctx251(vars331)));
+                                return runtime__runtime247['obj']('type', 'BlockStatement', 'body', runtime__runtime247['list->array'](runtime__runtime247['append'](decls335, runtime__runtime247['list'](body_loop336))));
                             }
                         }
                     };
-                    const build_arity_check285 = function (name321, count322) {
+                    const build_arity_check311 = function (name347, count348) {
                         if (2 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                         {
-                            var name319 = name321;
-                            var count320 = count322;
+                            var name345 = name347;
+                            var count346 = count348;
                             while (true) {
-                                return runtime__runtime221['obj']('type', 'IfStatement', 'test', runtime__runtime221['obj']('type', 'BinaryExpression', 'operator', '!==', 'left', gen_literal231(count320), 'right', gen_const_field_access234(gen_identifier232('arguments'), 'length')), 'consequent', runtime__runtime221['obj']('type', 'ExpressionStatement', 'expression', runtime__runtime221['obj']('type', 'CallExpression', 'callee', gen_const_field_access234(gen_identifier232('$runtime'), 'raise-arity-error'), 'arguments', runtime__runtime221['array'](gen_literal231(name319), gen_literal231(count320), gen_const_field_access234(gen_identifier232('arguments'), 'length')))), 'alternate', runtime__runtime221['null']);
+                                return runtime__runtime247['obj']('type', 'IfStatement', 'test', runtime__runtime247['obj']('type', 'BinaryExpression', 'operator', '!==', 'left', gen_literal257(count346), 'right', gen_const_field_access260(gen_identifier258('arguments'), 'length')), 'consequent', runtime__runtime247['obj']('type', 'ExpressionStatement', 'expression', runtime__runtime247['obj']('type', 'CallExpression', 'callee', gen_const_field_access260(gen_identifier258('$runtime'), 'raise-arity-error'), 'arguments', runtime__runtime247['array'](gen_literal257(name345), gen_literal257(count346), gen_const_field_access260(gen_identifier258('arguments'), 'length')))), 'alternate', runtime__runtime247['null']);
                             }
                         }
                     };
-                    const compile_fn286 = function () {
+                    const compile_fn312 = function () {
                         if (0 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
                         {
                             while (true) {
-                                const temps_as_refs323 = runtime__runtime221['map'](function (t325) {
+                                const temps_as_refs349 = runtime__runtime247['map'](function (t351) {
                                     if (1 !== arguments['length'])
                                         $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                                     {
-                                        var t324 = t325;
+                                        var t350 = t351;
                                         while (true) {
-                                            return runtime__runtime221['obj']('local-ref', t324);
+                                            return runtime__runtime247['obj']('local-ref', t350);
                                         }
                                     }
-                                }, runtime__runtime221['get'](e273, 'fn-temps'));
-                                return maybe_return275(runtime__runtime221['obj']('type', 'FunctionExpression', 'params', runtime__runtime221['list->array'](runtime__runtime221['map'](gen_identifier232, runtime__runtime221['get'](e273, 'fn-temps'))), 'body', runtime__runtime221['obj']('type', 'BlockStatement', 'body', runtime__runtime221['array'](build_arity_check285('anonymous procedure', runtime__runtime221['size'](runtime__runtime221['get'](e273, 'fn-args'))), build_loop_body284(runtime__runtime221['get'](e273, 'fn-args'), temps_as_refs323, e273, ctx274)))));
+                                }, runtime__runtime247['get'](e299, 'fn-temps'));
+                                return maybe_return301(runtime__runtime247['obj']('type', 'FunctionExpression', 'params', runtime__runtime247['list->array'](runtime__runtime247['map'](gen_identifier258, runtime__runtime247['get'](e299, 'fn-temps'))), 'body', runtime__runtime247['obj']('type', 'BlockStatement', 'body', runtime__runtime247['array'](build_arity_check311('anonymous procedure', runtime__runtime247['size'](runtime__runtime247['get'](e299, 'fn-args'))), build_loop_body310(runtime__runtime247['get'](e299, 'fn-args'), temps_as_refs349, e299, ctx300)))));
                             }
                         }
                     };
-                    const compile_loop_exp287 = function () {
+                    const compile_loop_exp313 = function () {
                         if (0 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
                         {
                             while (true) {
-                                return maybe_return275(gen_iife235(build_loop_body284(runtime__runtime221['get'](e273, 'loop-vars'), runtime__runtime221['get'](e273, 'loop-inits'), e273, ctx274)));
+                                return maybe_return301(gen_iife261(build_loop_body310(runtime__runtime247['get'](e299, 'loop-vars'), runtime__runtime247['get'](e299, 'loop-inits'), e299, ctx300)));
                             }
                         }
                     };
-                    const compile_loop_stmt288 = function () {
+                    const compile_loop_stmt314 = function () {
                         if (0 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
                         {
                             while (true) {
-                                return build_loop_body284(runtime__runtime221['get'](e273, 'loop-vars'), runtime__runtime221['get'](e273, 'loop-inits'), e273, ctx274);
+                                return build_loop_body310(runtime__runtime247['get'](e299, 'loop-vars'), runtime__runtime247['get'](e299, 'loop-inits'), e299, ctx300);
                             }
                         }
                     };
-                    const compile_block_exp289 = function () {
+                    const compile_block_exp315 = function () {
                         if (0 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
                         {
                             while (true) {
-                                return maybe_return275(gen_iife235(compile_block283(e273, non_recur_stmt_ctx226)));
+                                return maybe_return301(gen_iife261(compile_block309(e299, non_recur_stmt_ctx252)));
                             }
                         }
                     };
-                    const compile_block_stmt290 = function () {
+                    const compile_block_stmt316 = function () {
                         if (0 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
                         {
                             while (true) {
-                                return compile_block283(e273, ctx274);
+                                return compile_block309(e299, ctx300);
                             }
                         }
                     };
-                    const compile_recur291 = function () {
+                    const compile_recur317 = function () {
                         if (0 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
                         {
                             while (true) {
-                                const _1326 = false !== runtime__runtime221['not'](recur_ctx_huh_229(ctx274)) ? runtime__runtime221['error']('compile', 'recur not in tail position') : runtime__runtime221['null'];
-                                const _2327 = false !== runtime__runtime221['not'](runtime__runtime221['='](runtime__runtime221['size'](recur_ctx_vars230(ctx274)), runtime__runtime221['size'](runtime__runtime221['get'](e273, 'recur-exps')))) ? runtime__runtime221['error']('wrong number of arguments to recur') : runtime__runtime221['null'];
-                                const compiled_expressions328 = runtime__runtime221['map'](function (e332) {
+                                const _1352 = false !== runtime__runtime247['not'](recur_ctx_huh_255(ctx300)) ? runtime__runtime247['error']('compile', 'recur not in tail position') : runtime__runtime247['null'];
+                                const _2353 = false !== runtime__runtime247['not'](runtime__runtime247['='](runtime__runtime247['size'](recur_ctx_vars256(ctx300)), runtime__runtime247['size'](runtime__runtime247['get'](e299, 'recur-exps')))) ? runtime__runtime247['error']('wrong number of arguments to recur') : runtime__runtime247['null'];
+                                const compiled_expressions354 = runtime__runtime247['map'](function (e358) {
                                     if (1 !== arguments['length'])
                                         $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                                     {
-                                        var e331 = e332;
+                                        var e357 = e358;
                                         while (true) {
-                                            return compile_expression238(e331, exp_ctx224);
+                                            return compile_expression264(e357, exp_ctx250);
                                         }
                                     }
-                                }, runtime__runtime221['get'](e273, 'recur-exps'));
-                                const tmp_assigns329 = runtime__runtime221['zip'](gen_assignment_stmt236, runtime__runtime221['get'](e273, 'recur-temps'), compiled_expressions328);
-                                const loop_var_assigns330 = runtime__runtime221['zip'](function (loop_var335, tmp_var336) {
+                                }, runtime__runtime247['get'](e299, 'recur-exps'));
+                                const tmp_assigns355 = runtime__runtime247['zip'](gen_assignment_stmt262, runtime__runtime247['get'](e299, 'recur-temps'), compiled_expressions354);
+                                const loop_var_assigns356 = runtime__runtime247['zip'](function (loop_var361, tmp_var362) {
                                     if (2 !== arguments['length'])
                                         $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                                     {
-                                        var loop_var333 = loop_var335;
-                                        var tmp_var334 = tmp_var336;
+                                        var loop_var359 = loop_var361;
+                                        var tmp_var360 = tmp_var362;
                                         while (true) {
-                                            return gen_assignment_stmt236(loop_var333, compile_expression238(runtime__runtime221['obj']('local-ref', tmp_var334), exp_ctx224));
+                                            return gen_assignment_stmt262(loop_var359, compile_expression264(runtime__runtime247['obj']('local-ref', tmp_var360), exp_ctx250));
                                         }
                                     }
-                                }, recur_ctx_vars230(ctx274), runtime__runtime221['get'](e273, 'recur-temps'));
-                                return runtime__runtime221['obj']('type', 'BlockStatement', 'body', runtime__runtime221['list->array'](runtime__runtime221['append'](tmp_assigns329, loop_var_assigns330)));
+                                }, recur_ctx_vars256(ctx300), runtime__runtime247['get'](e299, 'recur-temps'));
+                                return runtime__runtime247['obj']('type', 'BlockStatement', 'body', runtime__runtime247['list->array'](runtime__runtime247['append'](tmp_assigns355, loop_var_assigns356)));
                             }
                         }
                     };
-                    if (false !== runtime__runtime221['has'](e273, 'literal'))
-                        return compile_literal276();
-                    else if (false !== runtime__runtime221['has'](e273, 'local-ref'))
-                        return compile_local_ref277();
-                    else if (false !== runtime__runtime221['has'](e273, 'module-ref-sym'))
-                        return compile_module_ref278();
-                    else if (false !== runtime__runtime221['has'](e273, 'app-exps'))
-                        return compile_app279();
-                    else if (false !== (false !== runtime__runtime221['has'](e273, 'if-c') ? exp_ctx_huh_227(ctx274) : false))
-                        return compile_if_exp281();
-                    else if (false !== (false !== runtime__runtime221['has'](e273, 'if-c') ? stmt_ctx_huh_228(ctx274) : false))
-                        return compile_if_stmt282();
-                    else if (false !== runtime__runtime221['has'](e273, 'fn-args'))
-                        return compile_fn286();
-                    else if (false !== (false !== runtime__runtime221['has'](e273, 'loop-vars') ? exp_ctx_huh_227(ctx274) : false))
-                        return compile_loop_exp287();
-                    else if (false !== (false !== runtime__runtime221['has'](e273, 'loop-vars') ? stmt_ctx_huh_228(ctx274) : false))
-                        return compile_loop_stmt288();
-                    else if (false !== (false !== runtime__runtime221['has'](e273, 'block-exp') ? exp_ctx_huh_227(ctx274) : false))
-                        return compile_block_exp289();
-                    else if (false !== (false !== runtime__runtime221['has'](e273, 'block-exp') ? stmt_ctx_huh_228(ctx274) : false))
-                        return compile_block_stmt290();
-                    else if (false !== runtime__runtime221['has'](e273, 'recur-exps'))
-                        return compile_recur291();
+                    if (false !== runtime__runtime247['has'](e299, 'literal'))
+                        return compile_literal302();
+                    else if (false !== runtime__runtime247['has'](e299, 'local-ref'))
+                        return compile_local_ref303();
+                    else if (false !== runtime__runtime247['has'](e299, 'module-ref-sym'))
+                        return compile_module_ref304();
+                    else if (false !== runtime__runtime247['has'](e299, 'app-exps'))
+                        return compile_app305();
+                    else if (false !== (false !== runtime__runtime247['has'](e299, 'if-c') ? exp_ctx_huh_253(ctx300) : false))
+                        return compile_if_exp307();
+                    else if (false !== (false !== runtime__runtime247['has'](e299, 'if-c') ? stmt_ctx_huh_254(ctx300) : false))
+                        return compile_if_stmt308();
+                    else if (false !== runtime__runtime247['has'](e299, 'fn-args'))
+                        return compile_fn312();
+                    else if (false !== (false !== runtime__runtime247['has'](e299, 'loop-vars') ? exp_ctx_huh_253(ctx300) : false))
+                        return compile_loop_exp313();
+                    else if (false !== (false !== runtime__runtime247['has'](e299, 'loop-vars') ? stmt_ctx_huh_254(ctx300) : false))
+                        return compile_loop_stmt314();
+                    else if (false !== (false !== runtime__runtime247['has'](e299, 'block-exp') ? exp_ctx_huh_253(ctx300) : false))
+                        return compile_block_exp315();
+                    else if (false !== (false !== runtime__runtime247['has'](e299, 'block-exp') ? stmt_ctx_huh_254(ctx300) : false))
+                        return compile_block_stmt316();
+                    else if (false !== runtime__runtime247['has'](e299, 'recur-exps'))
+                        return compile_recur317();
                     else
-                        return runtime__runtime221['error']('compile', runtime__runtime221['string-append']('unhandled expression ', runtime__runtime221['to-string'](e273)));
+                        return runtime__runtime247['error']('compile', runtime__runtime247['string-append']('unhandled expression ', runtime__runtime247['to-string'](e299)));
                 }
             }
         };
-        const compile_module239 = function (stree351) {
+        const compile_module265 = function (stree377) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var stree339 = stree351;
+                var stree365 = stree377;
                 while (true) {
-                    const compiled_defs340 = runtime__runtime221['map'](compile_def237, runtime__runtime221['get'](stree339, 'block-defs'));
-                    const compiled_return341 = runtime__runtime221['obj']('type', 'ReturnStatement', 'argument', runtime__runtime221['obj']('type', 'ObjectExpression', 'properties', runtime__runtime221['list->array'](runtime__runtime221['zip'](function (internal349, external350) {
+                    const compiled_defs366 = runtime__runtime247['map'](compile_def263, runtime__runtime247['get'](stree365, 'block-defs'));
+                    const compiled_return367 = runtime__runtime247['obj']('type', 'ReturnStatement', 'argument', runtime__runtime247['obj']('type', 'ObjectExpression', 'properties', runtime__runtime247['list->array'](runtime__runtime247['zip'](function (internal375, external376) {
                         if (2 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                         {
-                            var internal347 = internal349;
-                            var external348 = external350;
+                            var internal373 = internal375;
+                            var external374 = external376;
                             while (true) {
-                                return runtime__runtime221['obj']('type', 'Property', 'key', gen_literal231(external348), 'value', gen_identifier232(internal347));
+                                return runtime__runtime247['obj']('type', 'Property', 'key', gen_literal257(external374), 'value', gen_identifier258(internal373));
                             }
                         }
-                    }, runtime__runtime221['get'](stree339, 'module-provide-internal-ids'), runtime__runtime221['get'](stree339, 'module-provides')))));
-                    const require_internal_ids342 = runtime__runtime221['cons']('$runtime', runtime__runtime221['get'](stree339, 'module-require-internal-ids'));
-                    const estree343 = runtime__runtime221['obj']('type', 'FunctionExpression', 'params', runtime__runtime221['list->array'](runtime__runtime221['map'](gen_identifier232, require_internal_ids342)), 'body', runtime__runtime221['obj']('type', 'BlockStatement', 'body', runtime__runtime221['list->array'](runtime__runtime221['append'](compiled_defs340, runtime__runtime221['list'](compiled_return341)))));
-                    const compiled_body344 = vendor__escodegen222['generate'](estree343);
-                    const paren_wrapped345 = runtime__runtime221['string-append']('(', compiled_body344, ')');
-                    const module_requires346 = runtime__runtime221['cons']('runtime/minimal', runtime__runtime221['get'](stree339, 'module-requires'));
-                    return compile__module223['compiled-module'](module_requires346, runtime__runtime221['get'](stree339, 'module-provides'), paren_wrapped345);
+                    }, runtime__runtime247['get'](stree365, 'module-provide-internal-ids'), runtime__runtime247['get'](stree365, 'module-provides')))));
+                    const require_internal_ids368 = runtime__runtime247['cons']('$runtime', runtime__runtime247['get'](stree365, 'module-require-internal-ids'));
+                    const estree369 = runtime__runtime247['obj']('type', 'FunctionExpression', 'params', runtime__runtime247['list->array'](runtime__runtime247['map'](gen_identifier258, require_internal_ids368)), 'body', runtime__runtime247['obj']('type', 'BlockStatement', 'body', runtime__runtime247['list->array'](runtime__runtime247['append'](compiled_defs366, runtime__runtime247['list'](compiled_return367)))));
+                    const compiled_body370 = vendor__escodegen248['generate'](estree369);
+                    const paren_wrapped371 = runtime__runtime247['string-append']('(', compiled_body370, ')');
+                    const module_requires372 = runtime__runtime247['cons']('runtime/minimal', runtime__runtime247['get'](stree365, 'module-requires'));
+                    return compile__module249['compiled-module'](module_requires372, runtime__runtime247['get'](stree365, 'module-provides'), paren_wrapped371);
                 }
             }
         };
-        return { 'compile-module': compile_module239 };
+        return { 'compile-module': compile_module265 };
     }))(runtime__minimal, runtime__runtime, vendor__escodegen, compile__module);
-    const compile__parse = ((function ($runtime, runtime__runtime352, compile__reader353) {
-        const syntax_error354 = function (stx377) {
+    const compile__parse = ((function ($runtime, runtime__runtime378, compile__reader379) {
+        const syntax_error380 = function (stx403) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var stx376 = stx377;
+                var stx402 = stx403;
                 while (true) {
-                    return runtime__runtime352['error']('bad syntax', runtime__runtime352['to-string'](stx376));
+                    return runtime__runtime378['error']('bad syntax', runtime__runtime378['to-string'](stx402));
                 }
             }
         };
-        const unbound_reference_error355 = function (id379) {
+        const unbound_reference_error381 = function (id405) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var id378 = id379;
+                var id404 = id405;
                 while (true) {
-                    return runtime__runtime352['error']('unbound reference', runtime__runtime352['identifier-string'](id378));
+                    return runtime__runtime378['error']('unbound reference', runtime__runtime378['identifier-string'](id404));
                 }
             }
         };
-        const operators356 = runtime__runtime352['hash']('-', '_', '/', '__', '+', '_plus_', '*', '_mul_', '%', '_mod_', '>', '_gt_', '<', '_lt_', '=', '_eq_', '!', '_bang_', '?', '_huh_');
-        const transform_reserved357 = function (s383) {
+        const operators382 = runtime__runtime378['hash']('-', '_', '/', '__', '+', '_plus_', '*', '_mul_', '%', '_mod_', '>', '_gt_', '<', '_lt_', '=', '_eq_', '!', '_bang_', '?', '_huh_');
+        const transform_reserved383 = function (s409) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var s380 = s383;
+                var s406 = s409;
                 while (true) {
-                    return runtime__runtime352['string-join'](runtime__runtime352['map'](function (c382) {
+                    return runtime__runtime378['string-join'](runtime__runtime378['map'](function (c408) {
                         if (1 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                         {
-                            var c381 = c382;
+                            var c407 = c408;
                             while (true) {
-                                if (false !== runtime__runtime352['has'](operators356, c381))
-                                    return runtime__runtime352['get'](operators356, c381);
+                                if (false !== runtime__runtime378['has'](operators382, c407))
+                                    return runtime__runtime378['get'](operators382, c407);
                                 else
-                                    return c381;
+                                    return c407;
                             }
                         }
-                    }, runtime__runtime352['string-split'](s380, '')), '');
+                    }, runtime__runtime378['string-split'](s406, '')), '');
                 }
             }
         };
-        const gensym_counter358 = runtime__runtime352['box'](0);
-        const gensym359 = function (id387) {
+        const gensym_counter384 = runtime__runtime378['box'](0);
+        const gensym385 = function (id413) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var id384 = id387;
+                var id410 = id413;
                 while (true) {
-                    const n385 = runtime__runtime352['unbox'](gensym_counter358);
-                    const _386 = runtime__runtime352['set-box!'](gensym_counter358, runtime__runtime352['+'](1, n385));
-                    return runtime__runtime352['string-append'](transform_reserved357(runtime__runtime352['identifier-string'](id384)), runtime__runtime352['to-string'](n385));
+                    const n411 = runtime__runtime378['unbox'](gensym_counter384);
+                    const _412 = runtime__runtime378['set-box!'](gensym_counter384, runtime__runtime378['+'](1, n411));
+                    return runtime__runtime378['string-append'](transform_reserved383(runtime__runtime378['identifier-string'](id410)), runtime__runtime378['to-string'](n411));
                 }
             }
         };
-        const app_parser360 = function (exp392, env393) {
+        const app_parser386 = function (exp418, env419) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var exp388 = exp392;
-                var env389 = env393;
+                var exp414 = exp418;
+                var env415 = env419;
                 while (true) {
-                    if (false !== runtime__runtime352['<'](runtime__runtime352['size'](exp388), 1))
-                        return syntax_error354(exp388);
+                    if (false !== runtime__runtime378['<'](runtime__runtime378['size'](exp414), 1))
+                        return syntax_error380(exp414);
                     else
-                        return runtime__runtime352['hash']('app-exps', runtime__runtime352['map'](function (e391) {
+                        return runtime__runtime378['hash']('app-exps', runtime__runtime378['map'](function (e417) {
                             if (1 !== arguments['length'])
                                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                             {
-                                var e390 = e391;
+                                var e416 = e417;
                                 while (true) {
-                                    return parse_exp373(e390, env389);
+                                    return parse_exp399(e416, env415);
                                 }
                             }
-                        }, exp388));
+                        }, exp414));
                 }
             }
         };
-        const if_parser361 = function (exp396, env397) {
+        const if_parser387 = function (exp422, env423) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var exp394 = exp396;
-                var env395 = env397;
+                var exp420 = exp422;
+                var env421 = env423;
                 while (true) {
-                    if (false !== runtime__runtime352['not'](runtime__runtime352['='](runtime__runtime352['size'](exp394), 4)))
-                        return syntax_error354(exp394);
+                    if (false !== runtime__runtime378['not'](runtime__runtime378['='](runtime__runtime378['size'](exp420), 4)))
+                        return syntax_error380(exp420);
                     else
-                        return runtime__runtime352['hash']('if-c', parse_exp373(runtime__runtime352['get'](exp394, 1), env395), 'if-t', parse_exp373(runtime__runtime352['get'](exp394, 2), env395), 'if-e', parse_exp373(runtime__runtime352['get'](exp394, 3), env395));
+                        return runtime__runtime378['hash']('if-c', parse_exp399(runtime__runtime378['get'](exp420, 1), env421), 'if-t', parse_exp399(runtime__runtime378['get'](exp420, 2), env421), 'if-e', parse_exp399(runtime__runtime378['get'](exp420, 3), env421));
                 }
             }
         };
-        const and_parser362 = function (exp400, env401) {
+        const and_parser388 = function (exp426, env427) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var exp398 = exp400;
-                var env399 = env401;
+                var exp424 = exp426;
+                var env425 = env427;
                 while (true) {
-                    if (false !== runtime__runtime352['not'](runtime__runtime352['='](runtime__runtime352['size'](exp398), 3)))
-                        return syntax_error354(exp398);
+                    if (false !== runtime__runtime378['not'](runtime__runtime378['='](runtime__runtime378['size'](exp424), 3)))
+                        return syntax_error380(exp424);
                     else
-                        return runtime__runtime352['hash']('if-c', parse_exp373(runtime__runtime352['get'](exp398, 1), env399), 'if-t', parse_exp373(runtime__runtime352['get'](exp398, 2), env399), 'if-e', runtime__runtime352['hash']('literal', runtime__runtime352['false']));
+                        return runtime__runtime378['hash']('if-c', parse_exp399(runtime__runtime378['get'](exp424, 1), env425), 'if-t', parse_exp399(runtime__runtime378['get'](exp424, 2), env425), 'if-e', runtime__runtime378['hash']('literal', runtime__runtime378['false']));
                 }
             }
         };
-        const or_parser363 = function (exp405, env406) {
+        const or_parser389 = function (exp431, env432) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var exp402 = exp405;
-                var env403 = env406;
+                var exp428 = exp431;
+                var env429 = env432;
                 while (true) {
-                    if (false !== runtime__runtime352['not'](runtime__runtime352['='](runtime__runtime352['size'](exp402), 3)))
-                        return syntax_error354(exp402);
+                    if (false !== runtime__runtime378['not'](runtime__runtime378['='](runtime__runtime378['size'](exp428), 3)))
+                        return syntax_error380(exp428);
                     else {
-                        const tmpid404 = gensym359(runtime__runtime352['make-identifier']('tmp'));
-                        return runtime__runtime352['hash']('block-exp', runtime__runtime352['true'], 'block-defs', runtime__runtime352['list'](runtime__runtime352['hash']('id', tmpid404, 'rhs', parse_exp373(runtime__runtime352['get'](exp402, 1), env403))), 'block-ret', runtime__runtime352['hash']('if-c', runtime__runtime352['hash']('local-ref', tmpid404), 'if-t', runtime__runtime352['hash']('local-ref', tmpid404), 'if-e', parse_exp373(runtime__runtime352['get'](exp402, 2), env403)));
+                        const tmpid430 = gensym385(runtime__runtime378['make-identifier']('tmp'));
+                        return runtime__runtime378['hash']('block-exp', runtime__runtime378['true'], 'block-defs', runtime__runtime378['list'](runtime__runtime378['hash']('id', tmpid430, 'rhs', parse_exp399(runtime__runtime378['get'](exp428, 1), env429))), 'block-ret', runtime__runtime378['hash']('if-c', runtime__runtime378['hash']('local-ref', tmpid430), 'if-t', runtime__runtime378['hash']('local-ref', tmpid430), 'if-e', parse_exp399(runtime__runtime378['get'](exp428, 2), env429)));
                     }
                 }
             }
         };
-        const block_parser364 = function (exp410, env411) {
+        const block_parser390 = function (exp436, env437) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var exp407 = exp410;
-                var env408 = env411;
+                var exp433 = exp436;
+                var env434 = env437;
                 while (true) {
-                    const parsed_block409 = parse_block372(runtime__runtime352['rest'](exp407), env408);
-                    if (false !== runtime__runtime352['empty?'](runtime__runtime352['get'](parsed_block409, 'block-defs')))
-                        return runtime__runtime352['get'](parsed_block409, 'block-ret');
+                    const parsed_block435 = parse_block398(runtime__runtime378['rest'](exp433), env434);
+                    if (false !== runtime__runtime378['empty?'](runtime__runtime378['get'](parsed_block435, 'block-defs')))
+                        return runtime__runtime378['get'](parsed_block435, 'block-ret');
                     else
-                        return runtime__runtime352['assoc'](parsed_block409, 'block-exp', runtime__runtime352['true']);
+                        return runtime__runtime378['assoc'](parsed_block435, 'block-exp', runtime__runtime378['true']);
                 }
             }
         };
-        const fn_parser365 = function (exp423, env424) {
+        const fn_parser391 = function (exp449, env450) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var exp412 = exp423;
-                var env413 = env424;
+                var exp438 = exp449;
+                var env439 = env450;
                 while (true) {
-                    if (false !== runtime__runtime352['<'](runtime__runtime352['size'](exp412), 3))
-                        return syntax_error354(exp412);
+                    if (false !== runtime__runtime378['<'](runtime__runtime378['size'](exp438), 3))
+                        return syntax_error380(exp438);
                     else {
-                        const args414 = runtime__runtime352['get'](exp412, 1);
-                        const _415 = false !== runtime__runtime352['not'](false !== runtime__runtime352['list?'](args414) ? runtime__runtime352['map'](runtime__runtime352['identifier?'], args414) : false) ? syntax_error354(exp412) : runtime__runtime352['null'];
-                        const new_env416 = runtime__runtime352['foldl'](function (env419, arg420) {
+                        const args440 = runtime__runtime378['get'](exp438, 1);
+                        const _441 = false !== runtime__runtime378['not'](false !== runtime__runtime378['list?'](args440) ? runtime__runtime378['map'](runtime__runtime378['identifier?'], args440) : false) ? syntax_error380(exp438) : runtime__runtime378['null'];
+                        const new_env442 = runtime__runtime378['foldl'](function (env445, arg446) {
                             if (2 !== arguments['length'])
                                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                             {
-                                var env417 = env419;
-                                var arg418 = arg420;
+                                var env443 = env445;
+                                var arg444 = arg446;
                                 while (true) {
-                                    return runtime__runtime352['assoc'](env417, arg418, runtime__runtime352['hash']('local-ref', gensym359(arg418)));
+                                    return runtime__runtime378['assoc'](env443, arg444, runtime__runtime378['hash']('local-ref', gensym385(arg444)));
                                 }
                             }
-                        }, env413, args414);
-                        return runtime__runtime352['assoc'](runtime__runtime352['assoc'](parse_block372(runtime__runtime352['rest'](runtime__runtime352['rest'](exp412)), new_env416), 'fn-args', runtime__runtime352['map'](function (arg422) {
+                        }, env439, args440);
+                        return runtime__runtime378['assoc'](runtime__runtime378['assoc'](parse_block398(runtime__runtime378['rest'](runtime__runtime378['rest'](exp438)), new_env442), 'fn-args', runtime__runtime378['map'](function (arg448) {
                             if (1 !== arguments['length'])
                                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                             {
-                                var arg421 = arg422;
+                                var arg447 = arg448;
                                 while (true) {
-                                    return runtime__runtime352['get'](runtime__runtime352['get'](new_env416, arg421), 'local-ref');
+                                    return runtime__runtime378['get'](runtime__runtime378['get'](new_env442, arg447), 'local-ref');
                                 }
                             }
-                        }, args414)), 'fn-temps', runtime__runtime352['map'](gensym359, args414));
+                        }, args440)), 'fn-temps', runtime__runtime378['map'](gensym385, args440));
                     }
                 }
             }
         };
-        const loop_parser366 = function (exp441, env442) {
+        const loop_parser392 = function (exp467, env468) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var exp425 = exp441;
-                var env426 = env442;
+                var exp451 = exp467;
+                var env452 = env468;
                 while (true) {
-                    if (false !== runtime__runtime352['<'](runtime__runtime352['size'](exp425), 3))
-                        return syntax_error354(exp425);
+                    if (false !== runtime__runtime378['<'](runtime__runtime378['size'](exp451), 3))
+                        return syntax_error380(exp451);
                     else {
-                        const binding_list427 = runtime__runtime352['get'](exp425, 1);
-                        const _428 = false !== runtime__runtime352['not'](runtime__runtime352['list?'](binding_list427)) ? syntax_error354(exp425) : runtime__runtime352['null'];
-                        const surface_vars429 = runtime__runtime352['map'](function (pr432) {
+                        const binding_list453 = runtime__runtime378['get'](exp451, 1);
+                        const _454 = false !== runtime__runtime378['not'](runtime__runtime378['list?'](binding_list453)) ? syntax_error380(exp451) : runtime__runtime378['null'];
+                        const surface_vars455 = runtime__runtime378['map'](function (pr458) {
                             if (1 !== arguments['length'])
                                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                             {
-                                var pr431 = pr432;
+                                var pr457 = pr458;
                                 while (true) {
-                                    return runtime__runtime352['get'](pr431, 0);
+                                    return runtime__runtime378['get'](pr457, 0);
                                 }
                             }
-                        }, binding_list427);
-                        const new_env430 = runtime__runtime352['foldl'](function (env435, var436) {
+                        }, binding_list453);
+                        const new_env456 = runtime__runtime378['foldl'](function (env461, var462) {
                             if (2 !== arguments['length'])
                                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                             {
-                                var env433 = env435;
-                                var var434 = var436;
+                                var env459 = env461;
+                                var var460 = var462;
                                 while (true) {
-                                    return runtime__runtime352['assoc'](env433, var434, runtime__runtime352['hash']('local-ref', gensym359(var434)));
+                                    return runtime__runtime378['assoc'](env459, var460, runtime__runtime378['hash']('local-ref', gensym385(var460)));
                                 }
                             }
-                        }, env426, surface_vars429);
-                        return runtime__runtime352['assoc'](runtime__runtime352['assoc'](parse_block372(runtime__runtime352['rest'](runtime__runtime352['rest'](exp425)), new_env430), 'loop-vars', runtime__runtime352['map'](function (var438) {
+                        }, env452, surface_vars455);
+                        return runtime__runtime378['assoc'](runtime__runtime378['assoc'](parse_block398(runtime__runtime378['rest'](runtime__runtime378['rest'](exp451)), new_env456), 'loop-vars', runtime__runtime378['map'](function (var464) {
                             if (1 !== arguments['length'])
                                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                             {
-                                var var437 = var438;
+                                var var463 = var464;
                                 while (true) {
-                                    return runtime__runtime352['get'](runtime__runtime352['get'](new_env430, var437), 'local-ref');
+                                    return runtime__runtime378['get'](runtime__runtime378['get'](new_env456, var463), 'local-ref');
                                 }
                             }
-                        }, surface_vars429)), 'loop-inits', runtime__runtime352['map'](function (pr440) {
+                        }, surface_vars455)), 'loop-inits', runtime__runtime378['map'](function (pr466) {
                             if (1 !== arguments['length'])
                                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                             {
-                                var pr439 = pr440;
+                                var pr465 = pr466;
                                 while (true) {
-                                    return parse_exp373(runtime__runtime352['get'](pr439, 1), env426);
+                                    return parse_exp399(runtime__runtime378['get'](pr465, 1), env452);
                                 }
                             }
-                        }, binding_list427));
+                        }, binding_list453));
                     }
                 }
             }
         };
-        const recur_parser367 = function (exp449, env450) {
+        const recur_parser393 = function (exp475, env476) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var exp443 = exp449;
-                var env444 = env450;
+                var exp469 = exp475;
+                var env470 = env476;
                 while (true) {
-                    return runtime__runtime352['hash']('recur-exps', runtime__runtime352['map'](function (e446) {
+                    return runtime__runtime378['hash']('recur-exps', runtime__runtime378['map'](function (e472) {
                         if (1 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                         {
-                            var e445 = e446;
+                            var e471 = e472;
                             while (true) {
-                                return parse_exp373(e445, env444);
+                                return parse_exp399(e471, env470);
                             }
                         }
-                    }, runtime__runtime352['rest'](exp443)), 'recur-temps', runtime__runtime352['map'](function (_448) {
+                    }, runtime__runtime378['rest'](exp469)), 'recur-temps', runtime__runtime378['map'](function (_474) {
                         if (1 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                         {
-                            var _447 = _448;
+                            var _473 = _474;
                             while (true) {
-                                return gensym359(runtime__runtime352['make-identifier']('tmp'));
+                                return gensym385(runtime__runtime378['make-identifier']('tmp'));
                             }
                         }
-                    }, runtime__runtime352['rest'](exp443)));
+                    }, runtime__runtime378['rest'](exp469)));
                 }
             }
         };
-        const def_env_rhs368 = runtime__runtime352['hash']('def', runtime__runtime352['true']);
-        const initial_env369 = runtime__runtime352['hash'](runtime__runtime352['make-identifier']('def'), def_env_rhs368, runtime__runtime352['make-identifier']('fn'), runtime__runtime352['hash']('core-form', fn_parser365), runtime__runtime352['make-identifier']('if'), runtime__runtime352['hash']('core-form', if_parser361), runtime__runtime352['make-identifier']('or'), runtime__runtime352['hash']('core-form', or_parser363), runtime__runtime352['make-identifier']('and'), runtime__runtime352['hash']('core-form', and_parser362), runtime__runtime352['make-identifier']('loop'), runtime__runtime352['hash']('core-form', loop_parser366), runtime__runtime352['make-identifier']('block'), runtime__runtime352['hash']('core-form', block_parser364), runtime__runtime352['make-identifier']('recur'), runtime__runtime352['hash']('core-form', recur_parser367));
-        const match_def370 = function (form453, env454) {
+        const def_env_rhs394 = runtime__runtime378['hash']('def', runtime__runtime378['true']);
+        const initial_env395 = runtime__runtime378['hash'](runtime__runtime378['make-identifier']('def'), def_env_rhs394, runtime__runtime378['make-identifier']('fn'), runtime__runtime378['hash']('core-form', fn_parser391), runtime__runtime378['make-identifier']('if'), runtime__runtime378['hash']('core-form', if_parser387), runtime__runtime378['make-identifier']('or'), runtime__runtime378['hash']('core-form', or_parser389), runtime__runtime378['make-identifier']('and'), runtime__runtime378['hash']('core-form', and_parser388), runtime__runtime378['make-identifier']('loop'), runtime__runtime378['hash']('core-form', loop_parser392), runtime__runtime378['make-identifier']('block'), runtime__runtime378['hash']('core-form', block_parser390), runtime__runtime378['make-identifier']('recur'), runtime__runtime378['hash']('core-form', recur_parser393));
+        const match_def396 = function (form479, env480) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var form451 = form453;
-                var env452 = env454;
+                var form477 = form479;
+                var env478 = env480;
                 while (true) {
-                    if (false !== (false !== runtime__runtime352['list?'](form451) ? runtime__runtime352['equal?'](def_env_rhs368, runtime__runtime352['get'](env452, runtime__runtime352['get'](form451, 0))) : false))
-                        if (false !== (false !== runtime__runtime352['='](3, runtime__runtime352['size'](form451)) ? runtime__runtime352['identifier?'](runtime__runtime352['get'](form451, 1)) : false))
-                            return runtime__runtime352['hash']('id', runtime__runtime352['get'](form451, 1), 'exp', runtime__runtime352['get'](form451, 2));
+                    if (false !== (false !== runtime__runtime378['list?'](form477) ? runtime__runtime378['equal?'](def_env_rhs394, runtime__runtime378['get'](env478, runtime__runtime378['get'](form477, 0))) : false))
+                        if (false !== (false !== runtime__runtime378['='](3, runtime__runtime378['size'](form477)) ? runtime__runtime378['identifier?'](runtime__runtime378['get'](form477, 1)) : false))
+                            return runtime__runtime378['hash']('id', runtime__runtime378['get'](form477, 1), 'exp', runtime__runtime378['get'](form477, 2));
                         else
-                            return syntax_error354(form451);
+                            return syntax_error380(form477);
                     else
-                        return syntax_error354(form451);
+                        return syntax_error380(form477);
                 }
             }
         };
-        const parse_defs371 = function (forms477, env478) {
+        const parse_defs397 = function (forms503, env504) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var forms455 = forms477;
-                var env456 = env478;
+                var forms481 = forms503;
+                var env482 = env504;
                 while (true) {
-                    const defs457 = runtime__runtime352['map'](function (f462) {
+                    const defs483 = runtime__runtime378['map'](function (f488) {
                         if (1 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                         {
-                            var f461 = f462;
+                            var f487 = f488;
                             while (true) {
-                                return match_def370(f461, env456);
+                                return match_def396(f487, env482);
                             }
                         }
-                    }, forms455);
-                    const surface_ids458 = runtime__runtime352['map'](function (d464) {
+                    }, forms481);
+                    const surface_ids484 = runtime__runtime378['map'](function (d490) {
                         if (1 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                         {
-                            var d463 = d464;
+                            var d489 = d490;
                             while (true) {
-                                return runtime__runtime352['get'](d463, 'id');
+                                return runtime__runtime378['get'](d489, 'id');
                             }
                         }
-                    }, defs457);
-                    const new_env459 = runtime__runtime352['foldl'](function (env467, id468) {
+                    }, defs483);
+                    const new_env485 = runtime__runtime378['foldl'](function (env493, id494) {
                         if (2 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                         {
-                            var env465 = env467;
-                            var id466 = id468;
+                            var env491 = env493;
+                            var id492 = id494;
                             while (true) {
-                                return runtime__runtime352['assoc'](env465, id466, runtime__runtime352['hash']('local-ref', gensym359(id466)));
+                                return runtime__runtime378['assoc'](env491, id492, runtime__runtime378['hash']('local-ref', gensym385(id492)));
                             }
                         }
-                    }, env456, surface_ids458);
-                    const rhss460 = runtime__runtime352['map'](function (d470) {
+                    }, env482, surface_ids484);
+                    const rhss486 = runtime__runtime378['map'](function (d496) {
                         if (1 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                         {
-                            var d469 = d470;
+                            var d495 = d496;
                             while (true) {
-                                return parse_exp373(runtime__runtime352['get'](d469, 'exp'), new_env459);
+                                return parse_exp399(runtime__runtime378['get'](d495, 'exp'), new_env485);
                             }
                         }
-                    }, defs457);
-                    return runtime__runtime352['hash']('block-defs', runtime__runtime352['zip'](function (id473, rhs474) {
+                    }, defs483);
+                    return runtime__runtime378['hash']('block-defs', runtime__runtime378['zip'](function (id499, rhs500) {
                         if (2 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                         {
-                            var id471 = id473;
-                            var rhs472 = rhs474;
+                            var id497 = id499;
+                            var rhs498 = rhs500;
                             while (true) {
-                                return runtime__runtime352['hash']('id', id471, 'rhs', rhs472);
+                                return runtime__runtime378['hash']('id', id497, 'rhs', rhs498);
                             }
                         }
-                    }, runtime__runtime352['map'](function (id476) {
+                    }, runtime__runtime378['map'](function (id502) {
                         if (1 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                         {
-                            var id475 = id476;
+                            var id501 = id502;
                             while (true) {
-                                return runtime__runtime352['get'](runtime__runtime352['get'](new_env459, id475), 'local-ref');
+                                return runtime__runtime378['get'](runtime__runtime378['get'](new_env485, id501), 'local-ref');
                             }
                         }
-                    }, surface_ids458), rhss460), 'surface-def-ids', surface_ids458, 'new-env', new_env459);
+                    }, surface_ids484), rhss486), 'surface-def-ids', surface_ids484, 'new-env', new_env485);
                 }
             }
         };
-        const parse_block372 = function (forms485, env486) {
+        const parse_block398 = function (forms511, env512) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var forms479 = forms485;
-                var env480 = env486;
+                var forms505 = forms511;
+                var env506 = env512;
                 while (true) {
-                    if (false !== runtime__runtime352['='](0, runtime__runtime352['size'](forms479)))
-                        return runtime__runtime352['error']('parse', 'block must have at least one form');
+                    if (false !== runtime__runtime378['='](0, runtime__runtime378['size'](forms505)))
+                        return runtime__runtime378['error']('parse', 'block must have at least one form');
                     else {
-                        const reversed481 = runtime__runtime352['reverse'](forms479);
-                        const parsed_defs482 = parse_defs371(runtime__runtime352['reverse'](runtime__runtime352['rest'](reversed481)), env480);
-                        const new_env483 = runtime__runtime352['get'](parsed_defs482, 'new-env');
-                        const parsed_ret484 = parse_exp373(runtime__runtime352['first'](reversed481), new_env483);
-                        return runtime__runtime352['hash']('block-defs', runtime__runtime352['get'](parsed_defs482, 'block-defs'), 'block-ret', parsed_ret484);
+                        const reversed507 = runtime__runtime378['reverse'](forms505);
+                        const parsed_defs508 = parse_defs397(runtime__runtime378['reverse'](runtime__runtime378['rest'](reversed507)), env506);
+                        const new_env509 = runtime__runtime378['get'](parsed_defs508, 'new-env');
+                        const parsed_ret510 = parse_exp399(runtime__runtime378['first'](reversed507), new_env509);
+                        return runtime__runtime378['hash']('block-defs', runtime__runtime378['get'](parsed_defs508, 'block-defs'), 'block-ret', parsed_ret510);
                     }
                 }
             }
         };
-        const parse_exp373 = function (exp493, env494) {
+        const parse_exp399 = function (exp519, env520) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var exp487 = exp493;
-                var env488 = env494;
+                var exp513 = exp519;
+                var env514 = env520;
                 while (true) {
                     if (false !== function () {
-                            const tmp489 = runtime__runtime352['number?'](exp487);
-                            if (false !== tmp489)
-                                return tmp489;
+                            const tmp515 = runtime__runtime378['number?'](exp513);
+                            if (false !== tmp515)
+                                return tmp515;
                             else
-                                return runtime__runtime352['string?'](exp487);
+                                return runtime__runtime378['string?'](exp513);
                         }())
-                        return runtime__runtime352['hash']('literal', exp487);
-                    else if (false !== runtime__runtime352['identifier?'](exp487))
-                        if (false !== runtime__runtime352['not'](runtime__runtime352['has'](env488, exp487)))
-                            return unbound_reference_error355(exp487);
+                        return runtime__runtime378['hash']('literal', exp513);
+                    else if (false !== runtime__runtime378['identifier?'](exp513))
+                        if (false !== runtime__runtime378['not'](runtime__runtime378['has'](env514, exp513)))
+                            return unbound_reference_error381(exp513);
                         else {
-                            const env_entry490 = runtime__runtime352['get'](env488, exp487);
+                            const env_entry516 = runtime__runtime378['get'](env514, exp513);
                             if (false !== function () {
-                                    const tmp491 = runtime__runtime352['has'](env_entry490, 'local-ref');
-                                    if (false !== tmp491)
-                                        return tmp491;
+                                    const tmp517 = runtime__runtime378['has'](env_entry516, 'local-ref');
+                                    if (false !== tmp517)
+                                        return tmp517;
                                     else
-                                        return runtime__runtime352['has'](env_entry490, 'module-ref-sym');
+                                        return runtime__runtime378['has'](env_entry516, 'module-ref-sym');
                                 }())
-                                return env_entry490;
-                            else if (false !== runtime__runtime352['has'](env_entry490, 'core-form'))
-                                return syntax_error354(exp487);
+                                return env_entry516;
+                            else if (false !== runtime__runtime378['has'](env_entry516, 'core-form'))
+                                return syntax_error380(exp513);
                             else
-                                return runtime__runtime352['error']('parse-exp internal error', 'malformed environment');
+                                return runtime__runtime378['error']('parse-exp internal error', 'malformed environment');
                         }
                     else {
-                        const rator492 = runtime__runtime352['get'](exp487, 0);
-                        if (false !== (false !== (false !== runtime__runtime352['identifier?'](rator492) ? runtime__runtime352['has'](env488, rator492) : false) ? runtime__runtime352['has'](runtime__runtime352['get'](env488, rator492), 'core-form') : false))
-                            return runtime__runtime352['get'](runtime__runtime352['get'](env488, rator492), 'core-form')(exp487, env488);
+                        const rator518 = runtime__runtime378['get'](exp513, 0);
+                        if (false !== (false !== (false !== runtime__runtime378['identifier?'](rator518) ? runtime__runtime378['has'](env514, rator518) : false) ? runtime__runtime378['has'](runtime__runtime378['get'](env514, rator518), 'core-form') : false))
+                            return runtime__runtime378['get'](runtime__runtime378['get'](env514, rator518), 'core-form')(exp513, env514);
                         else
-                            return app_parser360(exp487, env488);
+                            return app_parser386(exp513, env514);
                     }
                 }
             }
         };
-        const andmap374 = function (f501, l502) {
+        const andmap400 = function (f527, l528) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var f495 = f501;
-                var l496 = l502;
+                var f521 = f527;
+                var l522 = l528;
                 while (true) {
-                    return runtime__runtime352['foldl'](function (a499, b500) {
+                    return runtime__runtime378['foldl'](function (a525, b526) {
                         if (2 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                         {
-                            var a497 = a499;
-                            var b498 = b500;
+                            var a523 = a525;
+                            var b524 = b526;
                             while (true) {
-                                if (false !== a497)
-                                    return b498;
+                                if (false !== a523)
+                                    return b524;
                                 else
                                     return false;
                             }
                         }
-                    }, runtime__runtime352['true'], runtime__runtime352['map'](f495, l496));
+                    }, runtime__runtime378['true'], runtime__runtime378['map'](f521, l522));
                 }
             }
         };
-        const parse_module375 = function (sexp541, runner542) {
+        const parse_module401 = function (sexp567, runner568) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var sexp503 = sexp541;
-                var runner504 = runner542;
+                var sexp529 = sexp567;
+                var runner530 = runner568;
                 while (true) {
-                    const module_syntax_error505 = function () {
+                    const module_syntax_error531 = function () {
                         if (0 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 0, arguments['length']);
                         {
                             while (true) {
-                                return runtime__runtime352['error']('syntax error', 'module must start with require and provide forms');
+                                return runtime__runtime378['error']('syntax error', 'module must start with require and provide forms');
                             }
                         }
                     };
-                    const _506 = false !== runtime__runtime352['not'](runtime__runtime352['list?'](sexp503)) ? module_syntax_error505() : runtime__runtime352['null'];
-                    const valid_reqprov_huh_507 = function (form522, name523) {
+                    const _532 = false !== runtime__runtime378['not'](runtime__runtime378['list?'](sexp529)) ? module_syntax_error531() : runtime__runtime378['null'];
+                    const valid_reqprov_huh_533 = function (form548, name549) {
                         if (2 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                         {
-                            var form520 = form522;
-                            var name521 = name523;
+                            var form546 = form548;
+                            var name547 = name549;
                             while (true) {
-                                if (false !== (false !== runtime__runtime352['list?'](form520) ? runtime__runtime352['>'](runtime__runtime352['size'](form520), 0) : false))
-                                    if (false !== runtime__runtime352['equal?'](runtime__runtime352['get'](form520, 0), runtime__runtime352['make-identifier'](name521)))
-                                        return andmap374(runtime__runtime352['identifier?'], runtime__runtime352['rest'](form520));
+                                if (false !== (false !== runtime__runtime378['list?'](form546) ? runtime__runtime378['>'](runtime__runtime378['size'](form546), 0) : false))
+                                    if (false !== runtime__runtime378['equal?'](runtime__runtime378['get'](form546, 0), runtime__runtime378['make-identifier'](name547)))
+                                        return andmap400(runtime__runtime378['identifier?'], runtime__runtime378['rest'](form546));
                                     else
                                         return false;
                                 else
@@ -13137,225 +13195,225 @@
                             }
                         }
                     };
-                    const require_form508 = runtime__runtime352['get'](sexp503, 0);
-                    const _2509 = false !== runtime__runtime352['not'](valid_reqprov_huh_507(require_form508, 'require')) ? module_syntax_error505() : runtime__runtime352['null'];
-                    const provide_form510 = runtime__runtime352['get'](sexp503, 1);
-                    const _3511 = false !== runtime__runtime352['not'](valid_reqprov_huh_507(provide_form510, 'provide')) ? module_syntax_error505() : runtime__runtime352['null'];
-                    const requires512 = runtime__runtime352['rest'](require_form508);
-                    const provides513 = runtime__runtime352['rest'](provide_form510);
-                    const body514 = runtime__runtime352['rest'](runtime__runtime352['rest'](sexp503));
-                    const module_bindings515 = runtime__runtime352['foldl'](function (table526, name527) {
+                    const require_form534 = runtime__runtime378['get'](sexp529, 0);
+                    const _2535 = false !== runtime__runtime378['not'](valid_reqprov_huh_533(require_form534, 'require')) ? module_syntax_error531() : runtime__runtime378['null'];
+                    const provide_form536 = runtime__runtime378['get'](sexp529, 1);
+                    const _3537 = false !== runtime__runtime378['not'](valid_reqprov_huh_533(provide_form536, 'provide')) ? module_syntax_error531() : runtime__runtime378['null'];
+                    const requires538 = runtime__runtime378['rest'](require_form534);
+                    const provides539 = runtime__runtime378['rest'](provide_form536);
+                    const body540 = runtime__runtime378['rest'](runtime__runtime378['rest'](sexp529));
+                    const module_bindings541 = runtime__runtime378['foldl'](function (table552, name553) {
                         if (2 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                         {
-                            var table524 = table526;
-                            var name525 = name527;
+                            var table550 = table552;
+                            var name551 = name553;
                             while (true) {
-                                return runtime__runtime352['assoc'](table524, name525, gensym359(name525));
+                                return runtime__runtime378['assoc'](table550, name551, gensym385(name551));
                             }
                         }
-                    }, runtime__runtime352['hash'](), requires512);
-                    const module_env516 = runtime__runtime352['foldl'](function (env535, req536) {
+                    }, runtime__runtime378['hash'](), requires538);
+                    const module_env542 = runtime__runtime378['foldl'](function (env561, req562) {
                         if (2 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                         {
-                            var env528 = env535;
-                            var req529 = req536;
+                            var env554 = env561;
+                            var req555 = req562;
                             while (true) {
-                                const decl530 = runtime__runtime352['get'](runner504, 'load')(runtime__runtime352['identifier-string'](req529));
-                                return runtime__runtime352['foldl'](function (env533, name534) {
+                                const decl556 = runtime__runtime378['get'](runner530, 'load')(runtime__runtime378['identifier-string'](req555));
+                                return runtime__runtime378['foldl'](function (env559, name560) {
                                     if (2 !== arguments['length'])
                                         $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                                     {
-                                        var env531 = env533;
-                                        var name532 = name534;
+                                        var env557 = env559;
+                                        var name558 = name560;
                                         while (true) {
-                                            return runtime__runtime352['assoc'](env531, runtime__runtime352['make-identifier'](name532), runtime__runtime352['hash']('module-ref-sym', runtime__runtime352['get'](module_bindings515, req529), 'module-ref-field', name532));
+                                            return runtime__runtime378['assoc'](env557, runtime__runtime378['make-identifier'](name558), runtime__runtime378['hash']('module-ref-sym', runtime__runtime378['get'](module_bindings541, req555), 'module-ref-field', name558));
                                         }
                                     }
-                                }, env528, runtime__runtime352['get'](decl530, 'exports'));
+                                }, env554, runtime__runtime378['get'](decl556, 'exports'));
                             }
                         }
-                    }, initial_env369, requires512);
-                    const parsed_defs517 = parse_defs371(body514, module_env516);
-                    const _4518 = false !== runtime__runtime352['not'](runtime__runtime352['subset'](provides513, runtime__runtime352['get'](parsed_defs517, 'surface-def-ids'))) ? runtime__runtime352['error']('syntax error', 'some provided identifiers not defined') : runtime__runtime352['null'];
-                    const provide_internal_ids519 = runtime__runtime352['map'](function (p538) {
+                    }, initial_env395, requires538);
+                    const parsed_defs543 = parse_defs397(body540, module_env542);
+                    const _4544 = false !== runtime__runtime378['not'](runtime__runtime378['subset'](provides539, runtime__runtime378['get'](parsed_defs543, 'surface-def-ids'))) ? runtime__runtime378['error']('syntax error', 'some provided identifiers not defined') : runtime__runtime378['null'];
+                    const provide_internal_ids545 = runtime__runtime378['map'](function (p564) {
                         if (1 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                         {
-                            var p537 = p538;
+                            var p563 = p564;
                             while (true) {
-                                return runtime__runtime352['get'](runtime__runtime352['get'](runtime__runtime352['get'](parsed_defs517, 'new-env'), p537), 'local-ref');
+                                return runtime__runtime378['get'](runtime__runtime378['get'](runtime__runtime378['get'](parsed_defs543, 'new-env'), p563), 'local-ref');
                             }
                         }
-                    }, provides513);
-                    return runtime__runtime352['hash']('module-requires', runtime__runtime352['map'](runtime__runtime352['identifier-string'], requires512), 'module-require-internal-ids', runtime__runtime352['map'](function (r540) {
+                    }, provides539);
+                    return runtime__runtime378['hash']('module-requires', runtime__runtime378['map'](runtime__runtime378['identifier-string'], requires538), 'module-require-internal-ids', runtime__runtime378['map'](function (r566) {
                         if (1 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                         {
-                            var r539 = r540;
+                            var r565 = r566;
                             while (true) {
-                                return runtime__runtime352['get'](module_bindings515, r539);
+                                return runtime__runtime378['get'](module_bindings541, r565);
                             }
                         }
-                    }, requires512), 'module-provides', runtime__runtime352['map'](runtime__runtime352['identifier-string'], provides513), 'module-provide-internal-ids', provide_internal_ids519, 'block-defs', runtime__runtime352['get'](parsed_defs517, 'block-defs'));
+                    }, requires538), 'module-provides', runtime__runtime378['map'](runtime__runtime378['identifier-string'], provides539), 'module-provide-internal-ids', provide_internal_ids545, 'block-defs', runtime__runtime378['get'](parsed_defs543, 'block-defs'));
                 }
             }
         };
         return {
-            'parse-module': parse_module375,
-            'transform-reserved': transform_reserved357
+            'parse-module': parse_module401,
+            'transform-reserved': transform_reserved383
         };
     }))(runtime__minimal, runtime__runtime, compile__reader);
-    const lang__a = ((function ($runtime, compile__reader199, compile__compile200, compile__parse201) {
-        const compile_a543 = function (body547, runner548) {
-            if (2 !== arguments['length'])
-                $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
+    const lang__a = ((function ($runtime, compile__reader223, compile__compile224, compile__parse225) {
+        const compile_a569 = function (source574, index575, runner576) {
+            if (3 !== arguments['length'])
+                $runtime['raise-arity-error']('anonymous procedure', 3, arguments['length']);
             {
-                var body545 = body547;
-                var runner546 = runner548;
+                var source571 = source574;
+                var index572 = index575;
+                var runner573 = runner576;
                 while (true) {
-                    return compile__compile200['compile-module'](compile__parse201['parse-module'](compile__reader199['read'](body545), runner546));
+                    return compile__compile224['compile-module'](compile__parse225['parse-module'](compile__reader223['read'](source571, index572), runner573));
                 }
             }
         };
-        const compile_language544 = compile_a543;
+        const compile_language570 = compile_a569;
         return {
-            'compile-a': compile_a543,
-            'compile-language': compile_language544
+            'compile-a': compile_a569,
+            'compile-language': compile_language570
         };
     }))(runtime__minimal, compile__reader, compile__compile, compile__parse);
     const compile__lang = ((function ($runtime, runtime__runtime2, lang__js3, lang__a4, compile__parser_tools5) {
-        const compile_via_lang549 = function (source557, runner558) {
+        const compile_via_lang577 = function (source584, runner585) {
             if (2 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
             {
-                var source550 = source557;
-                var runner551 = runner558;
+                var source578 = source584;
+                var runner579 = runner585;
                 while (true) {
-                    const res552 = compile__parser_tools5['parse'](compile__parser_tools5['seq'](compile__parser_tools5['string/p']('#lang '), compile__parser_tools5['module-name'], compile__parser_tools5['c'](runtime__runtime2['newline'])), source550);
-                    if (false !== (false !== runtime__runtime2['get'](res552, 'position') ? runtime__runtime2['<='](runtime__runtime2['get'](res552, 'position'), runtime__runtime2['size'](source550)) : false)) {
-                        const lang553 = runtime__runtime2['get'](res552, 'result');
-                        const body554 = runtime__runtime2['substring'](source550, runtime__runtime2['get'](res552, 'position'), runtime__runtime2['size'](source550));
-                        if (false !== runtime__runtime2['equal?']('js', lang553))
-                            return lang__js3['compile-js'](body554, runner551);
-                        else if (false !== runtime__runtime2['equal?']('a', lang553))
-                            return lang__a4['compile-a'](body554, runner551);
+                    const res580 = compile__parser_tools5['parse'](compile__parser_tools5['seq'](compile__parser_tools5['string/p']('#lang'), compile__parser_tools5['c'](' '), compile__parser_tools5['module-name'], compile__parser_tools5['c'](runtime__runtime2['newline'])), source578, 0);
+                    if (false !== (false !== runtime__runtime2['get'](res580, 'position') ? runtime__runtime2['<='](runtime__runtime2['get'](res580, 'position'), runtime__runtime2['size'](source578)) : false)) {
+                        const lang581 = runtime__runtime2['get'](res580, 'result');
+                        if (false !== runtime__runtime2['equal?']('js', lang581))
+                            return lang__js3['compile-js'](source578, runtime__runtime2['get'](res580, 'position'), runner579);
+                        else if (false !== runtime__runtime2['equal?']('a', lang581))
+                            return lang__a4['compile-a'](source578, runtime__runtime2['get'](res580, 'position'), runner579);
                         else {
-                            const lang_mod_inst555 = runtime__runtime2['get'](runner551, 'run')(lang553);
-                            const _556 = false !== runtime__runtime2['not'](runtime__runtime2['has'](lang_mod_inst555, 'compile-language')) ? runtime__runtime2['error']('compile-via-lang', '#lang module does not implement compile-language') : runtime__runtime2['null'];
-                            return runtime__runtime2['get'](lang_mod_inst555, 'compile-language')(body554, runner551);
+                            const lang_mod_inst582 = runtime__runtime2['get'](runner579, 'run')(lang581);
+                            const _583 = false !== runtime__runtime2['not'](runtime__runtime2['has'](lang_mod_inst582, 'compile-language')) ? runtime__runtime2['error']('compile-via-lang', '#lang module does not implement compile-language') : runtime__runtime2['null'];
+                            return runtime__runtime2['get'](lang_mod_inst582, 'compile-language')(source578, runtime__runtime2['get'](res580, 'position'), runner579);
                         }
                     } else
-                        return runtime__runtime2['error']('compile-via-lang', res552);
+                        return runtime__runtime2['error']('compile-via-lang', res580);
                 }
             }
         };
-        return { 'compile-via-lang': compile_via_lang549 };
+        return { 'compile-via-lang': compile_via_lang577 };
     }))(runtime__minimal, runtime__runtime, lang__js, lang__a, compile__parser_tools);
     const compile__runner = ((function ($runtime, runtime__runtime0, compile__lang1) {
-        const make_runner559 = function (platform595) {
+        const make_runner586 = function (platform622) {
             if (1 !== arguments['length'])
                 $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
             {
-                var platform560 = platform595;
+                var platform587 = platform622;
                 while (true) {
-                    const declaration_cache561 = runtime__runtime0['box'](runtime__runtime0['hash']());
-                    const load562 = function (module_name570) {
+                    const declaration_cache588 = runtime__runtime0['box'](runtime__runtime0['hash']());
+                    const load589 = function (module_name597) {
                         if (1 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                         {
-                            var module_name565 = module_name570;
+                            var module_name592 = module_name597;
                             while (true) {
-                                if (false !== runtime__runtime0['has'](runtime__runtime0['unbox'](declaration_cache561), module_name565))
-                                    return runtime__runtime0['get'](runtime__runtime0['unbox'](declaration_cache561), module_name565);
+                                if (false !== runtime__runtime0['has'](runtime__runtime0['unbox'](declaration_cache588), module_name592))
+                                    return runtime__runtime0['get'](runtime__runtime0['unbox'](declaration_cache588), module_name592);
                                 else {
-                                    const source566 = runtime__runtime0['get'](platform560, 'resolve')(module_name565);
-                                    const module_declaration567 = compile__lang1['compile-via-lang'](source566, runtime__runtime0['obj']('load', load562, 'run', run564));
-                                    const module_declaration2568 = runtime__runtime0['assoc'](module_declaration567, 'body-function', runtime__runtime0['get'](platform560, 'eval-module')(runtime__runtime0['get'](module_declaration567, 'body-code')));
-                                    const _569 = runtime__runtime0['set-box!'](declaration_cache561, runtime__runtime0['assoc'](runtime__runtime0['unbox'](declaration_cache561), module_name565, module_declaration2568));
-                                    return module_declaration2568;
+                                    const source593 = runtime__runtime0['get'](platform587, 'resolve')(module_name592);
+                                    const module_declaration594 = compile__lang1['compile-via-lang'](source593, runtime__runtime0['obj']('load', load589, 'run', run591));
+                                    const module_declaration2595 = runtime__runtime0['assoc'](module_declaration594, 'body-function', runtime__runtime0['get'](platform587, 'eval-module')(runtime__runtime0['get'](module_declaration594, 'body-code')));
+                                    const _596 = runtime__runtime0['set-box!'](declaration_cache588, runtime__runtime0['assoc'](runtime__runtime0['unbox'](declaration_cache588), module_name592, module_declaration2595));
+                                    return module_declaration2595;
                                 }
                             }
                         }
                     };
-                    const andmap563 = function (f577, l578) {
+                    const andmap590 = function (f604, l605) {
                         if (2 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                         {
-                            var f571 = f577;
-                            var l572 = l578;
+                            var f598 = f604;
+                            var l599 = l605;
                             while (true) {
-                                return runtime__runtime0['foldl'](function (a575, b576) {
+                                return runtime__runtime0['foldl'](function (a602, b603) {
                                     if (2 !== arguments['length'])
                                         $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                                     {
-                                        var a573 = a575;
-                                        var b574 = b576;
+                                        var a600 = a602;
+                                        var b601 = b603;
                                         while (true) {
-                                            if (false !== a573)
-                                                return b574;
+                                            if (false !== a600)
+                                                return b601;
                                             else
                                                 return false;
                                         }
                                     }
-                                }, runtime__runtime0['true'], runtime__runtime0['map'](f571, l572));
+                                }, runtime__runtime0['true'], runtime__runtime0['map'](f598, l599));
                             }
                         }
                     };
-                    const run564 = function (module_name594) {
+                    const run591 = function (module_name621) {
                         if (1 !== arguments['length'])
                             $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                         {
-                            var module_name579 = module_name594;
+                            var module_name606 = module_name621;
                             while (true) {
-                                const _580 = runtime__runtime0['string/c']('run', module_name579);
-                                const run_module_internal581 = function (instance_map592, module_name593) {
+                                const _607 = runtime__runtime0['string/c']('run', module_name606);
+                                const run_module_internal608 = function (instance_map619, module_name620) {
                                     if (2 !== arguments['length'])
                                         $runtime['raise-arity-error']('anonymous procedure', 2, arguments['length']);
                                     {
-                                        var instance_map582 = instance_map592;
-                                        var module_name583 = module_name593;
+                                        var instance_map609 = instance_map619;
+                                        var module_name610 = module_name620;
                                         while (true) {
-                                            if (false !== runtime__runtime0['has'](instance_map582, module_name583))
-                                                return instance_map582;
+                                            if (false !== runtime__runtime0['has'](instance_map609, module_name610))
+                                                return instance_map609;
                                             else {
-                                                const module_declaration584 = load562(module_name583);
-                                                const instance_map2585 = runtime__runtime0['foldl'](run_module_internal581, instance_map582, runtime__runtime0['get'](module_declaration584, 'imports'));
-                                                const instance586 = runtime__runtime0['apply'](runtime__runtime0['get'](module_declaration584, 'body-function'), runtime__runtime0['map'](function (i589) {
+                                                const module_declaration611 = load589(module_name610);
+                                                const instance_map2612 = runtime__runtime0['foldl'](run_module_internal608, instance_map609, runtime__runtime0['get'](module_declaration611, 'imports'));
+                                                const instance613 = runtime__runtime0['apply'](runtime__runtime0['get'](module_declaration611, 'body-function'), runtime__runtime0['map'](function (i616) {
                                                     if (1 !== arguments['length'])
                                                         $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                                                     {
-                                                        var i588 = i589;
+                                                        var i615 = i616;
                                                         while (true) {
-                                                            return runtime__runtime0['get'](instance_map2585, i588);
+                                                            return runtime__runtime0['get'](instance_map2612, i615);
                                                         }
                                                     }
-                                                }, runtime__runtime0['get'](module_declaration584, 'imports')));
-                                                const _587 = false !== runtime__runtime0['not'](andmap563(function (export591) {
+                                                }, runtime__runtime0['get'](module_declaration611, 'imports')));
+                                                const _614 = false !== runtime__runtime0['not'](andmap590(function (export618) {
                                                     if (1 !== arguments['length'])
                                                         $runtime['raise-arity-error']('anonymous procedure', 1, arguments['length']);
                                                     {
-                                                        var export590 = export591;
+                                                        var export617 = export618;
                                                         while (true) {
-                                                            return runtime__runtime0['has'](instance586, export590);
+                                                            return runtime__runtime0['has'](instance613, export617);
                                                         }
                                                     }
-                                                }, runtime__runtime0['get'](module_declaration584, 'exports'))) ? runtime__runtime0['error']('run', runtime__runtime0['string-append']('Module instance does not include all keys listed in exports: ', module_name583)) : runtime__runtime0['null'];
-                                                return runtime__runtime0['assoc'](instance_map2585, module_name583, instance586);
+                                                }, runtime__runtime0['get'](module_declaration611, 'exports'))) ? runtime__runtime0['error']('run', runtime__runtime0['string-append']('Module instance does not include all keys listed in exports: ', module_name610)) : runtime__runtime0['null'];
+                                                return runtime__runtime0['assoc'](instance_map2612, module_name610, instance613);
                                             }
                                         }
                                     }
                                 };
-                                return runtime__runtime0['get'](run_module_internal581(runtime__runtime0['hash'](), module_name579), module_name579);
+                                return runtime__runtime0['get'](run_module_internal608(runtime__runtime0['hash'](), module_name606), module_name606);
                             }
                         }
                     };
-                    return runtime__runtime0['obj']('load', load562, 'run', run564);
+                    return runtime__runtime0['obj']('load', load589, 'run', run591);
                 }
             }
         };
-        return { 'make-runner': make_runner559 };
+        return { 'make-runner': make_runner586 };
     }))(runtime__minimal, runtime__runtime, compile__lang);
     const node__platform = ((function () {
         const fs = require("fs")

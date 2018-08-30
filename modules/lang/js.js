@@ -14,10 +14,10 @@
                                                         empty-as-list))))
 
 (def compile-js
-  (fn (source runner)
+  (fn (source index runner)
     (def res (parse (seq (header "require" module-name) (c newline)
                          (header "provide" id-string) (c newline))
-                    source))
+                    source index))
     (if (and (get res :position) (<= (get res :position) (size source)))
       (compiled-module
         (get (get res :result) 0)

@@ -5,7 +5,7 @@
 
 (def sexp
   (nonterm
-    "sexp"
+    "s-expression"
     (fn ()
       (or/p
         id
@@ -31,7 +31,7 @@
   (nonterm
     "comment"
     (fn ()
-     (seq (c ";") (zero-or-more (c-not newline)) (c newline)))))
+     (seq (c ";") (zero-or-more (describe "comment body" (c-not newline))) newline/p))))
 
 (def id
   (nonterm
@@ -56,13 +56,13 @@
   (nonterm
     "string"
     (fn ()
-      (seq (c double-quote) (capture-string (zero-or-more (c-not double-quote))) (c double-quote)))))
+      (seq (c double-quote) (capture-string (zero-or-more (describe "string body" (c-not double-quote)))) (c double-quote)))))
 
 (def top (seq sexp-list eof))
 
 (def read
-  (fn (s)
-    (def res (parse top s))
+  (fn (s index)
+    (def res (parse top s index))
     (if (=== (size s) (get res :position))
       (get res :result)
       (error :read res))))
@@ -71,5 +71,5 @@
   (fn (args)
     (read-stdin
       (fn (s)
-        (displayln (read s))))))
+        (displayln (read s 0))))))
 
