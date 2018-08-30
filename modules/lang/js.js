@@ -1,7 +1,7 @@
 #lang a
 
 (require runtime/runtime compile/module compile/reader compile/parser-tools)
-(provide compile-language)
+(provide compile-js compile-language)
 
 (def header
   (fn (name el)
@@ -13,7 +13,7 @@
     (seq (string/p "// ") (string/p name) (c ":") (or/p (seq (c " ") comma-list)
                                                         empty-as-list))))
 
-(def compile-language
+(def compile-js
   (fn (source runner)
     (def res (parse (seq (header "require" module-name) (c newline)
                          (header "provide" id-string) (c newline))
@@ -24,3 +24,4 @@
         (get (get res :result) 1)
         (substring source (get res :position) (size source)))
       (error :compile-language res))))
+(def compile-language compile-js)
