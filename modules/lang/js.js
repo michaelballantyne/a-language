@@ -1,6 +1,6 @@
 #lang a
 
-(require runtime/runtime compile/module compile/reader compile/parser-tools)
+(require runtime/runtime compile/module compile/parser-tools)
 (provide compile-js compile-language)
 
 (def header

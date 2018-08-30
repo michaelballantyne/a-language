@@ -1,6 +1,6 @@
 #lang a
 
-(require runtime/runtime lang/js lang/a compile/parser-tools compile/reader)
+(require runtime/runtime lang/js lang/a compile/parser-tools)
 (provide compile-via-lang)
 
 (def compile-via-lang

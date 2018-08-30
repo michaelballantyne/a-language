@@ -1,7 +1,7 @@
 #lang a
 
 (require runtime/runtime compile/parser-tools)
-(provide main read id-string module-name valid-module-name valid-id-name)
+(provide main read)
 
 (def sexp
   (nonterm
@@ -33,29 +33,6 @@
     (fn ()
      (seq (c ";") (zero-or-more (c-not newline)) (c newline)))))
 
-(def module-segment (seq alpha (zero-or-more (or/p alpha digit))))
-(def module-name (capture-string (seq module-segment (zero-or-more (seq (c "/") module-segment)))))
-
-(def idchar
-  (nonterm
-    "identifier character"
-    (fn ()
-        (or/p
-          alpha
-          (c "+")
-          (c "-")
-          (c "*")
-          (c "%")
-          (c "=")
-          (c "!")
-          (c "<")
-          (c ">")
-          (c "-")
-          (c "/")
-          (c "?")
-          (c "_")))))
-
-(def id-string (capture-string (seq idchar (zero-or-more (or/p digit idchar)))))
 (def id
   (nonterm
     "identifier"
@@ -82,14 +59,6 @@
       (seq (c double-quote) (capture-string (zero-or-more (c-not double-quote))) (c double-quote)))))
 
 (def top (seq sexp-list eof))
-
-(def valid-module-name
-  (fn (s)
-    (!== false (get (parse module-name s) :position))))
-
-(def valid-id-name
-  (fn (s)
-    (!== false (get (parse id s) :position))))
 
 (def read
   (fn (s)

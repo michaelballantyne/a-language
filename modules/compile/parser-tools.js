@@ -1,7 +1,7 @@
 #lang a
 
 (require runtime/runtime)
-(provide c c-not c-range string/p empty seq or/p eof one-or-more zero-or-more describe nonterm action apply-action capture-string parse whitespace alpha digit empty-as-list)
+(provide c c-not c-range string/p empty seq or/p eof one-or-more zero-or-more describe nonterm action apply-action capture-string parse whitespace alpha digit empty-as-list module-name id-string idchar)
 
 (def succeed
   (fn (index)
@@ -168,3 +168,28 @@
 (def empty-as-list
   (action empty (fn (ignore) (list))))
 
+; These non-terminals are included here because they're used in several readers
+
+(def module-segment (seq alpha (zero-or-more (or/p alpha digit))))
+(def module-name (capture-string (seq module-segment (zero-or-more (seq (c "/") module-segment)))))
+
+(def idchar
+  (nonterm
+    "identifier character"
+    (fn ()
+        (or/p
+          alpha
+          (c "+")
+          (c "-")
+          (c "*")
+          (c "%")
+          (c "=")
+          (c "!")
+          (c "<")
+          (c ">")
+          (c "-")
+          (c "/")
+          (c "?")
+          (c "_")))))
+
+(def id-string (capture-string (seq idchar (zero-or-more (or/p digit idchar)))))
