@@ -74,16 +74,12 @@
                      (and (has res :position) (get res :position))
                      (if (has res :result) (cons (get res :result) results) results)
                      (merge-failures failures (get res :failure))))
-            ; TODO: this is ugly
-            (if (empty? results)
-              (obj :position current-index :failure failures)
+            (block
+             (def res (obj :position current-index :failure failures))
+             (if (empty? results) res
               (if (= (size results) 1)
-                (obj :position current-index :failure failures :result (first results))
-                (obj :position current-index :failure failures :result (reverse results))))
-            ;(obj :position current-index
-                  ;:result (if (= (size results) 1) (first results) results)
-                  ;:failure failures)
-          ))))))
+               (assoc res :result (first results))
+               (assoc res :result (reverse results)))))))))))
 
 (def or/p
   (variadic
