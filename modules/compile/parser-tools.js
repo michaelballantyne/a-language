@@ -3,6 +3,10 @@
 (require runtime/runtime)
 (provide c c-not c-range string/p empty seq or/p eof one-or-more zero-or-more describe nonterm action apply-action capture-string parse whitespace alpha digit empty-as-list module-name id-string idchar newline/p)
 
+; This is a simple PEG (not packrat) parsing framework, though all the langauges it is used for are LL(1).
+; When reporting failures, all but the longest parse is dropped. Because the underlying parsing is PEG rather
+; than LL, it unfortunately can't point to a particular nonterminal (or stack of nonterminals) it failed within.
+
 (def succeed
   (fn (index)
     (obj :position index :failure (list))))
@@ -50,7 +54,10 @@
       (succeed index)
       (fail (list (obj :expected "end of file" :position index))))))
 
-; TODO: clean up once I have cond
+; Assumes that within each list l and r, all failures have the same position.
+; If one list has failures with a further position than the other, that list
+; is returned. Otherwise the lists are appended. The intention is to preserve
+; only the failures after the maximum length parse. Called by both seq and or/p
 (def merge-failures
   (fn (l r)
     (if (empty? l) r
@@ -111,8 +118,8 @@
     (fn (input index)
       (def res (parser input index))
       (def failures (get res :failure))
-      ; TODO: is only checking the first of the failures the right idea? What if one
-      ; of the alternatives within the description / nonterminal matched further?
+      ; Because all failure lists have been summarized to only the longest parse,
+      ; it is safe to only check the first.
       (if (and (not (empty? failures)) (= index (get (first failures) :position)))
         (assoc res :failure (list (obj :expected name :position index)))
         res))))
@@ -141,16 +148,9 @@
         (assoc res :result (substring input index (get res :position)))
         res))))
 
-
 (def parse-failure
   (fn (failures)
-    (def min
-      (variadic
-        (fn (l)
-          (if (= 0 (size l))
-            l
-            (foldl (fn (a b) (if (<= a b) a b)) (first l) (rest l))))))
-    (def pos (apply min (map (fn (f) (get f :position)) failures)))
+    (def pos (get (first failures) :position))
     (def msgs (map (fn (f) (get f :expected)) failures))
     (error (string-append "Parse error at position " (number->string pos) ". Expected one of")
            (string-append (string-join msgs ", ")))))
