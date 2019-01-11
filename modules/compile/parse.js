@@ -79,6 +79,7 @@
 ;     "enum"
 ; ])
 
+; These characters need to be replaced by strings of legal JS identifier characters.
 (def operators
   (hash "-" "_"
         "/" "__"
@@ -92,6 +93,7 @@
         "?" "_huh_"))
 
 ; string -> string
+; replace characters legal in "a" identifiers but not JS identifiers with transliterations
 (def transform-reserved
   (fn (s)
     (string-join
@@ -101,12 +103,17 @@
 
 (def gensym-counter (box 0))
 
+
 ; identifier -> string
 (def gensym
   (fn (id)
     (def n (unbox gensym-counter))
     (def _ (set-box! gensym-counter (+ 1 n)))
     (string-append (transform-reserved (identifier-string id)) (to-string n))))
+
+; Env = (Hash Identifier EnvRHS)
+; EnvRHS = (OneOf def-env-rhs (hash :core-form Parser))
+; Parser = (-> Stx Env IR)
 
 (def app-parser
   (fn (exp env)
@@ -119,16 +126,16 @@
     (if (not (= (size exp) 4))
       (syntax-error exp)
       (hash :if-c (parse-exp (get exp 1) env)
-           :if-t (parse-exp (get exp 2) env)
-           :if-e (parse-exp (get exp 3) env)))))
+            :if-t (parse-exp (get exp 2) env)
+            :if-e (parse-exp (get exp 3) env)))))
 
 (def and-parser
   (fn (exp env)
     (if (not (= (size exp) 3))
       (syntax-error exp)
       (hash :if-c (parse-exp (get exp 1) env)
-           :if-t (parse-exp (get exp 2) env)
-           :if-e (hash :literal false)))))
+            :if-t (parse-exp (get exp 2) env)
+            :if-e (hash :literal false)))))
 
 (def or-parser
   (fn (exp env)
@@ -137,10 +144,10 @@
       (block
         (def tmpid (gensym (make-identifier "tmp")))
         (hash :block-exp true
-             :block-defs (list (hash :id tmpid :rhs (parse-exp (get exp 1) env)))
-             :block-ret (hash :if-c (hash :local-ref tmpid)
-                             :if-t (hash :local-ref tmpid)
-                             :if-e (parse-exp (get exp 2) env)))))))
+              :block-defs (list (hash :id tmpid :rhs (parse-exp (get exp 1) env)))
+              :block-ret (hash :if-c (hash :local-ref tmpid)
+                               :if-t (hash :local-ref tmpid)
+                               :if-e (parse-exp (get exp 2) env)))))))
 
 (def block-parser
   (fn (exp env)
@@ -178,14 +185,14 @@
         (def surface-vars (map (fn (pr) (get pr 0)) binding-list))
         (def new-env (foldl (fn (env var) (assoc env var (hash :local-ref (gensym var)))) env surface-vars))
         (assoc
-         (assoc (parse-block (rest (rest exp)) new-env)
-             :loop-vars (map (fn (var) (get (get new-env var) :local-ref)) surface-vars))
-         :loop-inits (map (fn (pr) (parse-exp (get pr 1) env)) binding-list))))))
+          (assoc (parse-block (rest (rest exp)) new-env)
+                 :loop-vars (map (fn (var) (get (get new-env var) :local-ref)) surface-vars))
+          :loop-inits (map (fn (pr) (parse-exp (get pr 1) env)) binding-list))))))
 
 (def recur-parser
   (fn (exp env)
     (hash :recur-exps (map (fn (e) (parse-exp e env)) (rest exp))
-         :recur-temps (map (fn (_) (gensym (make-identifier "tmp"))) (rest exp)))))
+          :recur-temps (map (fn (_) (gensym (make-identifier "tmp"))) (rest exp)))))
 
 (def def-env-rhs (hash :def true))
 
@@ -217,10 +224,10 @@
     (def new-env (foldl (fn (env id) (assoc env id (hash :local-ref (gensym id)))) env surface-ids))
     (def rhss (map (fn (d) (parse-exp (get d :exp) new-env)) defs))
     (hash :block-defs (zip (fn (id rhs) (hash :id id :rhs rhs))
-                          (map (fn (id) (get (get new-env id) :local-ref)) surface-ids)
-                          rhss)
-         :surface-def-ids surface-ids
-         :new-env new-env)))
+                           (map (fn (id) (get (get new-env id) :local-ref)) surface-ids)
+                           rhss)
+          :surface-def-ids surface-ids
+          :new-env new-env)))
 
 (def parse-block
   (fn (forms env)
@@ -232,7 +239,7 @@
         (def new-env (get parsed-defs :new-env))
         (def parsed-ret (parse-exp (first reversed) new-env))
         (hash :block-defs (get parsed-defs :block-defs)
-             :block-ret parsed-ret)))))
+              :block-ret parsed-ret)))))
 
 (def parse-exp
   (fn (exp env)
@@ -297,7 +304,7 @@
                  (fn (env name)
                    (assoc env (make-identifier name)
                           (hash :module-ref-sym (get module-bindings req)
-                               :module-ref-field name)))
+                                :module-ref-field name)))
                  env (get decl :exports)))
              initial-env requires))
 

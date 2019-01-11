@@ -2,6 +2,9 @@
 
 (require runtime/foreign runtime/minimal)
 
+; Start of a runtime implemented using the low level foreign functions in
+; foreign.js, rather than implemented directly in js
+
 (provide === is-string main)
 
 (def === (fn (a b) (_=== a b)))
