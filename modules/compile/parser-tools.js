@@ -7,6 +7,32 @@
 ; When reporting failures, all but the longest parse is dropped. Because the underlying parsing is PEG rather
 ; than LL, it unfortunately can't point to a particular nonterminal (or stack of nonterminals) it failed within.
 
+; Source location property format. From https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/Parser_API#Node_objects
+;
+; :loc :: SourceLocation
+; SourceLocation = (Has :source :start :end)
+; :source :: String
+; :start :: LocPosition
+; :end :: LocPosition
+; LocPosition = (Has :line :column)
+; :line :: uint32 >= 1
+; :column :: uint32 >= 0
+
+
+; State:
+; input, index, current source location.
+; Want to index and source location at a given point when a parse suceeds.
+; Always want to step index and source location together. They can be the
+; "position".
+
+; :postion :: LexPosition
+; LexPosition (has :index :loc)
+; :index :: uint32
+
+; LexState = (has :input :position)
+; :input :: String
+
+
 (def succeed
   (fn (index)
     (obj :position index :failure (list))))
@@ -87,6 +113,23 @@
               (if (= (size results) 1)
                (assoc res :result (first results))
                (assoc res :result (reverse results)))))))))))
+
+
+; `or/p`:
+;
+; Whether success or failure, the result will have all the failures with the equal length
+; longest parse from all the or branches considered before reaching the result, but not
+; from those after. Failures for a success are needed in order to describe all the possible
+; choice points in a sequence that could be corrected. For example, in a language without
+; block expressions, this program:
+;
+; if (foo)
+;    bar
+; {
+;    baz
+; }
+;
+; could be corrected either by inserting an else or by changing the {} block to an expression.
 
 (def or/p
   (variadic
