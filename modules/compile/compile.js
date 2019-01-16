@@ -69,6 +69,14 @@
 (def recur-ctx? (fn (ctx) (has ctx :recur-vars)))
 (def recur-ctx-vars (fn (ctx) (get ctx :recur-vars)))
 
+(def ctr (box 0))
+(def gen-fn-id
+ (fn ()
+  (def v (unbox ctr))
+  (def _ (set-box! ctr (+ v 1)))
+  v))
+
+
 ; LiteralVal -> ESTreeLiteral
 (def gen-literal
   (fn (value)
@@ -233,7 +241,7 @@
           (obj :type "FunctionExpression"
                :params (list->array (map gen-identifier (get e :fn-temps)))
                :body (obj :type "BlockStatement"
-                          :body (array (build-arity-check "anonymous procedure" (size (get e :fn-args)))
+                          :body (array (build-arity-check (string-append "anonymous procedure " (number->string (gen-fn-id))) (size (get e :fn-args)))
                                        (build-loop-body (get e :fn-args) temps-as-refs e ctx)))))))
 
     (def compile-loop-exp
