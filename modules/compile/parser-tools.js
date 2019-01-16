@@ -1,7 +1,7 @@
 #lang a
 
 (require runtime/runtime)
-(provide c c-not c-range string/p empty seq or/p eof one-or-more zero-or-more describe nonterm action apply-action capture-string parse whitespace alpha digit empty-as-list module-name id-string idchar newline/p)
+(provide test-input-rep c c-not c-range string/p empty seq or/p eof one-or-more zero-or-more describe nonterm action apply-action capture-string parse whitespace alpha digit empty-as-list module-name id-string idchar newline/p)
 
 ; This is a simple PEG (not packrat) parsing framework, though all the langauges it is used for are LL(1).
 ; When reporting failures, all but the longest parse is dropped. Because the underlying parsing is PEG rather
@@ -18,24 +18,50 @@
 ; :line :: uint32 >= 1
 ; :column :: uint32 >= 0
 
-
-; State:
-; input, index, current source location.
-; Want to index and source location at a given point when a parse suceeds.
-; Always want to step index and source location together. They can be the
-; "position".
-
-; :postion :: LexPosition
-; LexPosition (has :index :loc)
+; Input = (has :string :index :srcps)
+; :string :: string
 ; :index :: uint32
+; :srcpos :: LocPosition
 
-; LexState = (has :input :position)
-; :input :: String
+(def input-has-chars?
+  (fn (input n-chars)
+    (has (get input :string) (+ (get input :index) (- n-chars 1)))))
 
+(def advance-input
+  (fn (input n-chars)
+    (def _ (if (not (input-has-chars? input n-chars))
+             (error "advance-input" "input does not have enough characters")
+             null))
+    (def step-srcpos
+      (fn (pos c)
+        (if (=== newline c)
+          (hash :line (+ 1 (get pos :line)) :column 0)
+          (hash :line (get pos :line) :column (+ 1 (get pos :column))))))
+    (loop ([n-chars n-chars]
+           [index (get input :index)]
+           [srcpos (get input :srcpos)])
+      (if (= n-chars 0)
+        (assoc (assoc input :index index) :srcpos srcpos)
+        (recur (- n-chars 1) (+ index 1)
+               (step-srcpos srcpos (get (get input :string) index)))))))
+
+(def input-substring
+  (fn (start-input end-input)
+    (substring (get start-input :string)
+               (get start-input :index)
+               (get end-input :index))))
+
+(def test-input-rep
+  (fn (args)
+    (def init (hash :string (string-append "foo" newline "bar") :index 0 :srcpos (hash :line 1 :column 0)))
+    (def _1 (displayln (advance-input init 3)))
+    (def _2 (displayln (advance-input init 4)))
+    (def _3 (displayln (input-substring init (advance-input init 3))))
+    (displayln "not implemented")))
 
 (def succeed
-  (fn (index)
-    (obj :position index :failure (list))))
+  (fn (input)
+    (obj :position input :failure (list))))
 
 (def fail
   (fn (failures)
@@ -43,18 +69,18 @@
 
 (def string/p
   (fn (to-match)
-    (fn (input index)
-      (if (and (has input (+ index (- (size to-match) 1)))
-               (equal? to-match (substring input index (+ index (size to-match)))))
-        (succeed (+ index (size to-match)))
-        (fail (list (obj :expected (string-append "string " to-match) :position index)))))))
+    (fn (input)
+      (if (and (input-has-chars? input (size to-match))
+               (equal? to-match (input-substring input (advance-input input (size to-match)))))
+        (succeed (advance-input input (size to-match)))
+        (fail (list (obj :expected (string-append "string " to-match) :position input)))))))
 
 (def c-pred
   (fn (pred description)
-    (fn (input index)
-      (if (and (has input index) (pred (get input index)))
-        (succeed (+ index 1))
-        (fail (list (obj :expected description :position index)))))))
+    (fn (input)
+      (if (and (input-has-chars? input 1) (pred (input-substring input (advance-input input 1))))
+        (succeed (advance-input input 1))
+        (fail (list (obj :expected description :position input)))))))
 
 (def c
   (fn (to-match)
@@ -72,13 +98,13 @@
     (c-pred (fn (ch) (and (>= (character-code ch) (character-code lower)) (<= (character-code ch) (character-code upper))))
             (string-append "range '" lower "' to '" upper "'"))))
 
-(def empty (fn (input index) (succeed index)))
+(def empty (fn (input) (succeed input)))
 
 (def eof
-  (fn (input index)
-    (if (=== index (size input))
-      (succeed index)
-      (fail (list (obj :expected "end of file" :position index))))))
+  (fn (input)
+    (if (= (get input :index) (size (get input :string)))
+      (succeed input)
+      (fail (list (obj :expected "end of file" :position input))))))
 
 ; Assumes that within each list l and r, all failures have the same position.
 ; If one list has failures with a further position than the other, that list
@@ -88,27 +114,27 @@
   (fn (l r)
     (if (empty? l) r
       (if (empty? r) l
-        (if (> (get (first r) :position) (get (first l) :position)) r
-          (if (> (get (first l) :position) (get (first r) :position)) l
+        (if (> (get (get (first r) :position) :index) (get (get (first l) :position) :index)) r
+          (if (> (get (get (first l) :position) :index) (get (get (first r) :position) :index)) l
             (append l r)))))))
 
 (def seq
   (variadic
     (fn (parsers)
-      (fn (input index)
+      (fn (input)
         (loop ([parsers parsers]
-               [current-index index]
+               [current-input input]
                [results (list)]
                [failures (list)])
-          (if (and current-index (not (empty? parsers)))
+          (if (and current-input (not (empty? parsers)))
             (block
-              (def res ((first parsers) input current-index))
+              (def res ((first parsers) current-input))
               (recur (rest parsers)
                      (and (has res :position) (get res :position))
                      (if (has res :result) (cons (get res :result) results) results)
                      (merge-failures failures (get res :failure))))
             (block
-             (def res (obj :position current-index :failure failures))
+             (def res (obj :position current-input :failure failures))
              (if (empty? results) res
               (if (= (size results) 1)
                (assoc res :result (first results))
@@ -134,13 +160,13 @@
 (def or/p
   (variadic
     (fn (parsers)
-      (fn (input index)
+      (fn (input)
         (loop ([parsers parsers]
                [failures (list)])
           (if (empty? parsers)
             (fail failures)
             (block
-              (def res ((first parsers) input index))
+              (def res ((first parsers) input))
               (def merged (merge-failures failures (get res :failure)))
               (if (get res :position)
                 (assoc res :failure merged)
@@ -148,23 +174,23 @@
 
 (def one-or-more
   (fn (parser)
-    (def self (fn (input index) ((seq parser (or/p self empty)) input index)))
+    (def self (fn (input) ((seq parser (or/p self empty)) input)))
     self))
 
 (def zero-or-more
   (fn (parser)
-    (def self (fn (input index) ((or/p (seq parser self) empty) input index)))
+    (def self (fn (input) ((or/p (seq parser self) empty) input)))
     self))
 
 (def describe
   (fn (name parser)
-    (fn (input index)
-      (def res (parser input index))
+    (fn (input)
+      (def res (parser input))
       (def failures (get res :failure))
       ; Because all failure lists have been summarized to only the longest parse,
       ; it is safe to only check the first.
-      (if (and (not (empty? failures)) (= index (get (first failures) :position)))
-        (assoc res :failure (list (obj :expected name :position index)))
+      (if (and (not (empty? failures)) (= (get input :index) (get (get (first failures) :position) :index)))
+        (assoc res :failure (list (obj :expected name :position input)))
         res))))
 
 ; Helps tie the recursive knot.
@@ -175,8 +201,8 @@
 
 (def action
   (fn (parser f)
-    (fn (input index)
-      (def res (parser input index))
+    (fn (input)
+      (def res (parser input))
       (if (get res :position)
         (assoc res :result (f (if (has res :result) (get res :result) null)))
         res))))
@@ -185,22 +211,22 @@
 
 (def capture-string
   (fn (parser)
-    (fn (input index)
-      (def res (parser input index))
+    (fn (input)
+      (def res (parser input))
       (if (get res :position)
-        (assoc res :result (substring input index (get res :position)))
+        (assoc res :result (input-substring input (get res :position)))
         res))))
 
 (def parse-failure
   (fn (failures)
-    (def pos (get (first failures) :position))
+    (def pos (get (get (first failures) :position) :srcpos))
     (def msgs (map (fn (f) (get f :expected)) failures))
-    (error (string-append "Parse error at position " (number->string pos) ". Expected one of")
+    (error (string-append "Parse error at " (number->string (get pos :line)) ":" (number->string (get pos :column)) ". Expected one of")
            (string-append (string-join msgs ", ")))))
 
 (def parse
-  (fn (grammar input index)
-    (def res (grammar input index))
+  (fn (grammar input)
+    (def res (grammar input))
     (if (not (get res :position))
       (parse-failure (get res :failure))
       res)))

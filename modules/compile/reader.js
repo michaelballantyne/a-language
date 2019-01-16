@@ -61,9 +61,9 @@
 (def top (seq sexp-list eof))
 
 (def read
-  (fn (s index)
-    (def res (parse top s index))
-    (if (=== (size s) (get res :position))
+  (fn (input)
+    (def res (parse top input))
+    (if (= (size (get input :string)) (get (get res :position) :index))
       (get res :result)
       (error :read res))))
 
@@ -71,5 +71,5 @@
   (fn (args)
     (read-stdin
       (fn (s)
-        (displayln (read s 0))))))
+        (displayln (read (hash :string s :index 0 :srcpos (hash :line 1 :column 0))))))))
 

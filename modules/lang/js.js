@@ -14,14 +14,14 @@
                                                         empty-as-list))))
 
 (def compile-js
-  (fn (source index runner)
+  (fn (input runner)
     (def res (parse (seq (header "require" module-name) (c newline)
                          (header "provide" id-string) (c newline))
-                    source index))
-    (if (and (get res :position) (<= (get res :position) (size source)))
+                    input))
+    (if (and (get res :position) (<= (get (get res :position) :index) (size (get input :string))))
       (compiled-module
         (get (get res :result) 0)
         (get (get res :result) 1)
-        (substring source (get res :position) (size source)))
+        (substring (get input :string) (get (get res :position) :index) (size (get input :string))))
       (error :compile-language res))))
 (def compile-language compile-js)

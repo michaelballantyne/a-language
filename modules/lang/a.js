@@ -4,7 +4,7 @@
 (provide compile-a compile-language)
 
 (def compile-a
- (fn (source index runner)
-    (compile-module (parse-module (read source index) runner))))
+ (fn (input runner)
+    (compile-module (parse-module (read input) runner))))
 
 (def compile-language compile-a)

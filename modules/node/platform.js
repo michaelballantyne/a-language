@@ -8,7 +8,11 @@
     function resolve(name) {
         const text = fs.readFileSync("modules/" + name + ".js").toString();
 
-        return text;
+        return {
+            string: text,
+            index: 0,
+            srcpos: {line: 1, column: 0}
+        };
     }
 
     function eval_module(text) {
