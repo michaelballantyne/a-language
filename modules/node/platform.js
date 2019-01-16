@@ -6,10 +6,12 @@
     const vm = require("vm");
 
     function resolve(name) {
+        const filename = "modules/" + name + ".js";
         const text = fs.readFileSync("modules/" + name + ".js").toString();
 
         return {
             string: text,
+            source: filename,
             index: 0,
             srcpos: {line: 1, column: 0}
         };

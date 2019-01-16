@@ -1,7 +1,7 @@
 #lang a
 
 (require runtime/runtime)
-(provide test-input-rep c c-not c-range string/p empty seq or/p eof one-or-more zero-or-more describe nonterm action apply-action capture-string parse whitespace alpha digit empty-as-list module-name id-string idchar newline/p)
+(provide test-input-rep with-srcloc c c-not c-range string/p empty seq or/p eof one-or-more zero-or-more describe nonterm action apply-action capture-string parse whitespace alpha digit empty-as-list module-name id-string idchar newline/p)
 
 ; This is a simple PEG (not packrat) parsing framework, though all the langauges it is used for are LL(1).
 ; When reporting failures, all but the longest parse is dropped. Because the underlying parsing is PEG rather
@@ -35,8 +35,8 @@
     (def step-srcpos
       (fn (pos c)
         (if (=== newline c)
-          (hash :line (+ 1 (get pos :line)) :column 0)
-          (hash :line (get pos :line) :column (+ 1 (get pos :column))))))
+          (obj :line (+ 1 (get pos :line)) :column 0)
+          (obj :line (get pos :line) :column (+ 1 (get pos :column))))))
     (loop ([n-chars n-chars]
            [index (get input :index)]
            [srcpos (get input :srcpos)])
@@ -46,14 +46,34 @@
                (step-srcpos srcpos (get (get input :string) index)))))))
 
 (def input-substring
-  (fn (start-input end-input)
+  (fn (start-input after-input)
     (substring (get start-input :string)
                (get start-input :index)
-               (get end-input :index))))
+               (get after-input :index))))
+
+(def inputs->srcloc
+  (fn (start-input after-input)
+    (obj :source (get start-input :source)
+         :start (get start-input :srcpos)
+         :end (get after-input :srcpos))))
+
+(def with-srcloc
+  (fn (parser)
+    (fn (input)
+      (def res (parser input))
+      (if (get res :position)
+        (block
+          (def loc (inputs->srcloc input (get res :position)))
+          (def new-result (assoc (get res :result) :loc loc))
+          (def _ (if (not (has res :result))
+                   (error "with-srcloc" (string-append "term does not have result: " (to-string res)))
+                   null))
+          (assoc res :result new-result))
+        res))))
 
 (def test-input-rep
   (fn (args)
-    (def init (hash :string (string-append "foo" newline "bar") :index 0 :srcpos (hash :line 1 :column 0)))
+    (def init (obj :string (string-append "foo" newline "bar") :index 0 :srcpos (obj :line 1 :column 0)))
     (def _1 (displayln (advance-input init 3)))
     (def _2 (displayln (advance-input init 4)))
     (def _3 (displayln (input-substring init (advance-input init 3))))

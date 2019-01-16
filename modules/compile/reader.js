@@ -71,5 +71,5 @@
   (fn (args)
     (read-stdin
       (fn (s)
-        (displayln (read (hash :string s :index 0 :srcpos (hash :line 1 :column 0))))))))
+        (displayln (read (obj :string s :source "stdin" :index 0 :srcpos (obj :line 1 :column 0))))))))
 

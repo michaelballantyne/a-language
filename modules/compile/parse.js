@@ -112,20 +112,20 @@
     (string-append (transform-reserved (identifier-string id)) (to-string n))))
 
 ; Env = (Hash Identifier EnvRHS)
-; EnvRHS = (OneOf def-env-rhs (hash :core-form Parser))
+; EnvRHS = (OneOf def-env-rhs (obj :core-form Parser))
 ; Parser = (-> Stx Env IR)
 
 (def app-parser
   (fn (exp env)
     (if (< (size exp) 1)
       (syntax-error exp)
-      (hash :app-exps (map (fn (e) (parse-exp e env)) exp)))))
+      (obj :app-exps (map (fn (e) (parse-exp e env)) exp)))))
 
 (def if-parser
   (fn (exp env)
     (if (not (= (size exp) 4))
       (syntax-error exp)
-      (hash :if-c (parse-exp (get exp 1) env)
+      (obj :if-c (parse-exp (get exp 1) env)
             :if-t (parse-exp (get exp 2) env)
             :if-e (parse-exp (get exp 3) env)))))
 
@@ -133,9 +133,9 @@
   (fn (exp env)
     (if (not (= (size exp) 3))
       (syntax-error exp)
-      (hash :if-c (parse-exp (get exp 1) env)
+      (obj :if-c (parse-exp (get exp 1) env)
             :if-t (parse-exp (get exp 2) env)
-            :if-e (hash :literal false)))))
+            :if-e (obj :literal false)))))
 
 (def or-parser
   (fn (exp env)
@@ -143,10 +143,10 @@
       (syntax-error exp)
       (block
         (def tmpid (gensym (make-identifier "tmp")))
-        (hash :block-exp true
-              :block-defs (list (hash :id tmpid :rhs (parse-exp (get exp 1) env)))
-              :block-ret (hash :if-c (hash :local-ref tmpid)
-                               :if-t (hash :local-ref tmpid)
+        (obj :block-exp true
+              :block-defs (list (obj :id tmpid :rhs (parse-exp (get exp 1) env)))
+              :block-ret (obj :if-c (obj :local-ref tmpid)
+                               :if-t (obj :local-ref tmpid)
                                :if-e (parse-exp (get exp 2) env)))))))
 
 (def block-parser
@@ -165,7 +165,7 @@
         (def _ (if (not (and (list? args) (map identifier? args)))
                  (syntax-error exp)
                  null))
-        (def new-env (foldl (fn (env arg) (assoc env arg (hash :local-ref (gensym arg)))) env args))
+        (def new-env (foldl (fn (env arg) (assoc env arg (obj :local-ref (gensym arg)))) env args))
         (assoc
           (assoc (parse-block (rest (rest exp)) new-env)
                  :fn-args (map (fn (arg) (get (get new-env arg) :local-ref)) args))
@@ -183,7 +183,7 @@
                  (syntax-error exp)
                  null))
         (def surface-vars (map (fn (pr) (get pr 0)) binding-list))
-        (def new-env (foldl (fn (env var) (assoc env var (hash :local-ref (gensym var)))) env surface-vars))
+        (def new-env (foldl (fn (env var) (assoc env var (obj :local-ref (gensym var)))) env surface-vars))
         (assoc
           (assoc (parse-block (rest (rest exp)) new-env)
                  :loop-vars (map (fn (var) (get (get new-env var) :local-ref)) surface-vars))
@@ -191,20 +191,20 @@
 
 (def recur-parser
   (fn (exp env)
-    (hash :recur-exps (map (fn (e) (parse-exp e env)) (rest exp))
+    (obj :recur-exps (map (fn (e) (parse-exp e env)) (rest exp))
           :recur-temps (map (fn (_) (gensym (make-identifier "tmp"))) (rest exp)))))
 
-(def def-env-rhs (hash :def true))
+(def def-env-rhs (obj :def true))
 
 (def initial-env
   (hash (make-identifier "def") def-env-rhs
-        (make-identifier "fn") (hash :core-form fn-parser)
-        (make-identifier "if") (hash :core-form if-parser)
-        (make-identifier "or") (hash :core-form or-parser)
-        (make-identifier "and") (hash :core-form and-parser)
-        (make-identifier "loop") (hash :core-form loop-parser)
-        (make-identifier "block") (hash :core-form block-parser)
-        (make-identifier "recur") (hash :core-form recur-parser)))
+        (make-identifier "fn") (obj :core-form fn-parser)
+        (make-identifier "if") (obj :core-form if-parser)
+        (make-identifier "or") (obj :core-form or-parser)
+        (make-identifier "and") (obj :core-form and-parser)
+        (make-identifier "loop") (obj :core-form loop-parser)
+        (make-identifier "block") (obj :core-form block-parser)
+        (make-identifier "recur") (obj :core-form recur-parser)))
 
 (def match-def
   (fn (form env)
@@ -212,7 +212,7 @@
              (equal? def-env-rhs (get env (get form 0))))
       (if (and (= 3 (size form))
                (identifier? (get form 1)))
-        (hash :id (get form 1) :exp (get form 2))
+        (obj :id (get form 1) :exp (get form 2))
         (syntax-error form))
       ; right now, it's always a sequence of defs than an exp in a block
       (syntax-error form))))
@@ -221,9 +221,9 @@
   (fn (forms env)
     (def defs (map (fn (f) (match-def f env)) forms))
     (def surface-ids (map (fn (d) (get d :id)) defs))
-    (def new-env (foldl (fn (env id) (assoc env id (hash :local-ref (gensym id)))) env surface-ids))
+    (def new-env (foldl (fn (env id) (assoc env id (obj :local-ref (gensym id)))) env surface-ids))
     (def rhss (map (fn (d) (parse-exp (get d :exp) new-env)) defs))
-    (hash :block-defs (zip (fn (id rhs) (hash :id id :rhs rhs))
+    (obj :block-defs (zip (fn (id rhs) (obj :id id :rhs rhs))
                            (map (fn (id) (get (get new-env id) :local-ref)) surface-ids)
                            rhss)
           :surface-def-ids surface-ids
@@ -238,13 +238,13 @@
         (def parsed-defs (parse-defs (reverse (rest reversed)) env))
         (def new-env (get parsed-defs :new-env))
         (def parsed-ret (parse-exp (first reversed) new-env))
-        (hash :block-defs (get parsed-defs :block-defs)
+        (obj :block-defs (get parsed-defs :block-defs)
               :block-ret parsed-ret)))))
 
 (def parse-exp
   (fn (exp env)
     (if (or (number? exp) (string? exp))
-      (hash :literal exp)
+      (obj :literal exp)
       (if (identifier? exp)
         (if (not (has env exp))
           (unbound-reference-error exp)
@@ -303,7 +303,7 @@
                (foldl
                  (fn (env name)
                    (assoc env (make-identifier name)
-                          (hash :module-ref-sym (get module-bindings req)
+                          (obj :module-ref-sym (get module-bindings req)
                                 :module-ref-field name)))
                  env (get decl :exports)))
              initial-env requires))
@@ -316,7 +316,7 @@
 
     (def provide-internal-ids (map (fn (p) (get (get (get parsed-defs :new-env) p) :local-ref)) provides))
 
-    (hash
+    (obj
       :module-requires (map identifier-string requires)
       :module-require-internal-ids (map (fn (r) (get module-bindings r)) requires)
       :module-provides (map identifier-string provides)
