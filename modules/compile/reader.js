@@ -3,17 +3,34 @@
 (require runtime/runtime compile/parser-tools)
 (provide main read)
 
+; Syntax = (has :loc :e)
+
+(def wrap-syntax
+  (fn (parser)
+    (fn (input)
+      (def res (parser input))
+      (if (get res :position)
+        (block
+          (def _ (if (not (has res :result))
+                   (error "with-srcloc" (string-append "term does not have result: " (to-string res)))
+                   null))
+          (def loc (inputs->srcloc input (get res :position)))
+          (assoc res
+                 :result (obj :loc loc
+                              :e (get res :result))))
+        res))))
+
 (def sexp
   (nonterm
     "s-expression"
     (fn ()
       (or/p
-        id
-        integer
-        string
-        keyword
-        (seq (c "(") sexp-list (c ")"))
-        (seq (c "[") sexp-list (c "]"))))))
+        (wrap-syntax id)
+        (wrap-syntax integer)
+        (wrap-syntax string)
+        (wrap-syntax keyword)
+        (wrap-syntax (seq (c "(") sexp-list (c ")")))
+        (wrap-syntax (seq (c "[") sexp-list (c "]")))))))
 
 (def sexp-list
   (nonterm
@@ -36,7 +53,7 @@
 (def id
   (nonterm
     "identifier"
-    (fn () (action id-string make-identifier))))
+    (fn () (action id-string prim-make-identifier))))
 
 (def keyword
   (nonterm

@@ -3,13 +3,26 @@
 (require runtime/runtime compile/reader)
 (provide parse-module transform-reserved)
 
-(def syntax-error
-  (fn (stx)
-    (error "bad syntax" (to-string stx))))
-
 (def unbound-reference-error
   (fn (id)
-    (error "unbound reference" (identifier-string id))))
+    (syntax-error (string-append "unbound reference" (identifier-string id)) id)))
+
+(def syntax?
+  (fn (s)
+    (has s :e)))
+
+(def syntax-e
+  (fn (s)
+    (get s :e)))
+
+(def identifier?
+  (fn (i)
+    (and (syntax? i)
+         (prim-identifier? (syntax-e i)))))
+
+(def identifier-string
+  (fn (i)
+    (prim-identifier-string (syntax-e i))))
 
 ; Currently unused, becuase local names are always postfixed with a gensym counter.
 ; In the future I might want to minimize name mangling, so I'll keep the list for now.
@@ -109,40 +122,44 @@
   (fn (id)
     (def n (unbox gensym-counter))
     (def _ (set-box! gensym-counter (+ 1 n)))
-    (string-append (transform-reserved (identifier-string id)) (to-string n))))
+    (string-append (transform-reserved (prim-identifier-string id)) (to-string n))))
 
 ; Env = (Hash Identifier EnvRHS)
 ; EnvRHS = (OneOf def-env-rhs (obj :core-form Parser))
 ; Parser = (-> Stx Env IR)
 
 (def app-parser
-  (fn (exp env)
+  (fn (wexp env)
+    (def exp (syntax-e wexp))
     (if (< (size exp) 1)
-      (syntax-error exp)
+      (syntax-error "bad app syntax" wexp)
       (obj :app-exps (map (fn (e) (parse-exp e env)) exp)))))
 
 (def if-parser
-  (fn (exp env)
+  (fn (wexp env)
+    (def exp (syntax-e wexp))
     (if (not (= (size exp) 4))
-      (syntax-error exp)
+      (syntax-error "bad if syntax" wexp)
       (obj :if-c (parse-exp (get exp 1) env)
             :if-t (parse-exp (get exp 2) env)
             :if-e (parse-exp (get exp 3) env)))))
 
 (def and-parser
-  (fn (exp env)
+  (fn (wexp env)
+    (def exp (syntax-e wexp))
     (if (not (= (size exp) 3))
-      (syntax-error exp)
+      (syntax-error "bad and syntax" wexp)
       (obj :if-c (parse-exp (get exp 1) env)
             :if-t (parse-exp (get exp 2) env)
             :if-e (obj :literal false)))))
 
 (def or-parser
-  (fn (exp env)
+  (fn (wexp env)
+    (def exp (syntax-e wexp))
     (if (not (= (size exp) 3))
-      (syntax-error exp)
+      (syntax-error "bad or syntax" wexp)
       (block
-        (def tmpid (gensym (make-identifier "tmp")))
+        (def tmpid (gensym (prim-make-identifier "tmp")))
         (obj :block-exp true
               :block-defs (list (obj :id tmpid :rhs (parse-exp (get exp 1) env)))
               :block-ret (obj :if-c (obj :local-ref tmpid)
@@ -150,81 +167,86 @@
                                :if-e (parse-exp (get exp 2) env)))))))
 
 (def block-parser
-  (fn (exp env)
+  (fn (wexp env)
+    (def exp (syntax-e wexp))
     (def parsed-block (parse-block (rest exp) env))
     (if (empty? (get parsed-block :block-defs))
       (get parsed-block :block-ret)
       (assoc parsed-block :block-exp true))))
 
 (def fn-parser
-  (fn (exp env)
+  (fn (wexp env)
+    (def exp (syntax-e wexp))
     (if (< (size exp) 3)
-      (syntax-error exp)
+      (syntax-error "bad fn syntax" wexp)
       (block
-        (def args (get exp 1))
+        (def args (syntax-e (get exp 1)))
         (def _ (if (not (and (list? args) (map identifier? args)))
-                 (syntax-error exp)
+                 (syntax-error "bad fn syntax" wexp)
                  null))
-        (def new-env (foldl (fn (env arg) (assoc env arg (obj :local-ref (gensym arg)))) env args))
+        (def new-env (foldl (fn (env arg) (assoc env (syntax-e arg) (obj :local-ref (gensym (syntax-e arg))))) env args))
         (assoc
           (assoc (parse-block (rest (rest exp)) new-env)
-                 :fn-args (map (fn (arg) (get (get new-env arg) :local-ref)) args))
+                 :fn-args (map (fn (arg) (get (get new-env (syntax-e arg)) :local-ref)) args))
           ; A hack: the compiler only needs temporaries for this one transform,
           ; so we'll generate them here.
-          :fn-temps (map gensym args))))))
+          :fn-temps (map gensym (map syntax-e args)))))))
 
 (def loop-parser
-  (fn (exp env)
+  (fn (wexp env)
+    (def exp (syntax-e wexp))
     (if (< (size exp) 3)
-      (syntax-error exp)
+      (syntax-error "bad loop syntax" wexp)
       (block
-        (def binding-list (get exp 1))
+        (def binding-list (syntax-e (get exp 1)))
         (def _ (if (not (list? binding-list))
-                 (syntax-error exp)
+                 (syntax-error "bad loop binding list" (get exp 1))
                  null))
-        (def surface-vars (map (fn (pr) (get pr 0)) binding-list))
-        (def new-env (foldl (fn (env var) (assoc env var (obj :local-ref (gensym var)))) env surface-vars))
+        (def surface-vars (map (fn (pr) (get (syntax-e pr) 0)) binding-list))
+        (def new-env (foldl (fn (env var) (assoc env (syntax-e var) (obj :local-ref (gensym (syntax-e var))))) env surface-vars))
         (assoc
           (assoc (parse-block (rest (rest exp)) new-env)
-                 :loop-vars (map (fn (var) (get (get new-env var) :local-ref)) surface-vars))
-          :loop-inits (map (fn (pr) (parse-exp (get pr 1) env)) binding-list))))))
+                 :loop-vars (map (fn (var) (get (get new-env (syntax-e var)) :local-ref)) surface-vars))
+          :loop-inits (map (fn (pr) (parse-exp (get (syntax-e pr) 1) env)) binding-list))))))
 
 (def recur-parser
-  (fn (exp env)
+  (fn (wexp env)
+    (def exp (syntax-e wexp))
     (obj :recur-exps (map (fn (e) (parse-exp e env)) (rest exp))
-          :recur-temps (map (fn (_) (gensym (make-identifier "tmp"))) (rest exp)))))
+          :recur-temps (map (fn (_) (gensym (prim-make-identifier "tmp"))) (rest exp)))))
 
 (def def-env-rhs (obj :def true))
 
 (def initial-env
-  (hash (make-identifier "def") def-env-rhs
-        (make-identifier "fn") (obj :core-form fn-parser)
-        (make-identifier "if") (obj :core-form if-parser)
-        (make-identifier "or") (obj :core-form or-parser)
-        (make-identifier "and") (obj :core-form and-parser)
-        (make-identifier "loop") (obj :core-form loop-parser)
-        (make-identifier "block") (obj :core-form block-parser)
-        (make-identifier "recur") (obj :core-form recur-parser)))
+  (hash (prim-make-identifier "def") def-env-rhs
+        (prim-make-identifier "fn") (obj :core-form fn-parser)
+        (prim-make-identifier "if") (obj :core-form if-parser)
+        (prim-make-identifier "or") (obj :core-form or-parser)
+        (prim-make-identifier "and") (obj :core-form and-parser)
+        (prim-make-identifier "loop") (obj :core-form loop-parser)
+        (prim-make-identifier "block") (obj :core-form block-parser)
+        (prim-make-identifier "recur") (obj :core-form recur-parser)))
 
 (def match-def
   (fn (form env)
-    (if (and (list? form)
-             (equal? def-env-rhs (get env (get form 0))))
-      (if (and (= 3 (size form))
-               (identifier? (get form 1)))
-        (obj :id (get form 1) :exp (get form 2))
-        (syntax-error form))
+    (if (and (syntax? form)
+             (and (list? (syntax-e form))
+                  (equal? def-env-rhs (get env (syntax-e (get (syntax-e form) 0))))))
+      (if (and (= 3 (size (syntax-e form)))
+               (identifier? (get (syntax-e form) 1)))
+        (obj :id (get (syntax-e form) 1) :exp (get (syntax-e form) 2))
+        (syntax-error "bad def syntax" form))
       ; right now, it's always a sequence of defs than an exp in a block
-      (syntax-error form))))
+      (syntax-error "bad def syntax" form))))
 
 (def parse-defs
   (fn (forms env)
     (def defs (map (fn (f) (match-def f env)) forms))
     (def surface-ids (map (fn (d) (get d :id)) defs))
-    (def new-env (foldl (fn (env id) (assoc env id (obj :local-ref (gensym id)))) env surface-ids))
+    (def new-env (foldl (fn (env id) (assoc env (syntax-e id) (obj :local-ref (gensym (syntax-e id))))) env surface-ids))
     (def rhss (map (fn (d) (parse-exp (get d :exp) new-env)) defs))
     (obj :block-defs (zip (fn (id rhs) (obj :id id :rhs rhs))
-                           (map (fn (id) (get (get new-env id) :local-ref)) surface-ids)
+                           (map (fn (id) (get (get new-env (syntax-e id)) :local-ref)) surface-ids)
                            rhss)
           :surface-def-ids surface-ids
           :new-env new-env)))
@@ -242,67 +264,81 @@
               :block-ret parsed-ret)))))
 
 (def parse-exp
-  (fn (exp env)
+  (fn (wexp env)
+    (def exp (syntax-e wexp))
     (if (or (number? exp) (string? exp))
       (obj :literal exp)
-      (if (identifier? exp)
+      (if (prim-identifier? exp)
         (if (not (has env exp))
-          (unbound-reference-error exp)
+          (unbound-reference-error wexp)
           (block
             (def env-entry (get env exp))
             (if (or (has env-entry :local-ref) (has env-entry :module-ref-sym))
               env-entry
               (if (has env-entry :core-form)
-                (syntax-error exp)
+                (syntax-error "syntactic form referenced as variable" wexp)
                 (error "parse-exp internal error" "malformed environment")))))
         (block
           (def rator (get exp 0))
-          (if (and (and (identifier? rator) (has env rator)) (has (get env rator) :core-form))
-            ((get (get env rator) :core-form) exp env)
-            (app-parser exp env)))))))
+          (if (and (and (identifier? rator) (has env (syntax-e rator))) (has (get env (syntax-e rator)) :core-form))
+            ((get (get env (syntax-e rator)) :core-form) wexp env)
+            (app-parser wexp env)))))))
 
 (def andmap
   (fn (f l)
     (foldl (fn (a b) (and a b)) true
            (map f l))))
 
+(def syntax-error
+  (fn (msg stx)
+    (def loc (get stx :loc))
+    (def source (get loc :source))
+    (def position->string
+      (fn (pos)
+        (string-append (number->string (get pos :line)) ":" (number->string (+ 1 (get pos :column))))))
+    (def range (string-append (position->string (get loc :start)) "-" (position->string (get loc :end))))
+    (error (string-append "syntax error in " source " at " range) msg)))
+
 (def parse-module
   (fn (sexp runner)
     (def module-syntax-error
-      (fn () (error "syntax error" "module must start with require and provide forms")))
+      (fn (stx) (syntax-error "module must start with require and provide forms" stx)))
 
     (def _ (if (not (list? sexp))
-             (module-syntax-error)
+             (contract-error "parse-module" "(ListOf Syntax)" sexp)
              null))
 
     (def valid-reqprov?
-      (fn (form name)
-        (and (and (list? form)
-                  (> (size form) 0))
-             (and (equal? (get form 0) (make-identifier name))
-                  (andmap identifier? (rest form))))))
+      (fn (wform name)
+        (and (syntax? wform)
+             (block
+               (def form (syntax-e wform))
+               (and (and (list? form)
+                         (> (size form) 0))
+                    (and (equal? (syntax-e (get form 0)) (prim-make-identifier name))
+                         (andmap identifier? (rest form))))))))
 
     (def require-form (get sexp 0))
     (def _2 (if (not (valid-reqprov? require-form "require"))
-              (module-syntax-error)
+              (module-syntax-error require-form)
               null))
 
     (def provide-form (get sexp 1))
     (def _3 (if (not (valid-reqprov? provide-form "provide"))
-              (module-syntax-error)
+              (module-syntax-error provide-form)
               null))
 
-    (def requires (rest require-form))
-    (def provides (rest provide-form))
+    (def requires (map syntax-e (rest (syntax-e require-form))))
+    (def provides (map syntax-e (rest (syntax-e provide-form))))
     (def body (rest (rest sexp)))
 
     (def module-bindings (foldl (fn (table name) (assoc table name (gensym name))) (hash) requires))
     (def module-env
       (foldl (fn (env req)
-               (def decl ((get runner :load) (identifier-string req)))
+               (def decl ((get runner :load) (prim-identifier-string req)))
                (foldl
                  (fn (env name)
-                   (assoc env (make-identifier name)
+                   (assoc env (prim-make-identifier name)
                           (obj :module-ref-sym (get module-bindings req)
                                 :module-ref-field name)))
                  env (get decl :exports)))
@@ -310,15 +346,15 @@
 
     (def parsed-defs (parse-defs body module-env))
 
-    (def _4 (if (not (subset provides (get parsed-defs :surface-def-ids)))
+    (def _4 (if (not (subset provides (map syntax-e (get parsed-defs :surface-def-ids))))
               (error "syntax error" "some provided identifiers not defined")
               null))
 
     (def provide-internal-ids (map (fn (p) (get (get (get parsed-defs :new-env) p) :local-ref)) provides))
 
     (obj
-      :module-requires (map identifier-string requires)
+      :module-requires (map prim-identifier-string requires)
       :module-require-internal-ids (map (fn (r) (get module-bindings r)) requires)
-      :module-provides (map identifier-string provides)
+      :module-provides (map prim-identifier-string provides)
       :module-provide-internal-ids provide-internal-ids
       :block-defs (get parsed-defs :block-defs))))

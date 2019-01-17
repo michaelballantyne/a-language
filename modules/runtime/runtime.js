@@ -1,6 +1,6 @@
 #lang js
 // require: vendor/immutable, runtime/minimal
-// provide: identifier?, number?, string?, js-object?, js-array?, make-identifier, identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, list, assoc, empty?, append, null, number->string, first, rest, variadic, cons, size, function?, apply, substring, list/c, function/c, newline, string->integer, read-stdin, double-quote, to-string, character-code, contains, reverse, array, list->array, array->list, map, foldl, box, box?, unbox, set-box!, string-split, string-join, equal?, zip, subset, list?, string-trim, now
+// provide: prim-identifier?, number?, string?, js-object?, js-array?, prim-make-identifier, prim-identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, prim-identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, list, assoc, empty?, append, null, number->string, first, rest, variadic, cons, size, function?, apply, substring, list/c, function/c, newline, string->integer, read-stdin, double-quote, to-string, character-code, contains, reverse, array, list->array, array->list, map, foldl, box, box?, unbox, set-box!, string-split, string-join, equal?, zip, subset, list?, string-trim, now, contract-error
 (function (Immutable, runtime__minimal) {
     let raise_arity_error = runtime__minimal["raise-arity-error"]
 
@@ -72,13 +72,28 @@
         return id["identifier"];
     }
 
+    function contract_error(name, expected, given) {
+        if (3 !== arguments.length) {
+            raise_arity_error("contract-error", 3, arguments.length);
+        }
+
+        if (!is_string(name)) {
+            throw Error("contract-error: contract violation\n  expected: string?\n  given: " + to_string(name));
+        }
+        if (!is_string(expected)) {
+            throw Error("contract-error: contract violation\n  expected: string?\n  given: " + to_string(expected));
+        }
+
+        throw Error(name + ": contract violation\n  expected: " + expected + "\n  given: " + to_string(given));
+    }
+
     function number_c(name, v) {
         if (2 !== arguments.length) {
             raise_arity_error("number/c", 2, arguments.length);
         }
 
         if (!is_number(v)) {
-            throw Error(name + ": contract violation\n  expected: number?\n  given: " + v);
+            contract_error(name, "number?", v);
         }
     }
 
@@ -652,11 +667,11 @@
     return {
         "number?": is_number,
         "string?": is_string,
-        "identifier?": is_identifier,
+        "prim-identifier?": is_identifier,
         "js-object?": is_js_object,
         "js-array?": is_js_array,
-        "make-identifier": make_identifier,
-        "identifier-string": get_identifier_string,
+        "prim-make-identifier": make_identifier,
+        "prim-identifier-string": get_identifier_string,
         "true": true,
         "false": false,
         "+": checked_num_binop("+", (a, b) => a + b),
@@ -673,7 +688,7 @@
         "raise-arity-error": raise_arity_error,
         "number/c": number_c,
         "string/c": string_c,
-        "identifier/c": identifier_c,
+        "prim-identifier/c": identifier_c,
         "has": has,
         "get": get,
         "make-keyword": make_keyword,
@@ -724,6 +739,7 @@
         "subset": subset,
         "list?": is_list,
         "string-trim": string_trim,
-        "now": Date.now
+        "now": Date.now,
+        "contract-error": contract_error
     }
 })
