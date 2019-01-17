@@ -62,7 +62,10 @@
 
 (def read
   (fn (input)
+    ;(def start (now))
     (def res (parse top input))
+    ;(def end (now))
+    ;(def _ (displayln (/ (- end start) 1000)))
     (if (= (size (get input :string)) (get (get res :position) :index))
       (get res :result)
       (error :read res))))

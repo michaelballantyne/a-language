@@ -27,23 +27,24 @@
   (fn (input n-chars)
     (has (get input :string) (+ (get input :index) (- n-chars 1)))))
 
+(def step-input
+  (fn (input)
+    (def pos (get input :srcpos))
+    (def index (get input :index))
+    (assoc (assoc input
+                  :index (+ 1 index))
+           :srcpos (if (=== newline (get (get input :string) index))
+                     (obj :line (+ 1 (get pos :line)) :column 0)
+                     (obj :line (get pos :line) :column (+ 1 (get pos :column)))))))
+
 (def advance-input
   (fn (input n-chars)
-    (def _ (if (not (input-has-chars? input n-chars))
-             (error "advance-input" "input does not have enough characters")
-             null))
-    (def step-srcpos
-      (fn (pos c)
-        (if (=== newline c)
-          (obj :line (+ 1 (get pos :line)) :column 0)
-          (obj :line (get pos :line) :column (+ 1 (get pos :column))))))
     (loop ([n-chars n-chars]
-           [index (get input :index)]
-           [srcpos (get input :srcpos)])
-      (if (= n-chars 0)
-        (assoc (assoc input :index index) :srcpos srcpos)
-        (recur (- n-chars 1) (+ index 1)
-               (step-srcpos srcpos (get (get input :string) index)))))))
+           [input input])
+      (if (= 0 n-chars)
+        input
+        (recur (- n-chars 1)
+               (step-input input))))))
 
 (def input-substring
   (fn (start-input after-input)
@@ -90,16 +91,22 @@
 (def string/p
   (fn (to-match)
     (fn (input)
-      (if (and (input-has-chars? input (size to-match))
-               (equal? to-match (input-substring input (advance-input input (size to-match)))))
-        (succeed (advance-input input (size to-match)))
+      (def sz (size to-match))
+      (if (input-has-chars? input sz)
+        (block
+          (def next-input (advance-input input sz))
+          (if (=== to-match (input-substring input next-input))
+            (succeed next-input)
+            (fail (list (obj :expected (string-append "string " to-match) :position input)))))
         (fail (list (obj :expected (string-append "string " to-match) :position input)))))))
 
 (def c-pred
   (fn (pred description)
     (fn (input)
-      (if (and (input-has-chars? input 1) (pred (input-substring input (advance-input input 1))))
-        (succeed (advance-input input 1))
+      (if (input-has-chars? input 1)
+        (if (pred (get (get input :string) (get input :index)))
+          (succeed (step-input input))
+          (fail (list (obj :expected description :position input))))
         (fail (list (obj :expected description :position input)))))))
 
 (def c
@@ -150,7 +157,7 @@
             (block
               (def res ((first parsers) current-input))
               (recur (rest parsers)
-                     (and (has res :position) (get res :position))
+                     (get res :position)
                      (if (has res :result) (cons (get res :result) results) results)
                      (merge-failures failures (get res :failure))))
             (block
@@ -194,13 +201,15 @@
 
 (def one-or-more
   (fn (parser)
-    (def self (fn (input) ((seq parser (or/p self empty)) input)))
-    self))
+    (def self (box null))
+    (def _ (set-box! self (seq parser (or/p (fn (input) ((unbox self) input)) empty))))
+    (unbox self)))
 
 (def zero-or-more
   (fn (parser)
-    (def self (fn (input) ((or/p (seq parser self) empty) input)))
-    self))
+    (def self (box null))
+    (def _ (set-box! self (or/p (seq parser (fn (input) ((unbox self) input))) empty)))
+    (unbox self)))
 
 (def describe
   (fn (name parser)
@@ -216,8 +225,13 @@
 ; Helps tie the recursive knot.
 (def nonterm
   (fn (description f)
+    (def p (box false))
     (describe description
-              (variadic (fn (args) (apply (f) args))))))
+              (fn (input)
+                (def _ (if (not (unbox p))
+                            (set-box! p (f))
+                            null))
+                ((unbox p) input)))))
 
 (def action
   (fn (parser f)
@@ -240,8 +254,9 @@
 (def parse-failure
   (fn (failures)
     (def pos (get (get (first failures) :position) :srcpos))
+    (def source (get (get (first failures) :position) :source))
     (def msgs (map (fn (f) (get f :expected)) failures))
-    (error (string-append "Parse error at " (number->string (get pos :line)) ":" (number->string (get pos :column)) ". Expected one of")
+    (error (string-append "Parse error at " source ":" (number->string (get pos :line)) ":" (number->string (get pos :column)) ". Expected one of")
            (string-append (string-join msgs ", ")))))
 
 (def parse
