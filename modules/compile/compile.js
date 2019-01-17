@@ -273,9 +273,10 @@
         (def compiled-expressions
           (map (fn (e) (compile-expression e exp-ctx))
                (get e :recur-exps)))
-        (def tmp-assigns
-          (zip gen-assignment-stmt
-               (get e :recur-temps) compiled-expressions))
+        (def tmp-decls
+          (zip (fn (lhs rhs) (gen-binding lhs rhs :const))
+               (get e :recur-temps)
+               compiled-expressions))
         (def loop-var-assigns
           (zip (fn (loop-var tmp-var)
                  (gen-assignment-stmt
@@ -283,7 +284,7 @@
                    (compile-expression (obj :local-ref tmp-var) exp-ctx)))
                (recur-ctx-vars ctx) (get e :recur-temps)))
         (obj :type "BlockStatement"
-             :body (list->array (append tmp-assigns loop-var-assigns)))))
+             :body (list->array (append tmp-decls loop-var-assigns)))))
 
     (if (has e :literal) (compile-literal)
       (if (has e :local-ref) (compile-local-ref)
