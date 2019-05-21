@@ -13588,8 +13588,18 @@
         const vm = require("vm");
     
         function resolve(name) {
-            const filename = "modules/" + name + ".js";
-            const text = fs.readFileSync("modules/" + name + ".js").toString();
+            const afilename = "modules/" + name + ".a";
+            const jsfilename = "modules/" + name + ".js";
+    
+            var text;
+            let filename;
+            try {
+              text = fs.readFileSync(afilename).toString();
+              filename = afilename;
+            } catch (err) {
+              text = fs.readFileSync(jsfilename).toString();
+              filename = jsfilename;
+            }
     
             return {
                 string: text,
