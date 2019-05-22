@@ -1,8 +1,9 @@
 #lang js
 // require: vendor/immutable, runtime/minimal
-// provide: prim-identifier?, number?, string?, js-object?, js-array?, prim-make-identifier, prim-identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, prim-identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, list, assoc, empty?, append, null, number->string, first, rest, variadic, cons, size, function?, apply, substring, list/c, function/c, newline, string->integer, read-stdin, double-quote, to-string, character-code, contains, reverse, array, list->array, array->list, map, foldl, box, box?, unbox, set-box!, string-split, string-join, equal?, zip, subset, list?, string-trim, now, contract-error
-(function (Immutable, runtime__minimal) {
-    let raise_arity_error = runtime__minimal["raise-arity-error"]
+// provide: prim-identifier?, number?, string?, js-object?, js-array?, prim-make-identifier, prim-identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, prim-identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, list, assoc, empty?, append, null, number->string, first, rest, variadic, cons, size, function?, apply, substring, list/c, function/c, newline, string->integer, read-stdin, double-quote, to-string, character-code, contains, reverse, array, list->array, array->list, map, foldl, box, box?, unbox, set-box!, string-split, string-join, equal?, zip, subset, list?, string-trim, now, contract-error, hash/c, object->hash, hash->object
+(function (g) {
+    const Immutable = g["vendor/immutable"]
+    const raise_arity_error = g["runtime/minimal"]["raise-arity-error"]
 
     function is_string(arg) {
         if (1 !== arguments.length) {
@@ -401,6 +402,26 @@
         return Immutable.List(a);
     }
 
+    function hash_to_object(h) {
+        if (1 !== arguments.length) {
+            raise_arity_error("hash->object", 1, arguments.length);
+        }
+        hash_c("hash->object", h);
+
+        return h.toObject();
+    }
+
+    function object_to_hash(o) {
+        if (1 !== arguments.length) {
+            raise_arity_error("object->hash", 1, arguments.length);
+        }
+
+        if (!is_js_object(o)) {
+            throw Error("object->hash: contract violation\n  expected: object/c\n  given: " + o)
+        }
+
+        return Immutable.Map(o);
+    }
 
     function size(c) {
         if (Immutable.isCollection(c)) {
@@ -454,6 +475,12 @@
     function list_c(name, arg) {
         if (!Immutable.List.isList(arg)) {
             throw Error(name + ": contract violation\n  expected: list/c\n  given: " + String(arg));
+        }
+    }
+
+    function hash_c(name, arg) {
+        if (!Immutable.Map.isMap(arg)) {
+            throw Error(name + ": contract violation\n  expected: hash/c\n  given: " + String(arg));
         }
     }
 
@@ -740,6 +767,9 @@
         "list?": is_list,
         "string-trim": string_trim,
         "now": Date.now,
-        "contract-error": contract_error
+        "contract-error": contract_error,
+        "hash/c": hash_c,
+        "object->hash": object_to_hash,
+        "hash->object": hash_to_object
     }
 })

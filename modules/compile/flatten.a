@@ -3,22 +3,22 @@
 (require runtime/runtime compile/lang vendor/escodegen compile/parse)
 (provide flatten)
 
-(def gen-module-id
-  (fn (str)
-    (obj :type "Identifier"
-         :name (transform-reserved str))))
-
 (def gen-module-instance-declaration
-  (fn (name source deps)
-    (obj :type "VariableDeclaration"
-         :declarations
-         (array (obj :type "VariableDeclarator"
-                     :id (gen-module-id name)
-                     :init (obj :type "CallExpression"
+  (fn (name source)
+    (obj :type "ExpressionStatement"
+         :expression
+         (obj :type "AssignmentExpression"
+              :operator "="
+              :left (obj :type "MemberExpression"
+                         :object (obj :type "Identifier"
+                                      :name "$g")
+                         :property (obj :type "Literal"
+                                        :value name)
+                         :computed true)
+              :right (obj :type "CallExpression"
                                 :callee (obj :type "Literal"
                                              :verbatim source)
-                                :arguments (list->array (map gen-module-id deps)))))
-         :kind "const")))
+                                :arguments (array (obj :type "Identifier" :name "$g")))))))
 
 (def gen-iife-block-expression-statement
   (fn (body)
@@ -43,16 +43,31 @@
             (def instance-declaration
               (gen-module-instance-declaration
                 module-name
-                (get compiled :body-code)
-                (get compiled :imports)))
+                (get compiled :body-code)))
             (obj :declarations (cons instance-declaration (get acc2 :declarations))
                  :visited (assoc (get acc2 :visited) module-name true))))))
     (def module-declarations
       (reverse (get (flatten-internal (obj :declarations (list) :visited (hash)) main-module-name) :declarations)))
     (generate ; escodegen
       (gen-iife-block-expression-statement
-       (append
-        module-declarations
-         (list (obj :type "ReturnStatement"
-                    :argument (gen-module-id main-module-name)))))
+        (cons
+          (obj :type "VariableDeclaration"
+               :declarations
+               (array
+                 (obj :type "VariableDeclarator"
+                      :id (obj :type "Identifier"
+                               :name "$g")
+                      :init (obj :type "ObjectExpression"
+                                 :properties (array))))
+               :kind "const")
+          (append
+            module-declarations
+            (list (obj :type "ReturnStatement"
+                       :argument
+                       (obj :type "MemberExpression"
+                            :object (obj :type "Identifier"
+                                         :name "$g")
+                            :property (obj :type "Literal"
+                                           :value main-module-name)
+                            :computed true))))))
       (obj :verbatim :verbatim))))

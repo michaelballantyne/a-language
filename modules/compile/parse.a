@@ -273,7 +273,7 @@
           (unbound-reference-error wexp)
           (block
             (def env-entry (get env exp))
-            (if (or (has env-entry :local-ref) (has env-entry :module-ref-sym))
+            (if (or (has env-entry :local-ref) (has env-entry :module-ref-path))
               env-entry
               (if (has env-entry :core-form)
                 (syntax-error "syntactic form referenced as variable" wexp)
@@ -332,14 +332,13 @@
     (def provides (map syntax-e (rest (syntax-e provide-form))))
     (def body (rest (rest sexp)))
 
-    (def module-bindings (foldl (fn (table name) (assoc table name (gensym name))) (hash) requires))
     (def module-env
       (foldl (fn (env req)
                (def decl ((get runner :load) (prim-identifier-string req)))
                (foldl
                  (fn (env name)
                    (assoc env (prim-make-identifier name)
-                          (obj :module-ref-sym (get module-bindings req)
+                          (obj :module-ref-path (prim-identifier-string req)
                                 :module-ref-field name)))
                  env (get decl :exports)))
              initial-env requires))
@@ -354,7 +353,6 @@
 
     (obj
       :module-requires (map prim-identifier-string requires)
-      :module-require-internal-ids (map (fn (r) (get module-bindings r)) requires)
       :module-provides (map prim-identifier-string provides)
       :module-provide-internal-ids provide-internal-ids
       :block-defs (get parsed-defs :block-defs))))

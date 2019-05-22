@@ -1,7 +1,7 @@
 #lang js
 // require:
 // provide: generate
-(function () {
+(function (g) {
   function require(file, parentModule) {
     if ({}.hasOwnProperty.call(require.cache, file))
       return require.cache[file];

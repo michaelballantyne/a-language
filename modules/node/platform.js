@@ -1,7 +1,7 @@
 #lang js
 // require:
 // provide: make-platform
-(function () {
+(function (g) {
     const fs = require("fs")
     const vm = require("vm");
 

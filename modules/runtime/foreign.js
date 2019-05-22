@@ -1,7 +1,7 @@
 #lang js
 // require:
 // provide: _call, _obj-get, _undefined, _variadic, _typeof, _instanceof, _String, _Array, _isNaN, _===, _!==, _true, _false, _+, _-, _*, _/, _%, _<, _>, _>=, _<=, _=, _console_log, _not, _null
-(function () {
+(function (g) {
     function call(obj, method) {
         const args = Array.prototype.slice.call(arguments, 2)
         return obj[method].apply(obj, args)

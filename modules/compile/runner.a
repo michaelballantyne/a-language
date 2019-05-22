@@ -43,9 +43,8 @@
                 (def instance-map2
                   (foldl run-module-internal instance-map
                          (get module-declaration :imports)))
-                (def instance (apply (get module-declaration :body-function)
-                                     (map (fn (i) (get instance-map2 i))
-                                          (get module-declaration :imports))))
+                (def instance ((get module-declaration :body-function) 
+                               (hash->object instance-map2)))
                 ; TODO: clean up with expression in def ctx and when
                 (def _ (if (not (andmap (fn (export) (has instance export))
                                         (get module-declaration :exports)))

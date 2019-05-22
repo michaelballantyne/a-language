@@ -4,7 +4,7 @@
 //
 // References to this module and its exports are inserted by the compiler in every module.
 //
-(function () {
+(function (g) {
     function raise_arity_error(name, expected, given) {
         if (3 !== arguments.length) {
             raise_arity_error("raise-arity-error", 3, arguments.length);

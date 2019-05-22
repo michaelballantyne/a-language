@@ -1,7 +1,8 @@
 #lang js
 // require: vendor/immutable
 // provide: main
-(function (Immutable) {
+(function (g) {
+    const Immutable = g["vendor/immutable"];
     function main(args) {
         var map1 = Immutable.Map({a:1, b:2, c:3});
         var map2 = map1.set('b', 50);

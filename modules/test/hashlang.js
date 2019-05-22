@@ -1,7 +1,7 @@
 #lang lang/js
-// require: vendor/immutable, vendor/escodegen
+// require:
 // provide: main, foo
-(function () {
+(function (g) {
     function main() {
         console.log("hello world");
     }

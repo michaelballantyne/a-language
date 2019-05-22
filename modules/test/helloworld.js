@@ -1,7 +1,7 @@
 #lang js
 // require:
 // provide: main
-(function () {
+(function (g) {
     function main(args) {
         console.log("Hello world!");
     }
