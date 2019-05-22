@@ -13587,46 +13587,52 @@
         const fs = require("fs")
         const vm = require("vm");
     
-        function resolve(name) {
-            const afilename = "modules/" + name + ".a";
-            const jsfilename = "modules/" + name + ".js";
+        function make_platform(path) {
     
-            var text;
-            let filename;
-            try {
-              text = fs.readFileSync(afilename).toString();
-              filename = afilename;
-            } catch (err) {
-              text = fs.readFileSync(jsfilename).toString();
-              filename = jsfilename;
+            function resolve(name) {
+                const afilename = path + "/" + name + ".a";
+                const jsfilename = path + "/" + name + ".js";
+    
+                var text;
+                let filename;
+                try {
+                  text = fs.readFileSync(afilename).toString();
+                  filename = afilename;
+                } catch (err) {
+                  text = fs.readFileSync(jsfilename).toString();
+                  filename = jsfilename;
+                }
+    
+                return {
+                    string: text,
+                    source: filename,
+                    index: 0,
+                    srcpos: {line: 1, column: 0}
+                };
             }
     
-            return {
-                string: text,
-                source: filename,
-                index: 0,
-                srcpos: {line: 1, column: 0}
-            };
+            function eval_module(text) {
+                return vm.runInNewContext(text, {setImmediate: setImmediate, console: console, require: require, process: process});
+            }
+    
+            return { resolve: resolve,
+                     "eval-module": eval_module }
         }
     
-        function eval_module(text) {
-            return vm.runInNewContext(text, {setImmediate: setImmediate, console: console, require: require, process: process});
-        }
-    
-        return { resolve: resolve,
-                 "eval-module": eval_module }
+        return { "make-platform": make_platform };
     })
     )();
     const node__cli = ((function (runner, nodeplatform) {
         function usage() {
-            console.log("Usage: node run.js <module-name> <function>");
+            console.log("Usage: node run.js <modules-path> <module-name> <function>");
             process.exit(1);
         }
     
         function main(args) {
-            if (args.length >= 2) {
-                const module_instance = runner["make-runner"](nodeplatform).run(args[0]);
-                module_instance[args[1]](args.slice(2));
+            if (args.length >= 3) {
+                const platform = nodeplatform["make-platform"](args[0]);
+                const module_instance = runner["make-runner"](platform).run(args[1]);
+                module_instance[args[2]](args.slice(3));
             } else {
                 usage();
             }

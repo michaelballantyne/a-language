@@ -3,14 +3,15 @@
 // provide: main
 (function (runner, nodeplatform) {
     function usage() {
-        console.log("Usage: node run.js <module-name> <function>");
+        console.log("Usage: node run.js <modules-path> <module-name> <function>");
         process.exit(1);
     }
 
     function main(args) {
-        if (args.length >= 2) {
-            const module_instance = runner["make-runner"](nodeplatform).run(args[0]);
-            module_instance[args[1]](args.slice(2));
+        if (args.length >= 3) {
+            const platform = nodeplatform["make-platform"](args[0]);
+            const module_instance = runner["make-runner"](platform).run(args[1]);
+            module_instance[args[2]](args.slice(3));
         } else {
             usage();
         }
