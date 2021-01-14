@@ -1,0 +1,81 @@
+#lang a
+
+; Currently this module is unused.
+
+(require runtime/runtime compile/parser-tools)
+
+(provide legal-property-ref?)
+
+(def reserved
+  (hash
+     "break" true
+     "case" true
+     "catch" true
+     "class" true
+     "const" true
+     "continue" true
+     "debugger" true
+     "default" true
+     "delete" true
+     "do" true
+     "else" true
+     "export" true
+     "extends" true
+     "finally" true
+     "for" true
+     "function" true
+     "if" true
+     "import" true
+     "in" true
+     "instanceof" true
+     "new" true
+     "return" true
+     "super" true
+     "switch" true
+     "this" true
+     "throw" true
+     "try" true
+     "typeof" true
+     "var" true
+     "void" true
+     "while" true
+     "with" true
+     "yield" true
+     "null" true
+     "true" true
+     "false" true
+     "abstract" true
+     "boolean" true
+     "byte" true
+     "char" true
+     "double" true
+     "final" true
+     "float" true
+     "goto" true
+     "int" true
+     "long" true
+     "native" true
+     "short" true
+     "synchronized" true
+     "throws" true
+     "transient" true
+     "volatile" true
+     "await" true
+     "implements" true
+     "interface" true
+     "let" true
+     "package" true
+     "private" true
+     "protected" true
+     "public" true
+     "static" true
+     "enum" true))
+
+(def js-identifier-start (or/p alpha (c "$") (c "_")))
+(def js-identifier-name (capture-string (seq js-identifier-start (zero-or-more (or/p digit js-identifier-start)))))
+
+(def legal-property-ref?
+  (fn (s)
+    (if (contains reserved s)
+      false
+      (get (parse js-identifier-name (string->parse-input s "none")) :complete))))

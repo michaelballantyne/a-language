@@ -1,0 +1,61 @@
+#lang a
+
+(require runtime/runtime)
+
+(provide gen-literal gen-identifier gen-binding gen-const-field-access gen-iife gen-assignment-stmt)
+
+; LiteralVal -> ESTreeLiteral
+(def gen-literal
+  (fn (value)
+    (obj :type "Literal"
+         :value value)))
+
+; String -> ESTreeIdentifier
+(def gen-identifier
+  (fn (str)
+    (def _ (string/c "gen-identifier" str))
+    (obj :type "Identifier"
+         :name str)))
+
+; String, ESTreeExpression -> ESTreeVariableDeclaration
+(def gen-binding
+  (fn (lhs rhs kind)
+    (obj :type "VariableDeclaration"
+         :kind kind
+         :declarations
+         (array
+           (obj :type "VariableDeclarator"
+                :id (gen-identifier lhs)
+                :init rhs)))))
+
+; ESTreeExpression, String -> ESTreeExpression
+(def gen-const-field-access
+  (fn (o name)
+    (if false ; attempted but so far failed "optimization: (legal-property-ref? name)
+      (obj :type "MemberExpression"
+           :object o
+           :property (gen-identifier name)
+           :computed false)
+      (obj :type "MemberExpression"
+           :object o
+           :property (gen-literal name)
+           :computed true))))
+
+; ESTreeBlockStatement -> ESTreeExpression
+(def gen-iife
+  (fn (body)
+    (obj :type "CallExpression"
+         :arguments (array)
+         :callee (obj :type "FunctionExpression"
+                      :params (array)
+                      :body body))))
+
+; String, ESTreeExpression -> ESTreeStatement
+(def gen-assignment-stmt
+  (fn (lhs rhs)
+    (obj :type "ExpressionStatement"
+         :expression
+         (obj :type "AssignmentExpression"
+              :operator "="
+              :left (gen-identifier lhs)
+              :right rhs))))
