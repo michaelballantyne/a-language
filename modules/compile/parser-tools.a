@@ -1,7 +1,7 @@
 #lang a
 
 (require runtime/runtime)
-(provide inputs->srcloc c c-not c-range string/p empty seq or/p eof one-or-more zero-or-more describe nonterm action apply-action capture-string parse whitespace alpha digit empty-as-list module-name id-string idchar newline/p)
+(provide inputs->srcloc c c-not c-range string/p empty seq or/p eof one-or-more zero-or-more describe nonterm action apply-action capture-string parse string->parse-input whitespace alpha digit empty-as-list module-name id-string idchar newline/p)
 
 ; This is a simple PEG (not packrat) parsing framework, though all the langauges it is used for are LL(1).
 ; When reporting failures, all but the longest parse is dropped. Because the underlying parsing is PEG rather
@@ -234,15 +234,21 @@
     (def pos (get (get (first failures) :position) :srcpos))
     (def source (get (get (first failures) :position) :source))
     (def msgs (map (fn (f) (get f :expected)) failures))
-    (error (string-append "Parse error at " source ":" (number->string (get pos :line)) ":" (number->string (+ 1 (get pos :column))) ". Expected one of")
-           (string-append (string-join msgs ", ")))))
+    (string-append "Parse error at " source ":" (number->string (get pos :line)) ":" (number->string (+ 1 (get pos :column))) ". Expected one of\n" (string-join msgs ", "))))
+
 
 (def parse
   (fn (grammar input)
     (def res (grammar input))
     (if (not (get res :position))
-      (parse-failure (get res :failure))
+      (assoc
+        (assoc res :failure-message (parse-failure (get res :failure)))
+        :complete false)
       (assoc res :complete (<= (get (get res :position) :index) (size (get input :string)))))))
+
+(def string->parse-input
+  (fn (s source)
+    (obj :string s :source source :index 0 :srcpos (obj :line 1 :column 0))))
 
 (def whitespace
   (describe

@@ -83,13 +83,13 @@
     (def res (parse top input))
     ;(def end (now))
     ;(def _ (displayln (/ (- end start) 1000)))
-    (if (= (size (get input :string)) (get (get res :position) :index))
+    (if (get res :complete)
       (get res :result)
-      (error :read res))))
+      (error :read (get res :failure-message)))))
 
 (def main
   (fn (args)
     (read-stdin
       (fn (s)
-        (displayln (read (obj :string s :source "stdin" :index 0 :srcpos (obj :line 1 :column 0))))))))
+        (displayln (read (string->parse-input s "stdin")))))))
 
