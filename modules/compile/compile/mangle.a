@@ -4,7 +4,7 @@
 
 (require runtime/runtime compile/parser-tools)
 
-(provide legal-property-ref?)
+(provide legal-property-ref? transform-reserved)
 
 (def reserved
   (hash
@@ -79,3 +79,25 @@
     (if (contains reserved s)
       false
       (get (parse js-identifier-name (string->parse-input s "none")) :complete))))
+
+; These characters need to be replaced by strings of legal JS identifier characters.
+(def operators
+  (hash "-" "_"
+        "/" "__"
+        "+" "_plus_"
+        "*" "_mul_"
+        "%" "_mod_"
+        ">" "_gt_"
+        "<" "_lt_"
+        "=" "_eq_"
+        "!" "_bang_"
+        "?" "_huh_"))
+
+; string -> string
+; replace characters legal in "a" identifiers but not JS identifiers with transliterations
+(def transform-reserved
+  (fn (s)
+    (string-join
+      (map (fn (c) (if (has operators c) (get operators c) c))
+           (string-split s ""))
+      "")))

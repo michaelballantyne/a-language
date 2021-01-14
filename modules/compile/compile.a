@@ -1,6 +1,6 @@
 #lang a
 
-(require runtime/runtime vendor/escodegen compile/module compile/compile/estreegen)
+(require runtime/runtime vendor/escodegen compile/module compile/compile/estreegen compile/compile/mangle)
 
 (provide compile-module)
 
@@ -57,7 +57,6 @@
 ; :recur-exps :: (ListOf IRExp)
 ; :recur-temps :: (ListOf String)
 
-
 ; Ctx = (obj :ctx-type (OneOf :exp :stmt)
 ;            (Optional :recur-vars) (ListOf String))
 (def exp-ctx (obj :ctx-type :exp))
@@ -87,7 +86,7 @@
 ; IRDef -> ESTreeVariableDeclaration
 (def compile-def
   (fn (d)
-    (gen-binding (get d :id)
+    (gen-binding (transform-reserved (get d :id))
                  (compile-expression (get d :rhs) exp-ctx)
                  :const)))
 
@@ -109,7 +108,7 @@
 
     (def compile-local-ref
       (fn ()
-        (maybe-return (gen-identifier (get e :local-ref)))))
+        (maybe-return (gen-identifier (transform-reserved (get e :local-ref))))))
 
     (def compile-module-ref
       (fn ()
@@ -157,7 +156,7 @@
     (def build-loop-body
       (fn (vars inits body ctx)
         (def decls (zip (fn (var init)
-                          (gen-binding var
+                          (gen-binding (transform-reserved var)
                                        (compile-expression init exp-ctx)
                                        :var))
                         vars inits))
@@ -192,7 +191,7 @@
         (def temps-as-refs (map (fn (t) (obj :local-ref t)) (get e :fn-temps)))
         (maybe-return
           (obj :type "FunctionExpression"
-               :params (list->array (map gen-identifier (get e :fn-temps)))
+               :params (list->array (map gen-identifier (map transform-reserved (get e :fn-temps))))
                :body (obj :type "BlockStatement"
                           :body (array (build-arity-check (string-append "anonymous procedure " (number->string (gen-fn-id))) (size (get e :fn-args)))
                                        (build-loop-body (get e :fn-args) temps-as-refs e ctx)))))))
@@ -227,13 +226,13 @@
           (map (fn (e) (compile-expression e exp-ctx))
                (get e :recur-exps)))
         (def tmp-decls
-          (zip (fn (lhs rhs) (gen-binding lhs rhs :const))
+          (zip (fn (lhs rhs) (gen-binding (transform-reserved lhs) rhs :const))
                (get e :recur-temps)
                compiled-expressions))
         (def loop-var-assigns
           (zip (fn (loop-var tmp-var)
                  (gen-assignment-stmt
-                   loop-var
+                   (transform-reserved loop-var)
                    (compile-expression (obj :local-ref tmp-var) exp-ctx)))
                (recur-ctx-vars ctx) (get e :recur-temps)))
         (obj :type "BlockStatement"
@@ -266,7 +265,7 @@
                   (zip (fn (internal external)
                          (obj :type "Property"
                               :key (gen-literal external)
-                              :value (gen-identifier internal)))
+                              :value (gen-identifier (transform-reserved internal))))
                        (get stree :module-provide-internal-ids)
                        (get stree :module-provides))))))
 
