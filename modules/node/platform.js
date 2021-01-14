@@ -1,6 +1,6 @@
 #lang js
 // require:
-// provide: make-platform
+// provide: make-platform, exit, node-require
 (function (g) {
     const fs = require("fs")
     const vm = require("vm");
@@ -37,5 +37,5 @@
                  "eval-module": eval_module }
     }
 
-    return { "make-platform": make_platform };
+    return { "make-platform": make_platform, "exit": process.exit, "node-require": require};
 })

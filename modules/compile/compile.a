@@ -262,12 +262,11 @@
            (obj :type "ObjectExpression"
                 :properties
                 (list->array
-                  (zip (fn (internal external)
+                  (map (fn (internal)
                          (obj :type "Property"
-                              :key (gen-literal external)
+                              :key (gen-literal internal)
                               :value (gen-identifier (transform-reserved internal))))
-                       (get stree :module-provide-internal-ids)
-                       (get stree :module-provides))))))
+                       (map (fn (d) (get d :id)) (get stree :block-defs)))))))
 
     (def estree
       (obj :type "FunctionExpression"
@@ -283,4 +282,5 @@
     (compiled-module
       module-requires
       (get stree :module-provides)
+      (get stree :module-provide-internal-ids)
       paren-wrapped)))

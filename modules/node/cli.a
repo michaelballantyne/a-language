@@ -1,0 +1,60 @@
+#lang a
+
+(require runtime/runtime compile/runner node/platform)
+
+(provide main)
+
+(def usage
+  (fn ()
+    (def _ (displayln "Usage: node run.js <modules-path> <module-name> <function>"))
+    (exit 1)))
+
+(def find-internal-name
+  (fn (decl name)
+    (def m (foldl
+             (fn (acc el)
+               (assoc acc (get el :key) (get el :val)))
+             (hash)
+             (zip (fn (a b) (obj :key a :val b)) (get decl :exports) (get decl :export-rt-ids))))
+    (if (has m name)
+      (get m name)
+      (error "node/cli" (string-append "method " name " not exported by module")))))
+
+(def main
+  (fn (args)
+    (if (>= (size args) 3)
+      (block
+        (def load-path (get args 0))
+        (def mod-name (get args 1))
+        (def fn-name (get args 2))
+        (def r (make-runner (make-platform load-path)))
+        (def decl ((get r :load) mod-name))
+        (def fn-internal-name (find-internal-name decl fn-name))
+        (def instance ((get r :run) mod-name))
+        ((get instance fn-internal-name) (slice args 3 (size args))))
+      (usage))))
+
+; #lang js
+; // require: compile/runner, node/platform
+; // provide: main
+; (function (g) {
+;     function usage() {
+;         console.log("Usage: node run.js <modules-path> <module-name> <function>");
+;         process.exit(1);
+;     }
+; 
+;     function main(args) {
+;         if (args.length >= 3) {
+;             const platform = g["node/platform"]["make-platform"](args[0]);
+;             const module_instance = g["compile/runner"]["make-runner"](platform).run(args[1]);
+;             module_instance[args[2]](args.slice(3));
+;         } else {
+;             usage();
+;         }
+;     }
+; 
+;     return { main: main };
+; })
+
+
+

@@ -29,8 +29,19 @@
                           :body (obj :type "BlockStatement"
                                      :body (list->array body))))))
 
+(def find-internal-name
+  (fn (decl name)
+    (def m (foldl
+             (fn (acc el)
+               (assoc acc (get el :key) (get el :val)))
+             (hash)
+             (zip (fn (a b) (obj :key a :val b)) (get decl :exports) (get decl :export-rt-ids))))
+    (if (has m name)
+      (get m name)
+      (error "flatten" (string-append "method " name " not exported by module")))))
+
 (def flatten
-  (fn (runner main-module-name)
+  (fn (runner main-module-name main-fn-name)
     ; TODO: clean up with support for expressions in defn sequence
     (def _ (string/c "flatten" main-module-name))
     (def flatten-internal
@@ -65,9 +76,14 @@
             (list (obj :type "ReturnStatement"
                        :argument
                        (obj :type "MemberExpression"
-                            :object (obj :type "Identifier"
-                                         :name "$g")
+                            :object
+                            (obj :type "MemberExpression"
+                                 :object (obj :type "Identifier"
+                                              :name "$g")
+                                 :property (obj :type "Literal"
+                                                :value main-module-name)
+                                 :computed true)
                             :property (obj :type "Literal"
-                                           :value main-module-name)
+                                                :value (find-internal-name ((get runner :load) main-module-name) main-fn-name))
                             :computed true))))))
       (obj :verbatim :verbatim))))

@@ -230,11 +230,12 @@
       (foldl (fn (env req)
                (def decl ((get runner :load) (prim-identifier-string req)))
                (foldl
-                 (fn (env name)
-                   (assoc env (prim-make-identifier name)
+                 (fn (env export)
+                   (assoc env (prim-make-identifier (get export :external))
                           (obj :module-ref-path (prim-identifier-string req)
-                                :module-ref-field name)))
-                 env (get decl :exports)))
+                               :module-ref-field (get export :internal))))
+                 env
+                 (zip (fn (a b) (obj :external a :internal b)) (get decl :exports) (get decl :export-rt-ids))))
              initial-env requires))
 
     (def parsed-defs (parse-defs body module-env))

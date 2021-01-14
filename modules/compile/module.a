@@ -9,13 +9,16 @@
            (map f l))))
 
 (def compiled-module
-  (fn (imports exports body-code)
+  (fn (imports exports export-rt-ids body-code)
     (if (not (and
                 (and
-                  (and (list? imports) (andmap string? imports))
-                  (and (list? exports) (andmap string? exports)))
+                  (and
+                    (and (list? imports) (andmap string? imports))
+                    (and (list? exports) (andmap string? exports)))
+                  (and (list? exports) (andmap string? export-rt-ids)))
                 (string? body-code)))
       (error "compiled-module" "malformed module declaration")
       (obj :imports imports
            :exports exports
+           :export-rt-ids export-rt-ids
            :body-code body-code))))

@@ -1,6 +1,6 @@
 #lang js
 // require: vendor/immutable, runtime/minimal
-// provide: prim-identifier?, number?, string?, js-object?, js-array?, prim-make-identifier, prim-identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, prim-identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, list, assoc, empty?, append, null, number->string, first, rest, variadic, cons, size, function?, apply, substring, list/c, function/c, newline, string->integer, read-stdin, double-quote, to-string, character-code, contains, reverse, array, list->array, array->list, map, foldl, box, box?, unbox, set-box!, string-split, string-join, equal?, zip, subset, list?, string-trim, now, contract-error, hash/c, object->hash, hash->object
+// provide: prim-identifier?, number?, string?, js-object?, js-array?, prim-make-identifier, prim-identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, prim-identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, list, assoc, empty?, append, null, number->string, first, rest, variadic, cons, size, function?, apply, substring, list/c, function/c, newline, string->integer, read-stdin, double-quote, to-string, character-code, contains, reverse, array, list->array, array->list, map, foldl, box, box?, unbox, set-box!, string-split, string-join, equal?, zip, subset, list?, string-trim, now, contract-error, hash/c, object->hash, hash->object, slice
 (function (g) {
     const Immutable = g["vendor/immutable"]
     const raise_arity_error = g["runtime/minimal"]["raise-arity-error"]
@@ -431,7 +431,18 @@
         } else if (is_string(c)) {
             return c.length;
         } else {
-            throw Error("size: contract violation\n  expected: (or/c collection/c array/c)\n  given: " + c);
+            throw Error("size: contract violation\n  expected: (or/c collection/c array/c string/c)\n  given: " + c);
+        }
+    }
+
+    function slice(c, begin, end) {
+        number_c("slice", begin)
+        number_c("slice", end)
+
+        if (Immutable.isCollection(c) || is_js_array(c) || is_string(c)) {
+            return c.slice(begin, end);
+        } else {
+            throw Error("slice: contract violation\n  expected: (or/c collection/c array/c string/c)\n  given: " + c);
         }
     }
 
@@ -770,6 +781,7 @@
         "contract-error": contract_error,
         "hash/c": hash_c,
         "object->hash": object_to_hash,
-        "hash->object": hash_to_object
+        "hash->object": hash_to_object,
+        "slice": slice
     }
 })

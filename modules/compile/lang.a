@@ -3,6 +3,17 @@
 (require runtime/runtime lang/js lang/a compile/parser-tools)
 (provide compile-via-lang)
 
+(def find-internal-name
+  (fn (decl name)
+    (def m (foldl
+             (fn (acc el)
+               (assoc acc (get el :key) (get el :val)))
+             (hash)
+             (zip (fn (a b) (obj :key a :val b)) (get decl :exports) (get decl :export-rt-ids))))
+    (if (has m name)
+      (get m name)
+      (error "flatten" (string-append "method " name " not exported by module")))))
+
 (def compile-via-lang
   (fn (source runner)
     (def res (parse (seq (string/p "#lang") (c " ") module-name (c newline)) source))
@@ -14,10 +25,12 @@
           (if (equal? "a" lang)
             (compile-a (get res :position) runner)
             (block
+              (def lang-mod-decl ((get runner :load) lang))
               (def lang-mod-inst ((get runner :run) lang))
-              (def _ (if (not (has lang-mod-inst :compile-language))
+              (def _ (if (not (contains (get lang-mod-decl :exports) :compile-language))
                        (error "compile-via-lang" "#lang module does not implement compile-language")
                        null))
-              ((get lang-mod-inst :compile-language) (get res :position) runner)))))
+              (def internal-name (find-internal-name lang-mod-decl "compile-language"))
+              ((get lang-mod-inst internal-name) (get res :position) runner)))))
       (error "compile-via-lang" (get res :failure-message)))))
 
