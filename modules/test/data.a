@@ -17,4 +17,5 @@
                  ;(assoc (list) 0 5)
                  ;(append (list 1 2) (list 3 4))
                  (assoc (obj :a 5) :b (list 1))
+                 (has (hash (obj :a 1) 2) (obj :a 2))
                  ))))
