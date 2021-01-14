@@ -299,6 +299,7 @@
     (def range (string-append (position->string (get loc :start)) "-" (position->string (get loc :end))))
     (error (string-append "syntax error in " source " at " range) msg)))
 
+; Sexp, Runner -> IRModule
 (def parse-module
   (fn (sexp runner)
     (def module-syntax-error

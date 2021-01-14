@@ -3,6 +3,9 @@
 (require runtime/runtime compile/lang)
 (provide make-runner)
 
+; Runner: (obj :load (-> ModuleName ModuleDeclaration) :run (-> ModuleName ModuleInstance))
+
+; Platform -> Runner
 (def make-runner
   (fn (platform)
     (def declaration-cache (box (hash)))
