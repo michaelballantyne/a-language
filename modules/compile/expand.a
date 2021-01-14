@@ -1,29 +1,11 @@
 #lang a
 
-(require runtime/runtime compile/reader)
+(require runtime/runtime compile/expand/syntax)
 (provide parse-module)
 
 (def unbound-reference-error
   (fn (id)
-    (syntax-error (string-append "unbound reference" (identifier-string id)) id)))
-
-(def syntax?
-  (fn (s)
-    (has s :e)))
-
-(def syntax-e
-  (fn (s)
-    (get s :e)))
-
-(def identifier?
-  (fn (i)
-    (and (syntax? i)
-         (prim-identifier? (syntax-e i)))))
-
-(def identifier-string
-  (fn (i)
-    (prim-identifier-string (syntax-e i))))
-
+    (syntax-error (string-append "unbound reference " (identifier-string id)) id)))
 
 (def gensym-counter (box 0))
 

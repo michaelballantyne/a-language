@@ -1,6 +1,6 @@
 #lang a
 
-(require runtime/runtime compile/lang vendor/escodegen compile/parse)
+(require runtime/runtime compile/lang vendor/escodegen compile/expand)
 (provide flatten)
 
 (def gen-module-instance-declaration

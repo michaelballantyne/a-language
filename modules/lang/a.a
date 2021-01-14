@@ -1,6 +1,6 @@
 #lang a
 
-(require compile/reader compile/compile compile/parse)
+(require compile/reader compile/compile compile/expand)
 (provide compile-a compile-language)
 
 (def compile-a

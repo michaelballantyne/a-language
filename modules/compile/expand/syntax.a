@@ -1,0 +1,21 @@
+#lang a
+
+(require runtime/runtime)
+(provide syntax? syntax-e identifier? identifier-string)
+
+(def syntax?
+  (fn (s)
+    (has s :e)))
+
+(def syntax-e
+  (fn (s)
+    (get s :e)))
+
+(def identifier?
+  (fn (i)
+    (and (syntax? i)
+         (prim-identifier? (syntax-e i)))))
+
+(def identifier-string
+  (fn (i)
+    (prim-identifier-string (syntax-e i))))

@@ -78,10 +78,10 @@
 (def gen-module-ref
   (fn (path name)
     (gen-const-field-access
-    (gen-const-field-access
-      (gen-identifier "$g")
-      path)
-    name)))
+      (gen-const-field-access
+        (gen-identifier "$g")
+        path)
+      name)))
 
 ; IRDef -> ESTreeVariableDeclaration
 (def compile-def
