@@ -242,7 +242,7 @@
     (def res (grammar input))
     (if (not (get res :position))
       (parse-failure (get res :failure))
-      res)))
+      (assoc res :complete (<= (get (get res :position) :index) (size (get input :string)))))))
 
 (def whitespace
   (describe

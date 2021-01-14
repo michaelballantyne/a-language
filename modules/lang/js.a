@@ -18,7 +18,7 @@
     (def res (parse (seq (header "require" module-name) (c newline)
                          (header "provide" id-string) (c newline))
                     input))
-    (if (and (get res :position) (<= (get (get res :position) :index) (size (get input :string))))
+    (if (get res :complete)
       (compiled-module
         (get (get res :result) 0)
         (get (get res :result) 1)

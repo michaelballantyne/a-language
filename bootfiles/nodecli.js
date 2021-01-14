@@ -7153,7 +7153,7 @@
                     if (false !== $g['runtime/runtime']['not']($g['runtime/runtime']['get'](res192, 'position')))
                         return parse_failure40($g['runtime/runtime']['get'](res192, 'failure'));
                     else
-                        return res192;
+                        return $g['runtime/runtime']['assoc'](res192, 'complete', $g['runtime/runtime']['<=']($g['runtime/runtime']['get']($g['runtime/runtime']['get'](res192, 'position'), 'index'), $g['runtime/runtime']['size']($g['runtime/runtime']['get'](input191, 'string'))));
                 }
             }
         };
@@ -7250,7 +7250,7 @@
                 var runner209 = runner212;
                 while (true) {
                     const res210 = $g['compile/parser-tools']['parse']($g['compile/parser-tools']['seq'](header199('require', $g['compile/parser-tools']['module-name']), $g['compile/parser-tools']['c']($g['runtime/runtime']['newline']), header199('provide', $g['compile/parser-tools']['id-string']), $g['compile/parser-tools']['c']($g['runtime/runtime']['newline'])), input208);
-                    if (false !== (false !== $g['runtime/runtime']['get'](res210, 'position') ? $g['runtime/runtime']['<=']($g['runtime/runtime']['get']($g['runtime/runtime']['get'](res210, 'position'), 'index'), $g['runtime/runtime']['size']($g['runtime/runtime']['get'](input208, 'string'))) : false))
+                    if (false !== $g['runtime/runtime']['get'](res210, 'complete'))
                         return $g['compile/module']['compiled-module']($g['runtime/runtime']['get']($g['runtime/runtime']['get'](res210, 'result'), 0), $g['runtime/runtime']['get']($g['runtime/runtime']['get'](res210, 'result'), 1), $g['runtime/runtime']['substring']($g['runtime/runtime']['get'](input208, 'string'), $g['runtime/runtime']['get']($g['runtime/runtime']['get'](res210, 'position'), 'index'), $g['runtime/runtime']['size']($g['runtime/runtime']['get'](input208, 'string'))));
                     else
                         return $g['runtime/runtime']['error']('compile-language', res210);
