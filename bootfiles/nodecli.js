@@ -7153,7 +7153,7 @@
                     if (false !== $g['runtime/runtime']['not']($g['runtime/runtime']['get'](res193, 'position')))
                         return $g['runtime/runtime']['assoc']($g['runtime/runtime']['assoc'](res193, 'failure-message', parse_failure40($g['runtime/runtime']['get'](res193, 'failure'))), 'complete', $g['runtime/runtime']['false']);
                     else
-                        return $g['runtime/runtime']['assoc'](res193, 'complete', $g['runtime/runtime']['<=']($g['runtime/runtime']['get']($g['runtime/runtime']['get'](res193, 'position'), 'index'), $g['runtime/runtime']['size']($g['runtime/runtime']['get'](input192, 'string'))));
+                        return $g['runtime/runtime']['assoc'](res193, 'complete', $g['runtime/runtime']['not']($g['runtime/runtime']['<']($g['runtime/runtime']['get']($g['runtime/runtime']['get'](res193, 'position'), 'index'), $g['runtime/runtime']['size']($g['runtime/runtime']['get'](input192, 'string')))));
                 }
             }
         };
@@ -7262,7 +7262,7 @@
                 var runner214 = runner217;
                 while (true) {
                     const res215 = $g['compile/parser-tools']['parse']($g['compile/parser-tools']['seq'](header204('require', $g['compile/parser-tools']['module-name']), $g['compile/parser-tools']['c']($g['runtime/runtime']['newline']), header204('provide', $g['compile/parser-tools']['id-string']), $g['compile/parser-tools']['c']($g['runtime/runtime']['newline'])), input213);
-                    if (false !== $g['runtime/runtime']['get'](res215, 'complete'))
+                    if (false !== $g['runtime/runtime']['get'](res215, 'position'))
                         return $g['compile/module']['compiled-module']($g['runtime/runtime']['get']($g['runtime/runtime']['get'](res215, 'result'), 0), $g['runtime/runtime']['get']($g['runtime/runtime']['get'](res215, 'result'), 1), $g['runtime/runtime']['substring']($g['runtime/runtime']['get'](input213, 'string'), $g['runtime/runtime']['get']($g['runtime/runtime']['get'](res215, 'position'), 'index'), $g['runtime/runtime']['size']($g['runtime/runtime']['get'](input213, 'string'))));
                     else
                         return $g['runtime/runtime']['error']('compile-language', res215);
@@ -12531,7 +12531,10 @@
                 var o285 = o287;
                 var name286 = name288;
                 while (true) {
-                    return $g['runtime/runtime']['obj']('type', 'MemberExpression', 'object', o285, 'property', gen_literal252(name286), 'computed', $g['runtime/runtime']['true']);
+                    if (false !== $g['runtime/runtime']['false'])
+                        return $g['runtime/runtime']['obj']('type', 'MemberExpression', 'object', o285, 'property', gen_identifier253(name286), 'computed', $g['runtime/runtime']['false']);
+                    else
+                        return $g['runtime/runtime']['obj']('type', 'MemberExpression', 'object', o285, 'property', gen_literal252(name286), 'computed', $g['runtime/runtime']['true']);
                 }
             }
         };

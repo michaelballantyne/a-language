@@ -244,7 +244,7 @@
       (assoc
         (assoc res :failure-message (parse-failure (get res :failure)))
         :complete false)
-      (assoc res :complete (<= (get (get res :position) :index) (size (get input :string)))))))
+      (assoc res :complete (not (< (get (get res :position) :index) (size (get input :string))))))))
 
 (def string->parse-input
   (fn (s source)

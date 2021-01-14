@@ -4,10 +4,10 @@
 
 (provide main)
 
-(def g (seq (c "a") (c "b")))
+(def js-identifier-start (or/p alpha (c "$") (c "_")))
+(def js-identifier-name (capture-string (seq js-identifier-start (zero-or-more (or/p digit js-identifier-start)))))
 
 (def main
   (fn (args)
-  (def _ (displayln (parse g (string->parse-input "ab" "unknown"))))
-  (def _2 (displayln (parse g (string->parse-input "c" "unknown"))))
+  (def _2 (displayln (parse js-identifier-name (string->parse-input "empty?" "none"))))
   "foo"))
