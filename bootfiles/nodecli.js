@@ -13553,95 +13553,86 @@
         return { 'compile-via-lang': compile_via_lang609 };
     }))($g);
     $g['compile/runner'] = ((function ($g) {
-        const make_runner618 = function (platform652) {
+        const make_runner618 = function (platform649) {
             if (1 !== arguments['length'])
                 $g['runtime/minimal']['raise-arity-error']('anonymous procedure 151', 1, arguments['length']);
             {
-                var platform619 = platform652;
+                var platform619 = platform649;
                 while (true) {
-                    const declaration_cache620 = $g['runtime/runtime']['box']($g['runtime/runtime']['hash']());
-                    const load621 = function (module_name629) {
+                    const declaration_map620 = $g['runtime/runtime']['box']($g['runtime/runtime']['hash']());
+                    const instance_map621 = $g['runtime/runtime']['box']($g['runtime/runtime']['hash']());
+                    const load622 = function (module_name630) {
                         if (1 !== arguments['length'])
                             $g['runtime/minimal']['raise-arity-error']('anonymous procedure 152', 1, arguments['length']);
                         {
-                            var module_name624 = module_name629;
+                            var module_name625 = module_name630;
                             while (true) {
-                                if (false !== $g['runtime/runtime']['has']($g['runtime/runtime']['unbox'](declaration_cache620), module_name624))
-                                    return $g['runtime/runtime']['get']($g['runtime/runtime']['unbox'](declaration_cache620), module_name624);
+                                if (false !== $g['runtime/runtime']['has']($g['runtime/runtime']['unbox'](declaration_map620), module_name625))
+                                    return $g['runtime/runtime']['get']($g['runtime/runtime']['unbox'](declaration_map620), module_name625);
                                 else {
-                                    const source625 = $g['runtime/runtime']['get'](platform619, 'resolve')(module_name624);
-                                    const module_declaration626 = $g['compile/lang']['compile-via-lang'](source625, $g['runtime/runtime']['obj']('load', load621, 'run', run623));
-                                    const module_declaration2627 = $g['runtime/runtime']['assoc'](module_declaration626, 'body-function', $g['runtime/runtime']['get'](platform619, 'eval-module')($g['runtime/runtime']['get'](module_declaration626, 'body-code')));
-                                    const _628 = $g['runtime/runtime']['set-box!'](declaration_cache620, $g['runtime/runtime']['assoc']($g['runtime/runtime']['unbox'](declaration_cache620), module_name624, module_declaration2627));
-                                    return module_declaration2627;
+                                    const source626 = $g['runtime/runtime']['get'](platform619, 'resolve')(module_name625);
+                                    const module_declaration627 = $g['compile/lang']['compile-via-lang'](source626, $g['runtime/runtime']['obj']('load', load622, 'run', run624));
+                                    const module_declaration2628 = $g['runtime/runtime']['assoc'](module_declaration627, 'body-function', $g['runtime/runtime']['get'](platform619, 'eval-module')($g['runtime/runtime']['get'](module_declaration627, 'body-code')));
+                                    const _629 = $g['runtime/runtime']['set-box!'](declaration_map620, $g['runtime/runtime']['assoc']($g['runtime/runtime']['unbox'](declaration_map620), module_name625, module_declaration2628));
+                                    return module_declaration2628;
                                 }
                             }
                         }
                     };
-                    const andmap622 = function (f636, l637) {
+                    const andmap623 = function (f637, l638) {
                         if (2 !== arguments['length'])
                             $g['runtime/minimal']['raise-arity-error']('anonymous procedure 153', 2, arguments['length']);
                         {
-                            var f630 = f636;
-                            var l631 = l637;
+                            var f631 = f637;
+                            var l632 = l638;
                             while (true) {
-                                return $g['runtime/runtime']['foldl'](function (a634, b635) {
+                                return $g['runtime/runtime']['foldl'](function (a635, b636) {
                                     if (2 !== arguments['length'])
                                         $g['runtime/minimal']['raise-arity-error']('anonymous procedure 154', 2, arguments['length']);
                                     {
-                                        var a632 = a634;
-                                        var b633 = b635;
+                                        var a633 = a635;
+                                        var b634 = b636;
                                         while (true) {
-                                            if (false !== a632)
-                                                return b633;
+                                            if (false !== a633)
+                                                return b634;
                                             else
                                                 return false;
                                         }
                                     }
-                                }, $g['runtime/runtime']['true'], $g['runtime/runtime']['map'](f630, l631));
+                                }, $g['runtime/runtime']['true'], $g['runtime/runtime']['map'](f631, l632));
                             }
                         }
                     };
-                    const run623 = function (module_name651) {
+                    const run624 = function (module_name648) {
                         if (1 !== arguments['length'])
                             $g['runtime/minimal']['raise-arity-error']('anonymous procedure 155', 1, arguments['length']);
                         {
-                            var module_name638 = module_name651;
+                            var module_name639 = module_name648;
                             while (true) {
-                                const _639 = $g['runtime/runtime']['string/c']('run', module_name638);
-                                const run_module_internal640 = function (instance_map649, module_name650) {
-                                    if (2 !== arguments['length'])
-                                        $g['runtime/minimal']['raise-arity-error']('anonymous procedure 156', 2, arguments['length']);
-                                    {
-                                        var instance_map641 = instance_map649;
-                                        var module_name642 = module_name650;
-                                        while (true) {
-                                            if (false !== $g['runtime/runtime']['has'](instance_map641, module_name642))
-                                                return instance_map641;
-                                            else {
-                                                const module_declaration643 = load621(module_name642);
-                                                const instance_map2644 = $g['runtime/runtime']['foldl'](run_module_internal640, instance_map641, $g['runtime/runtime']['get'](module_declaration643, 'imports'));
-                                                const instance645 = $g['runtime/runtime']['get'](module_declaration643, 'body-function')($g['runtime/runtime']['hash->object'](instance_map2644));
-                                                const _646 = false !== $g['runtime/runtime']['not'](andmap622(function (export648) {
-                                                    if (1 !== arguments['length'])
-                                                        $g['runtime/minimal']['raise-arity-error']('anonymous procedure 157', 1, arguments['length']);
-                                                    {
-                                                        var export647 = export648;
-                                                        while (true) {
-                                                            return $g['runtime/runtime']['has'](instance645, export647);
-                                                        }
-                                                    }
-                                                }, $g['runtime/runtime']['get'](module_declaration643, 'exports'))) ? $g['runtime/runtime']['error']('run', $g['runtime/runtime']['string-append']('Module instance does not include all keys listed in exports: ', module_name642)) : $g['runtime/runtime']['null'];
-                                                return $g['runtime/runtime']['assoc'](instance_map2644, module_name642, instance645);
+                                const _640 = $g['runtime/runtime']['string/c']('run', module_name639);
+                                if (false !== $g['runtime/runtime']['has']($g['runtime/runtime']['unbox'](instance_map621), module_name639))
+                                    return $g['runtime/runtime']['get']($g['runtime/runtime']['unbox'](instance_map621), module_name639);
+                                else {
+                                    const module_declaration641 = load622(module_name639);
+                                    const _1642 = $g['runtime/runtime']['map'](run624, $g['runtime/runtime']['get'](module_declaration641, 'imports'));
+                                    const instance643 = $g['runtime/runtime']['get'](module_declaration641, 'body-function')($g['runtime/runtime']['hash->object']($g['runtime/runtime']['unbox'](instance_map621)));
+                                    const _2644 = false !== $g['runtime/runtime']['not'](andmap623(function (export647) {
+                                        if (1 !== arguments['length'])
+                                            $g['runtime/minimal']['raise-arity-error']('anonymous procedure 156', 1, arguments['length']);
+                                        {
+                                            var export646 = export647;
+                                            while (true) {
+                                                return $g['runtime/runtime']['has'](instance643, export646);
                                             }
                                         }
-                                    }
-                                };
-                                return $g['runtime/runtime']['get'](run_module_internal640($g['runtime/runtime']['hash'](), module_name638), module_name638);
+                                    }, $g['runtime/runtime']['get'](module_declaration641, 'exports'))) ? $g['runtime/runtime']['error']('run', $g['runtime/runtime']['string-append']('Module instance does not include all keys listed in exports: ', module_name639)) : $g['runtime/runtime']['null'];
+                                    const _3645 = $g['runtime/runtime']['set-box!'](instance_map621, $g['runtime/runtime']['assoc']($g['runtime/runtime']['unbox'](instance_map621), module_name639, instance643));
+                                    return instance643;
+                                }
                             }
                         }
                     };
-                    return $g['runtime/runtime']['obj']('load', load621, 'run', run623);
+                    return $g['runtime/runtime']['obj']('load', load622, 'run', run624);
                 }
             }
         };

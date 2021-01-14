@@ -8,12 +8,13 @@
 ; Platform -> Runner
 (def make-runner
   (fn (platform)
-    (def declaration-cache (box (hash)))
+    (def declaration-map (box (hash)))
+    (def instance-map (box (hash)))
 
     (def load
       (fn (module-name)
-        (if (has (unbox declaration-cache) module-name)
-          (get (unbox declaration-cache) module-name)
+        (if (has (unbox declaration-map) module-name)
+          (get (unbox declaration-map) module-name)
           (block
             (def source ((get platform :resolve) module-name))
             (def module-declaration (compile-via-lang source (obj :load load :run run)))
@@ -23,8 +24,8 @@
                      ((get platform :eval-module)
                       (get module-declaration :body-code))))
             ; TODO: clean up with expression in def ctx
-            (def _ (set-box! declaration-cache
-                             (assoc (unbox declaration-cache)
+            (def _ (set-box! declaration-map
+                             (assoc (unbox declaration-map)
                                     module-name module-declaration2)))
             module-declaration2))))
 
@@ -37,26 +38,23 @@
     (def run
       (fn (module-name)
         (def _ (string/c "run" module-name))
-        (def run-module-internal
-          (fn (instance-map module-name)
-            (if (has instance-map module-name)
-              instance-map
-              (block
-                (def module-declaration (load module-name))
-                (def instance-map2
-                  (foldl run-module-internal instance-map
-                         (get module-declaration :imports)))
-                (def instance ((get module-declaration :body-function) 
-                               (hash->object instance-map2)))
-                ; TODO: clean up with expression in def ctx and when
-                (def _ (if (not (andmap (fn (export) (has instance export))
-                                        (get module-declaration :exports)))
-                         (error "run"
-                                (string-append
-                                  "Module instance does not include all keys listed in exports: "
-                                  module-name))
-                         null))
-                (assoc instance-map2 module-name instance)))))
-        (get (run-module-internal (hash) module-name) module-name)))
+        (if (has (unbox instance-map) module-name)
+          (get (unbox instance-map) module-name)
+          (block
+            (def module-declaration (load module-name))
+            (def _1 (map run (get module-declaration :imports)))
+            (def instance ((get module-declaration :body-function)
+                           (hash->object (unbox instance-map))))
+            ; TODO: clean up with expression in def ctx and when
+            (def _2 (if (not (andmap (fn (export) (has instance export))
+                                     (get module-declaration :exports)))
+                     (error "run"
+                            (string-append
+                              "Module instance does not include all keys listed in exports: "
+                              module-name))
+                     null))
+            (def _3 (set-box! instance-map (assoc (unbox instance-map) module-name instance)))
+            instance
+            ))))
 
     (obj :load load :run run)))
