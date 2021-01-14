@@ -19,5 +19,5 @@
                        (error "compile-via-lang" "#lang module does not implement compile-language")
                        null))
               ((get lang-mod-inst :compile-language) (get res :position) runner)))))
-      (error "compile-via-lang" res))))
+      (error "compile-via-lang" (get res :failure-message)))))
 

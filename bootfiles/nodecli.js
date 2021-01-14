@@ -7138,7 +7138,7 @@
                             }
                         }
                     }, failures184);
-                    return $g['runtime/runtime']['string-append']('Parse error at ', source186, ':', $g['runtime/runtime']['number->string']($g['runtime/runtime']['get'](pos185, 'line')), ':', $g['runtime/runtime']['number->string']($g['runtime/runtime']['+'](1, $g['runtime/runtime']['get'](pos185, 'column'))), '. Expected one of\\n', $g['runtime/runtime']['string-join'](msgs187, ', '));
+                    return $g['runtime/runtime']['string-append']('Parse error at ', source186, ':', $g['runtime/runtime']['number->string']($g['runtime/runtime']['get'](pos185, 'line')), ':', $g['runtime/runtime']['number->string']($g['runtime/runtime']['+'](1, $g['runtime/runtime']['get'](pos185, 'column'))), '. Expected one of: ', $g['runtime/runtime']['string-join'](msgs187, ', '));
                 }
             }
         };
@@ -13506,7 +13506,7 @@
                             return $g['runtime/runtime']['get'](lang_mod_inst608, 'compile-language')($g['runtime/runtime']['get'](res606, 'position'), runner605);
                         }
                     } else
-                        return $g['runtime/runtime']['error']('compile-via-lang', res606);
+                        return $g['runtime/runtime']['error']('compile-via-lang', $g['runtime/runtime']['get'](res606, 'failure-message'));
                 }
             }
         };

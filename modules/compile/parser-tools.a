@@ -234,7 +234,7 @@
     (def pos (get (get (first failures) :position) :srcpos))
     (def source (get (get (first failures) :position) :source))
     (def msgs (map (fn (f) (get f :expected)) failures))
-    (string-append "Parse error at " source ":" (number->string (get pos :line)) ":" (number->string (+ 1 (get pos :column))) ". Expected one of\n" (string-join msgs ", "))))
+    (string-append "Parse error at " source ":" (number->string (get pos :line)) ":" (number->string (+ 1 (get pos :column))) ". Expected one of: " (string-join msgs ", "))))
 
 
 (def parse
