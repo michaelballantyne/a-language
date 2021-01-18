@@ -1,6 +1,6 @@
 #lang js
 // require: vendor/immutable, runtime/minimal
-// provide: prim-identifier?, number?, string?, js-object?, js-array?, prim-make-identifier, prim-identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, prim-identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, list, assoc, empty?, append, null, number->string, first, rest, variadic, cons, size, function?, apply, substring, list/c, function/c, newline, string->integer, read-stdin, double-quote, to-string, character-code, contains, reverse, array, list->array, array->list, map, foldl, box, box?, unbox, set-box!, string-split, string-join, equal?, zip, subset, list?, string-trim, now, contract-error, hash/c, object->hash, hash->object, hash-keys, hash-values, slice
+// provide: prim-identifier?, number?, string?, js-object?, js-array?, prim-make-identifier, prim-identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, prim-identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, hash?, list, assoc, empty?, append, null, number->string, first, rest, variadic, cons, size, function?, apply, substring, list/c, function/c, newline, string->integer, read-stdin, double-quote, to-string, character-code, contains, reverse, array, list->array, array->list, map, foldl, box, box?, unbox, set-box!, string-split, string-join, equal?, zip, subset, list?, string-trim, now, contract-error, hash/c, object->hash, hash->object, hash-keys, hash-values, slice
 (function (g) {
     const Immutable = g["vendor/immutable"]
     const raise_arity_error = g["runtime/minimal"]["raise-arity-error"]
@@ -285,6 +285,14 @@
         return res;
     }
 
+    function is_hash(arg) {
+        if (1 !== arguments.length) {
+            raise_arity_error("hash?", 1, arguments.length);
+        }
+
+        return Immutable.Map.isMap(arg)
+    }
+
     function list() {
         return Immutable.List(arguments);
     }
@@ -518,7 +526,7 @@
     }
 
     function hash_c(name, arg) {
-        if (!Immutable.Map.isMap(arg)) {
+        if (!is_hash(arg)) {
             throw Error(name + ": contract violation\n  expected: hash/c\n  given: " + String(arg));
         }
     }
@@ -765,6 +773,7 @@
         "!==": threeneq,
         "obj": obj,
         "hash": hash,
+        "hash?": is_hash,
         "list": list,
         "assoc": assoc,
         "empty?": empty,
