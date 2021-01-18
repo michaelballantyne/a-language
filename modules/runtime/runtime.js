@@ -1,6 +1,6 @@
 #lang js
 // require: vendor/immutable, runtime/minimal
-// provide: prim-identifier?, number?, string?, js-object?, js-array?, prim-make-identifier, prim-identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, prim-identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, hash?, list, assoc, empty?, append, null, number->string, first, rest, variadic, cons, size, function?, apply, substring, list/c, function/c, newline, string->integer, read-stdin, double-quote, to-string, character-code, contains, reverse, array, list->array, array->list, map, foldl, box, box?, unbox, set-box!, string-split, string-join, equal?, zip, subset, list?, string-trim, now, contract-error, hash/c, object->hash, hash->object, hash-keys, hash-values, slice
+// provide: prim-identifier?, number?, string?, js-object?, js-array?, prim-make-identifier, prim-identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, prim-identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, hash?, list, assoc, empty?, append, null, number->string, first, rest, variadic, cons, size, function?, apply, substring, list/c, function/c, newline, string->integer, read-stdin, double-quote, to-string, character-code, contains, reverse, array, list->array, array->list, map, foldl, box, box?, unbox, set-box!, string-split, string-join, equal?, zip, subset, list?, string-trim, now, contract-error, hash/c, object->hash, hash->object, hash-keys, hash-values, hash-entries, slice
 (function (g) {
     const Immutable = g["vendor/immutable"]
     const raise_arity_error = g["runtime/minimal"]["raise-arity-error"]
@@ -451,6 +451,16 @@
         return h.toList()
     }
 
+    function hash_entries(h) {
+        if (1 !== arguments.length) {
+            raise_arity_error("hash-entries", 1, arguments.length);
+        }
+
+        hash_c("hash-entries", h)
+
+        return Immutable.List(h.entries()).map(function (e) {return obj("key", e[0], "val", e[1]);});
+    }
+
     function size(c) {
         if (1 !== arguments.length) {
             raise_arity_error("size", 1, arguments.length);
@@ -821,6 +831,7 @@
         "hash->object": hash_to_object,
         "hash-keys": hash_keys,
         "hash-values": hash_values,
+        "hash-entries": hash_entries,
         "slice": slice
     }
 })
