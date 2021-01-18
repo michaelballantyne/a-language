@@ -6239,7 +6239,31 @@
             return Immutable.Map(o);
         }
     
+        function hash_keys(h) {
+            if (1 !== arguments.length) {
+                raise_arity_error("hash-keys", 1, arguments.length);
+            }
+    
+            hash_c("hash-keys", h)
+    
+            return Immutable.List(h.keys())
+        }
+    
+        function hash_values(h) {
+            if (1 !== arguments.length) {
+                raise_arity_error("hash-values", 1, arguments.length);
+            }
+    
+            hash_c("hash-values", h)
+    
+            return h.toList()
+        }
+    
         function size(c) {
+            if (1 !== arguments.length) {
+                raise_arity_error("size", 1, arguments.length);
+            }
+    
             if (Immutable.isCollection(c)) {
                 return c.size;
             } else if (is_js_array(c)) {
@@ -6252,6 +6276,10 @@
         }
     
         function slice(c, begin, end) {
+            if (3 !== arguments.length) {
+                raise_arity_error("slice", 3, arguments.length);
+            }
+    
             number_c("slice", begin)
             number_c("slice", end)
     
@@ -6598,6 +6626,8 @@
             "hash/c": hash_c,
             "object->hash": object_to_hash,
             "hash->object": hash_to_object,
+            "hash-keys": hash_keys,
+            "hash-values": hash_values,
             "slice": slice
         }
     })

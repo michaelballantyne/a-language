@@ -1,6 +1,6 @@
 #lang js
 // require: vendor/immutable, runtime/minimal
-// provide: prim-identifier?, number?, string?, js-object?, js-array?, prim-make-identifier, prim-identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, prim-identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, list, assoc, empty?, append, null, number->string, first, rest, variadic, cons, size, function?, apply, substring, list/c, function/c, newline, string->integer, read-stdin, double-quote, to-string, character-code, contains, reverse, array, list->array, array->list, map, foldl, box, box?, unbox, set-box!, string-split, string-join, equal?, zip, subset, list?, string-trim, now, contract-error, hash/c, object->hash, hash->object, slice
+// provide: prim-identifier?, number?, string?, js-object?, js-array?, prim-make-identifier, prim-identifier-string, true, false, +, -, *, /, %, <, >, <=, >=, =, displayln, raise-arity-error, number/c, string/c, prim-identifier/c, has, get, make-keyword, error, string-append, not, ===, !==, obj, hash, list, assoc, empty?, append, null, number->string, first, rest, variadic, cons, size, function?, apply, substring, list/c, function/c, newline, string->integer, read-stdin, double-quote, to-string, character-code, contains, reverse, array, list->array, array->list, map, foldl, box, box?, unbox, set-box!, string-split, string-join, equal?, zip, subset, list?, string-trim, now, contract-error, hash/c, object->hash, hash->object, hash-keys, hash-values, slice
 (function (g) {
     const Immutable = g["vendor/immutable"]
     const raise_arity_error = g["runtime/minimal"]["raise-arity-error"]
@@ -423,7 +423,31 @@
         return Immutable.Map(o);
     }
 
+    function hash_keys(h) {
+        if (1 !== arguments.length) {
+            raise_arity_error("hash-keys", 1, arguments.length);
+        }
+
+        hash_c("hash-keys", h)
+
+        return Immutable.List(h.keys())
+    }
+
+    function hash_values(h) {
+        if (1 !== arguments.length) {
+            raise_arity_error("hash-values", 1, arguments.length);
+        }
+
+        hash_c("hash-values", h)
+
+        return h.toList()
+    }
+
     function size(c) {
+        if (1 !== arguments.length) {
+            raise_arity_error("size", 1, arguments.length);
+        }
+
         if (Immutable.isCollection(c)) {
             return c.size;
         } else if (is_js_array(c)) {
@@ -436,6 +460,10 @@
     }
 
     function slice(c, begin, end) {
+        if (3 !== arguments.length) {
+            raise_arity_error("slice", 3, arguments.length);
+        }
+
         number_c("slice", begin)
         number_c("slice", end)
 
@@ -782,6 +810,8 @@
         "hash/c": hash_c,
         "object->hash": object_to_hash,
         "hash->object": hash_to_object,
+        "hash-keys": hash_keys,
+        "hash-values": hash_values,
         "slice": slice
     }
 })
