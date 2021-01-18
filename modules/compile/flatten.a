@@ -1,6 +1,6 @@
 #lang a
 
-(require runtime/runtime compile/lang vendor/escodegen compile/expand)
+(require runtime/runtime compile/lang vendor/escodegen compile/expand compile/module)
 (provide flatten)
 
 (def gen-module-instance-declaration
@@ -28,17 +28,6 @@
                           :params (array)
                           :body (obj :type "BlockStatement"
                                      :body (list->array body))))))
-
-(def find-internal-name
-  (fn (decl name)
-    (def m (foldl
-             (fn (acc el)
-               (assoc acc (get el :key) (get el :val)))
-             (hash)
-             (zip (fn (a b) (obj :key a :val b)) (get decl :exports) (get decl :export-rt-ids))))
-    (if (has m name)
-      (get m name)
-      (error "flatten" (string-append "method " name " not exported by module")))))
 
 (def flatten
   (fn (runner main-module-name main-fn-name)
@@ -84,6 +73,7 @@
                                                 :value main-module-name)
                                  :computed true)
                             :property (obj :type "Literal"
-                                                :value (find-internal-name ((get runner :load) main-module-name) main-fn-name))
+                                           :value
+                                           (compiled-module-export-internal-name ((get runner :load) main-module-name) main-fn-name))
                             :computed true))))))
       (obj :verbatim :verbatim))))

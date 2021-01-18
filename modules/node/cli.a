@@ -1,6 +1,6 @@
 #lang a
 
-(require runtime/runtime compile/runner node/platform)
+(require runtime/runtime compile/runner node/platform compile/module)
 
 (provide main)
 
@@ -8,17 +8,6 @@
   (fn ()
     (def _ (displayln "Usage: node run.js <modules-path> <module-name> <function>"))
     (exit 1)))
-
-(def find-internal-name
-  (fn (decl name)
-    (def m (foldl
-             (fn (acc el)
-               (assoc acc (get el :key) (get el :val)))
-             (hash)
-             (zip (fn (a b) (obj :key a :val b)) (get decl :exports) (get decl :export-rt-ids))))
-    (if (has m name)
-      (get m name)
-      (error "node/cli" (string-append "method " name " not exported by module")))))
 
 (def main
   (fn (args)
@@ -29,7 +18,7 @@
         (def fn-name (get args 2))
         (def r (make-runner (make-platform load-path)))
         (def decl ((get r :load) mod-name))
-        (def fn-internal-name (find-internal-name decl fn-name))
+        (def fn-internal-name (compiled-module-export-internal-name decl fn-name))
         (def instance ((get r :run) mod-name))
         ((get instance fn-internal-name) (slice args 3 (size args))))
       (usage))))

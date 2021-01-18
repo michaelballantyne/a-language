@@ -47,7 +47,7 @@
                            (hash->object (unbox instance-map))))
             ; TODO: clean up with expression in def ctx and when
             (def _2 (if (not (andmap (fn (export) (has instance export))
-                                     (get module-declaration :export-rt-ids)))
+                                     (hash-values (get module-declaration :exports))))
                      (error "run"
                             (string-append
                               "Module instance does not include all keys listed in exports: "

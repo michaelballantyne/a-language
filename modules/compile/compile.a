@@ -8,11 +8,9 @@
 
 ; IRModule = (Has :module-requires
 ;                 :module-provides
-;                 :module-provide-internal-ids
 ;                 :block-defs)
 ; :module-requires :: (ListOf String)
-; :module-provides :: (ListOf String)
-; :module-provide-internal-ids :: (ListOf String)
+; :module-provides :: (HashOf String String)
 
 ; :id :: String
 ; :rhs :: IRExp
@@ -282,5 +280,4 @@
     (compiled-module
       module-requires
       (get stree :module-provides)
-      (get stree :module-provide-internal-ids)
       paren-wrapped)))

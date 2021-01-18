@@ -1,7 +1,7 @@
 #lang a
 
 (require runtime/runtime)
-(provide compiled-module)
+(provide compiled-module compiled-module-export-internal-name)
 
 (def andmap
   (fn (f l)
@@ -9,16 +9,20 @@
            (map f l))))
 
 (def compiled-module
-  (fn (imports exports export-rt-ids body-code)
+  (fn (imports exports body-code)
     (if (not (and
                 (and
-                  (and
                     (and (list? imports) (andmap string? imports))
-                    (and (list? exports) (andmap string? exports)))
-                  (and (list? exports) (andmap string? export-rt-ids)))
+                    (and (hash? exports)
+                         (and
+                           (andmap string? (hash-keys exports))
+                           (andmap string? (hash-values exports)))))
                 (string? body-code)))
       (error "compiled-module" "malformed module declaration")
       (obj :imports imports
            :exports exports
-           :export-rt-ids export-rt-ids
            :body-code body-code))))
+
+(def compiled-module-export-internal-name
+  (fn (decl name)
+    (get (get decl :exports) name)))

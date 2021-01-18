@@ -231,11 +231,11 @@
                (def decl ((get runner :load) (prim-identifier-string req)))
                (foldl
                  (fn (env export)
-                   (assoc env (prim-make-identifier (get export :external))
+                   (assoc env (prim-make-identifier (get export :key))
                           (obj :module-ref-path (prim-identifier-string req)
-                               :module-ref-field (get export :internal))))
+                               :module-ref-field (get export :val))))
                  env
-                 (zip (fn (a b) (obj :external a :internal b)) (get decl :exports) (get decl :export-rt-ids))))
+                 (hash-entries (get decl :exports))))
              initial-env requires))
 
     (def parsed-defs (parse-defs body module-env))
@@ -244,10 +244,17 @@
               (error "syntax error" "some provided identifiers not defined")
               null))
 
-    (def provide-internal-ids (map (fn (p) (get (get (get parsed-defs :new-env) p) :local-ref)) provides))
+    (def provide-internal-ids
+      (map (fn (p) (get (get (get parsed-defs :new-env) p) :local-ref))
+           provides))
+
+    (def provides-map
+      (foldl (fn (acc provide)
+               (assoc acc (prim-identifier-string provide) (get (get (get parsed-defs :new-env) provide) :local-ref)))
+             (hash)
+             provides))
 
     (obj
       :module-requires (map prim-identifier-string requires)
-      :module-provides (map prim-identifier-string provides)
-      :module-provide-internal-ids provide-internal-ids
+      :module-provides provides-map
       :block-defs (get parsed-defs :block-defs))))

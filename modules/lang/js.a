@@ -21,8 +21,10 @@
     (if (get res :position)
       (compiled-module
         (get (get res :result) 0)
-        (get (get res :result) 1)
-        (get (get res :result) 1) ; internal and external names are the same.
+        (foldl (fn (acc export)
+                 (assoc acc export export)) ; internal and external names are the same.
+               (hash)
+               (get (get res :result) 1))
         (substring (get input :string) (get (get res :position) :index) (size (get input :string))))
       (error :compile-language res))))
 (def compile-language compile-js)
